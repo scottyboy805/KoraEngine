@@ -1,6 +1,4 @@
-﻿using ImGuiNET;
-using Microsoft.Win32;
-using KoraGame;
+﻿using KoraGame;
 using KoraGame.Graphics;
 using SDL;
 using System.Runtime.CompilerServices;
@@ -240,6 +238,36 @@ namespace KoraEditor
                 // Clear assets
                 assets = null;
             }
+        }
+
+        internal static void DoEvent(Action action)
+        {
+            try
+            {
+                if (action != null)
+                    action.Invoke();
+            }
+            catch (Exception e) { Debug.LogException(e); }
+        }
+
+        internal static void DoEvent<T>(Action<T> action, T arg0)
+        {
+            try
+            {
+                if (action != null)
+                    action.Invoke( arg0);
+            }
+            catch (Exception e) { Debug.LogException(e); }
+        }
+
+        internal static void DoEvent<T0, T1>(Action<T0, T1> action, T0 arg0, T1 arg1)
+        {
+            try
+            {
+                if (action != null)
+                    action.Invoke(arg0, arg1);
+            }
+            catch (Exception e) { Debug.LogException(e); }
         }
     }
 }

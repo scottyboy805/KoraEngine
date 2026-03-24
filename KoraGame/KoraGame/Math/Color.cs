@@ -1,4 +1,5 @@
 ﻿using SDL;
+using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 
@@ -411,6 +412,18 @@ namespace KoraGame
             result.B = (byte)Math.Round(Math.Clamp(color.B, 0, 1) * 255f);
             result.A = (byte)Math.Round(Math.Clamp(color.A, 0, 1) * 255f);
             return result;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static explicit operator Vector4(in Color color)
+        {
+            return new Vector4(color.R, color.G, color.B, color.A);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static explicit operator Color(in Vector4 value)
+        {
+            return new Color(value.X, value.Y, value.Z, value.W);
         }
         #endregion
 

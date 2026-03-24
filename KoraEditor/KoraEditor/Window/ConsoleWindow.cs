@@ -1,4 +1,5 @@
-﻿using System;
+﻿using KoraEditor.UI;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -10,6 +11,7 @@ namespace KoraEditor
         protected override void OnGui()
         {
             base.OnGui();
+            Gui.Label(new GuiContent("Testing label", "This should be a tooltip"));
         }
 
         [Menu("Window/Console", "Ctrl+Shift+C")]
