@@ -5,7 +5,7 @@ namespace KoraGame.Assets
     internal sealed class KoraAssetReader : IAssetImporter
     {
         // Public
-        public const string AssetExtension = ".asset";
+        public const string AssetExtension = ".kasset";
         public const int AssetMagic = (('K' & 0xFF))            // Kora asset
                                     | (('O' & 0xFF) << 8)
                                     | (('R' & 0xFF) << 16)

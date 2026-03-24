@@ -7,7 +7,7 @@ layout(location = 2) in vec4 in_color;
 layout(location = 0) out vec2 frag_uv;
 layout(location = 1) out vec4 frag_color;
 
-layout(set = 0, binding = 0) uniform MVPBuffer
+layout(set = 1, binding = 0) uniform MVPBuffer
 {
     mat4 mvp;
 };

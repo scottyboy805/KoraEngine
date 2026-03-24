@@ -5,10 +5,12 @@ namespace KoraGame.Graphics
     public enum MeshVertexElements : uint
     {
         None = 0,
-        Position = 1 << 0,
-        Normal = 1 << 1,
-        UV = 1 << 2,
-        Color = 1 << 3,
+        Position2 = 1 << 0,
+        Position3 = 1 << 1,
+        Normal = 1 << 2,
+        UV = 1 << 3,
+        Color = 1 << 4,
+        Color32 = 1 << 5,
     }
 
     public sealed class Mesh : GameElement
@@ -286,7 +288,7 @@ namespace KoraGame.Graphics
             }
 
             // Get vertex elements for this sub mesh only
-            MeshVertexElements elements = MeshVertexElements.Position;
+            MeshVertexElements elements = MeshVertexElements.Position3;
             if (normals != null && normals.Count > 0) elements |= MeshVertexElements.Normal;
             if (uvs != null && uvs.Count > 0) elements |= MeshVertexElements.UV;
             if (colors != null && colors.Count > 0) elements |= MeshVertexElements.Color;
@@ -401,7 +403,7 @@ namespace KoraGame.Graphics
                     byte* vertexPtr = ptr + (vertexSize * i);
 
                     // Write position
-                    if ((elements & MeshVertexElements.Position) != 0)
+                    if ((elements & MeshVertexElements.Position3) != 0)
                     {
                         *(Vector3F*)vertexPtr = positions[i];
                         vertexPtr += sizeof(Vector3F);
@@ -446,10 +448,12 @@ namespace KoraGame.Graphics
             uint size = 0;
 
             // Calculate required size for one vertex element
-            if ((elements & MeshVertexElements.Position) != 0) size += (uint)sizeof(Vector3F);
+            if ((elements & MeshVertexElements.Position2) != 0) size += (uint)sizeof(Vector2F);
+            if ((elements & MeshVertexElements.Position3) != 0) size += (uint)sizeof(Vector3F);
             if ((elements & MeshVertexElements.Normal) != 0) size += (uint)sizeof(Vector3F);
             if ((elements & MeshVertexElements.UV) != 0) size += (uint)sizeof(Vector2F);
             if ((elements & MeshVertexElements.Color) != 0) size += (uint)sizeof(Color);
+            if ((elements & MeshVertexElements.Color32) != 0) size += (uint)sizeof(Color32);
 
             return size;
         }
@@ -459,10 +463,12 @@ namespace KoraGame.Graphics
             uint count = 0;
 
             // Calculate required size for one vertex element
-            if ((elements & MeshVertexElements.Position) != 0) count++;
+            if ((elements & MeshVertexElements.Position2) != 0) count++;
+            if ((elements & MeshVertexElements.Position3) != 0) count++;
             if ((elements & MeshVertexElements.Normal) != 0) count++;
             if ((elements & MeshVertexElements.UV) != 0) count++;
             if ((elements & MeshVertexElements.Color) != 0) count++;
+            if ((elements & MeshVertexElements.Color32) != 0) count++;
 
             return count;
         }

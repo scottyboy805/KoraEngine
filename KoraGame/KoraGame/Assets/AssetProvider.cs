@@ -180,6 +180,10 @@ namespace KoraGame
                 // Get the full path
                 string assetFullPath = Path.Combine(assetDirectory, assetRelativePath);
 
+                // Check for no extension
+                if (string.IsNullOrEmpty(assetRelativePath) == true)
+                    assetFullPath += KoraAssetReader.AssetExtension;
+
                 try
                 {
                     // Read the file
@@ -219,6 +223,16 @@ namespace KoraGame
         internal bool GetAssetImporter(string ext, out IAssetImporter importer)
         {
             importer = null;
+
+            // Check for no extension
+            if(string.IsNullOrEmpty(ext) == true)
+            {
+                if(assetImporters.TryGetValue(KoraAssetReader.AssetExtension, out ThreadLocal<IAssetImporter> foundDefaultImporter) == true)
+                {
+                    importer = foundDefaultImporter.Value;
+                    return true;
+                }
+            }
 
             // Get the asset importer
             if (assetImporters.TryGetValue(ext.ToLower(), out ThreadLocal<IAssetImporter> foundImporter) == false)

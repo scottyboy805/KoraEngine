@@ -1,17 +1,18 @@
 {
+	"$type": "KoraGame.Graphics.Shader, KoraGame",
 	"Name": "ImGui Shader",
 	"Format": 2,
 	"CullMode": 2,
 	"Vertex": 
 	{
-		"Source": { "@ref": "imgui.vert.spv" },
+		"Source": { "$ref": "imgui.vert.spv" },
 		"EntryPoint": "main",
 		"UniformCount": 1,
 		"SamplerCount": 0
 	},
 	"Fragment":
 	{
-		"Source": { "@ref": "imgui.frag.spv" },
+		"Source": { "$ref": "imgui.frag.spv" },
 		"EntryPoint": "main",
 		"UniformCount": 0,
 		"SamplerCount": 1
@@ -19,7 +20,13 @@
 	"Properties":
 	[
 		{
-			"Name": "Texture",
+			"Name": "Matrix",
+			"Location": 0,
+			"Stage": 0,
+			"Type": 1
+		},
+		{
+			"Name": "FontTexture",
 			"Location": 0,
 			"Stage": 0,
 			"Type": 2

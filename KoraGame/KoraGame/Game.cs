@@ -116,7 +116,7 @@ namespace KoraGame
         internal virtual void DoShutdown()
         {
             // Unload assets
-            assets.UnloadAll();
+            assets?.UnloadAll();
 
             // Shutdown debug
             Debug.Terminate();

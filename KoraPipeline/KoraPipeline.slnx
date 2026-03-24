@@ -2,5 +2,8 @@
   <Folder Name="/Reference/">
     <Project Path="../KoraGame/KoraGame/KoraGame.csproj" />
   </Folder>
+  <Folder Name="/Tool/">
+    <Project Path="KoraPipelineTool/KoraPipelineTool.csproj" />
+  </Folder>
   <Project Path="KoraPipeline/KoraPipeline.csproj" />
 </Solution>

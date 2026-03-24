@@ -301,7 +301,8 @@ namespace KoraGame.Graphics
             // Create raster state
             SDL_GPURasterizerState rasterState = new SDL_GPURasterizerState
             {
-                cull_mode = SDL_GPUCullMode.SDL_GPU_CULLMODE_FRONT,
+                // Disable face culling by default to avoid mismatches with imported vertex winding (UI/ImGui expects no culling)
+                cull_mode = SDL_GPUCullMode.SDL_GPU_CULLMODE_BACK,
                 fill_mode = SDL_GPUFillMode.SDL_GPU_FILLMODE_FILL,
                 front_face = SDL_GPUFrontFace.SDL_GPU_FRONTFACE_CLOCKWISE,
             };
@@ -338,11 +339,11 @@ namespace KoraGame.Graphics
                         has_depth_stencil_target = true,
                     },
 
-                    // Attach depth target
+                    // Attach depth target - default to disabled for compatibility with 2D/UI shaders
                     depth_stencil_state = new SDL_GPUDepthStencilState
                     {
-                        enable_depth_test = true,
-                        enable_depth_write = true,
+                        enable_depth_test = false,
+                        enable_depth_write = false,
                         compare_op = SDL_GPUCompareOp.SDL_GPU_COMPAREOP_LESS,
                         enable_stencil_test = false,
                     },
@@ -383,8 +384,24 @@ namespace KoraGame.Graphics
             uint location = 0;
             uint offset = 0;
 
-            // Create position attribute
-            if((elements & MeshVertexElements.Position) != 0)
+            // Create position2 attribute
+            if ((elements & MeshVertexElements.Position2) != 0)
+            {
+                // Add position
+                attributes[location] = new SDL_GPUVertexAttribute
+                {
+                    location = location,
+                    format = SDL_GPUVertexElementFormat.SDL_GPU_VERTEXELEMENTFORMAT_FLOAT2,
+                    offset = offset,
+                };
+
+                // Update location and offset and index
+                location++;
+                offset += (uint)sizeof(Vector2F);
+            }
+
+            // Create position3 attribute
+            if((elements & MeshVertexElements.Position3) != 0)
             {
                 // Add position
                 attributes[location] = new SDL_GPUVertexAttribute
@@ -445,6 +462,22 @@ namespace KoraGame.Graphics
                 // Update location and offset
                 location++;
                 offset += (uint)sizeof(Color);
+            }
+
+            // Create color32 attribute
+            if ((elements & MeshVertexElements.Color32) != 0)
+            {
+                // Add color attribute
+                attributes[location] = new SDL_GPUVertexAttribute
+                {
+                    location = location,
+                    format = SDL_GPUVertexElementFormat.SDL_GPU_VERTEXELEMENTFORMAT_UBYTE4_NORM,
+                    offset = offset,
+                };
+
+                // Update location and offset
+                location++;
+                offset += (uint)sizeof(Color32);
             }
 
             return attributes;

@@ -11,12 +11,14 @@ namespace KoraEditor
     public sealed class Editor : Game
     {
         // Private
-        private ImGuiContext gui = null;
+        private AssetProvider editorAssets = null;
+        private ImGuiContext gui = null;        
 
         private ulong lastFrameTime = 0;
         private ulong performanceFrequency = 0;
 
         // Properties
+        public AssetProvider EditorAssets => editorAssets;
         internal ImGuiContext Gui => gui;
 
         // Properties
@@ -63,13 +65,13 @@ namespace KoraEditor
 
             // Create assets
             Debug.Log($"Initialize assets", LogFilter.Assets);
-            this.assets = new AssetProvider(scriptable, graphics, EditorContentPath, false);
+            this.editorAssets = new AssetProvider(scriptable, graphics, EditorContentPath, false);
 
-            Debug.Log($"Use assets directory: '{assets.AssetDirectory}'", LogFilter.Assets);
+            Debug.Log($"Use assets directory: '{editorAssets.AssetDirectory}'", LogFilter.Assets);
 
             // Init gui
             gui = new ImGuiContext();
-            gui.Initialize(graphics, assets);
+            gui.Initialize(graphics, editorAssets);
         }
 
         internal override void DoUpdate()
