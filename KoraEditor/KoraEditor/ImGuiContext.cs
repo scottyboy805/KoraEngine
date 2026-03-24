@@ -17,8 +17,8 @@ namespace KoraEditor
         private Material material;
 
         // Public
-        public const uint DefaultVertexBufferSize = sizeof(float) * 5 * 4098;
-        public const uint DefaultIndexBufferSize = sizeof(ushort) * 2048;
+        public const uint DefaultVertexBufferSize = sizeof(float) * 4098;
+        public const uint DefaultIndexBufferSize = sizeof(ushort) * 4098;
 
         // Methods
         public async void Initialize(GraphicsDevice graphics, AssetProvider assets)
@@ -52,11 +52,8 @@ namespace KoraEditor
                     Buffer.MemoryCopy(pixels, (void*)ptr, size, size);
                 });
 
-                // Upload the font texture to the GPU so the sampler will read valid contents
-                // The pixel data was written into the texture's upload buffer by MapMemory above,
-                // but we must perform an explicit copy pass to transfer it to the device-local texture.
-                {
-                    GraphicsCommand uploadCmd = graphics.AcquireCommandBuffer();
+                GraphicsCommand uploadCmd = graphics.AcquireCommandBuffer();
+                {                                        
                     uploadCmd.BeginCopyPass();
                     uploadCmd.UploadTexture(fontTexture);
                     uploadCmd.EndCopyPass();
@@ -76,12 +73,49 @@ namespace KoraEditor
             material.SetTexture("FontTexture", fontTexture);
         }
 
+        public void HandleSDLEvent(SDL_Event e)
+        {
+            var io = ImGui.GetIO();
+
+            switch (e.Type)
+            {
+                case SDL_EventType.SDL_EVENT_MOUSE_MOTION:
+                    io.AddMousePosEvent(e.motion.x, e.motion.y);
+                    break;
+                case SDL_EventType.SDL_EVENT_MOUSE_BUTTON_DOWN:
+                case SDL_EventType.SDL_EVENT_MOUSE_BUTTON_UP:
+                    int b = e.button.Button == SDLButton.SDL_BUTTON_LEFT ? 0 :
+                            (e.button.Button == SDLButton.SDL_BUTTON_RIGHT) ? 1 : 2;
+                    io.AddMouseButtonEvent(b, e.Type == SDL_EventType.SDL_EVENT_MOUSE_BUTTON_DOWN);
+                    break;
+                case SDL_EventType.SDL_EVENT_MOUSE_WHEEL:
+                    io.AddMouseWheelEvent(e.wheel.x, e.wheel.y);
+                    break;
+                case SDL_EventType.SDL_EVENT_TEXT_INPUT:
+                    io.AddInputCharactersUTF8(e.text.GetText());
+                    break;
+                case SDL_EventType.SDL_EVENT_KEY_DOWN:
+                case SDL_EventType.SDL_EVENT_KEY_UP:
+                    ImGuiKey k = GetSDLMappedScancode(e.key.scancode);
+                    io.AddKeyEvent(k, e.Type == SDL_EventType.SDL_EVENT_KEY_DOWN);
+
+                    SDL_Keymod mod = SDL3.SDL_GetModState();
+
+                    // update modifiers if needed:
+                    io.KeyCtrl = (mod & SDL_Keymod.SDL_KMOD_CTRL) != 0;
+                    io.KeyShift = (mod & SDL_Keymod.SDL_KMOD_SHIFT) != 0;
+                    io.KeyAlt = (mod & SDL_Keymod.SDL_KMOD_ALT) != 0;
+                    io.KeySuper = (mod & SDL_Keymod.SDL_KMOD_GUI) != 0;
+                    break;
+            }
+        }
+
         public void BeginFrame()
         {
             ImGuiIOPtr io = ImGui.GetIO();
             io.DisplaySize = new Vector2(graphics.DefaultRenderTarget.Width, graphics.DefaultRenderTarget.Height);
             io.DeltaTime = 1f / 60f;
-
+            
             ImGui.NewFrame();
             ImGui.ShowDemoWindow();
         }
@@ -119,13 +153,15 @@ namespace KoraEditor
             // Check size
             if (drawPtr.TotalVtxCount > vertexBuffer.Size)
             {
-                // TODO - recreate buffer
+                // Resize vertex buffer
+                vertexBuffer = new GraphicsBuffer(graphics, GraphicsBufferUsage.Vertex, (uint)(drawPtr.TotalVtxCount * sizeof(ImDrawVert)));
                 return;
             }
 
             if (drawPtr.TotalIdxCount > indexBuffer.Size)
             {
-                // TODO - recreate buffer
+                // Resize index buffer
+                indexBuffer = new GraphicsBuffer(graphics, GraphicsBufferUsage.Index, (uint)(drawPtr.TotalIdxCount * sizeof(ushort)));
                 return;
             }
 
@@ -257,6 +293,93 @@ namespace KoraEditor
             }
             // End render pass
             cmd.EndRenderPass();
+        }
+
+        private static ImGuiKey GetSDLMappedScancode(SDL_Scancode scancode)
+        {
+            switch (scancode)
+            {
+                case SDL_Scancode.SDL_SCANCODE_TAB: return ImGuiKey.Tab;
+                case SDL_Scancode.SDL_SCANCODE_LEFT: return ImGuiKey.LeftArrow;
+                case SDL_Scancode.SDL_SCANCODE_RIGHT: return ImGuiKey.RightArrow;
+                case SDL_Scancode.SDL_SCANCODE_UP: return ImGuiKey.UpArrow;
+                case SDL_Scancode.SDL_SCANCODE_DOWN: return ImGuiKey.DownArrow;
+                case SDL_Scancode.SDL_SCANCODE_PAGEUP: return ImGuiKey.PageUp;
+                case SDL_Scancode.SDL_SCANCODE_PAGEDOWN: return ImGuiKey.PageDown;
+                case SDL_Scancode.SDL_SCANCODE_HOME: return ImGuiKey.Home;
+                case SDL_Scancode.SDL_SCANCODE_END: return ImGuiKey.End;
+                case SDL_Scancode.SDL_SCANCODE_INSERT: return ImGuiKey.Insert;
+                case SDL_Scancode.SDL_SCANCODE_DELETE: return ImGuiKey.Delete;
+                case SDL_Scancode.SDL_SCANCODE_BACKSPACE: return ImGuiKey.Backspace;
+                case SDL_Scancode.SDL_SCANCODE_SPACE: return ImGuiKey.Space;
+                case SDL_Scancode.SDL_SCANCODE_RETURN: return ImGuiKey.Enter;
+                case SDL_Scancode.SDL_SCANCODE_ESCAPE: return ImGuiKey.Escape;
+
+                case SDL_Scancode.SDL_SCANCODE_LCTRL:
+                case SDL_Scancode.SDL_SCANCODE_RCTRL: return ImGuiKey.ModCtrl;
+                case SDL_Scancode.SDL_SCANCODE_LSHIFT:
+                case SDL_Scancode.SDL_SCANCODE_RSHIFT: return ImGuiKey.ModShift;
+                case SDL_Scancode.SDL_SCANCODE_LALT:
+                case SDL_Scancode.SDL_SCANCODE_RALT: return ImGuiKey.ModAlt;
+                case SDL_Scancode.SDL_SCANCODE_LGUI:
+                case SDL_Scancode.SDL_SCANCODE_RGUI: return ImGuiKey.ModSuper;
+
+                // Letters
+                case SDL_Scancode.SDL_SCANCODE_A: return ImGuiKey.A;
+                case SDL_Scancode.SDL_SCANCODE_B: return ImGuiKey.B;
+                case SDL_Scancode.SDL_SCANCODE_C: return ImGuiKey.C;
+                case SDL_Scancode.SDL_SCANCODE_D: return ImGuiKey.D;
+                case SDL_Scancode.SDL_SCANCODE_E: return ImGuiKey.E;
+                case SDL_Scancode.SDL_SCANCODE_F: return ImGuiKey.F;
+                case SDL_Scancode.SDL_SCANCODE_G: return ImGuiKey.G;
+                case SDL_Scancode.SDL_SCANCODE_H: return ImGuiKey.H;
+                case SDL_Scancode.SDL_SCANCODE_I: return ImGuiKey.I;
+                case SDL_Scancode.SDL_SCANCODE_J: return ImGuiKey.J;
+                case SDL_Scancode.SDL_SCANCODE_K: return ImGuiKey.K;
+                case SDL_Scancode.SDL_SCANCODE_L: return ImGuiKey.L;
+                case SDL_Scancode.SDL_SCANCODE_M: return ImGuiKey.M;
+                case SDL_Scancode.SDL_SCANCODE_N: return ImGuiKey.N;
+                case SDL_Scancode.SDL_SCANCODE_O: return ImGuiKey.O;
+                case SDL_Scancode.SDL_SCANCODE_P: return ImGuiKey.P;
+                case SDL_Scancode.SDL_SCANCODE_Q: return ImGuiKey.Q;
+                case SDL_Scancode.SDL_SCANCODE_R: return ImGuiKey.R;
+                case SDL_Scancode.SDL_SCANCODE_S: return ImGuiKey.S;
+                case SDL_Scancode.SDL_SCANCODE_T: return ImGuiKey.T;
+                case SDL_Scancode.SDL_SCANCODE_U: return ImGuiKey.U;
+                case SDL_Scancode.SDL_SCANCODE_V: return ImGuiKey.V;
+                case SDL_Scancode.SDL_SCANCODE_W: return ImGuiKey.W;
+                case SDL_Scancode.SDL_SCANCODE_X: return ImGuiKey.X;
+                case SDL_Scancode.SDL_SCANCODE_Y: return ImGuiKey.Y;
+                case SDL_Scancode.SDL_SCANCODE_Z: return ImGuiKey.Z;
+
+                // Numbers (top row)
+                case SDL_Scancode.SDL_SCANCODE_0: return ImGuiKey._0;
+                case SDL_Scancode.SDL_SCANCODE_1: return ImGuiKey._1;
+                case SDL_Scancode.SDL_SCANCODE_2: return ImGuiKey._2;
+                case SDL_Scancode.SDL_SCANCODE_3: return ImGuiKey._3;
+                case SDL_Scancode.SDL_SCANCODE_4: return ImGuiKey._4;
+                case SDL_Scancode.SDL_SCANCODE_5: return ImGuiKey._5;
+                case SDL_Scancode.SDL_SCANCODE_6: return ImGuiKey._6;
+                case SDL_Scancode.SDL_SCANCODE_7: return ImGuiKey._7;
+                case SDL_Scancode.SDL_SCANCODE_8: return ImGuiKey._8;
+                case SDL_Scancode.SDL_SCANCODE_9: return ImGuiKey._9;
+
+                // Function keys
+                case SDL_Scancode.SDL_SCANCODE_F1: return ImGuiKey.F1;
+                case SDL_Scancode.SDL_SCANCODE_F2: return ImGuiKey.F2;
+                case SDL_Scancode.SDL_SCANCODE_F3: return ImGuiKey.F3;
+                case SDL_Scancode.SDL_SCANCODE_F4: return ImGuiKey.F4;
+                case SDL_Scancode.SDL_SCANCODE_F5: return ImGuiKey.F5;
+                case SDL_Scancode.SDL_SCANCODE_F6: return ImGuiKey.F6;
+                case SDL_Scancode.SDL_SCANCODE_F7: return ImGuiKey.F7;
+                case SDL_Scancode.SDL_SCANCODE_F8: return ImGuiKey.F8;
+                case SDL_Scancode.SDL_SCANCODE_F9: return ImGuiKey.F9;
+                case SDL_Scancode.SDL_SCANCODE_F10: return ImGuiKey.F10;
+                case SDL_Scancode.SDL_SCANCODE_F11: return ImGuiKey.F11;
+                case SDL_Scancode.SDL_SCANCODE_F12: return ImGuiKey.F12;
+
+                default: return ImGuiKey.None;
+            }
         }
     }
 }

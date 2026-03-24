@@ -97,6 +97,9 @@ namespace KoraEditor
         internal override void DoEvent(in SDL_Event evt)
         {
             base.DoEvent(evt);
+
+            // Update gui
+            gui.HandleSDLEvent(evt);
         }
     }
 }
