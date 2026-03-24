@@ -46,7 +46,7 @@ namespace KoraEditor
 
             ImGui.CreateContext();
             ImGuiIOPtr io = ImGui.GetIO();
-            io.ConfigFlags |= ImGuiConfigFlags.NavEnableKeyboard;
+            io.ConfigFlags |= ImGuiConfigFlags.NavEnableKeyboard | ImGuiConfigFlags.DockingEnable;
 
             // Go to dark style
             ImGui.StyleColorsDark();
@@ -160,6 +160,20 @@ namespace KoraEditor
             io.DeltaTime = 1f / 60f;
             
             ImGui.NewFrame();
+
+
+            // Dock area
+            ImGuiWindowFlags flags = ImGuiWindowFlags.MenuBar | ImGuiWindowFlags.NoDocking | ImGuiWindowFlags.NoTitleBar | ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoMove | ImGuiWindowFlags.NoBringToFrontOnFocus | ImGuiWindowFlags.NoNavFocus;
+            ImGui.SetNextWindowPos(new Vector2(0, 0));
+            ImGui.SetNextWindowSize(io.DisplaySize);
+
+            ImGui.Begin("Dockspace", flags);
+            uint dockspaceId = ImGui.GetID("MyDockspace");
+            ImGui.DockSpace(dockspaceId, Vector2.Zero, ImGuiDockNodeFlags.None);
+
+
+            ImGui.End();
+
             ImGui.ShowDemoWindow();
         }
 

@@ -376,6 +376,15 @@ namespace KoraGame
         //}
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static explicit operator Vector2(Vector2F vector)
+        {
+            Vector2 result;
+            result.X = vector.X;
+            result.Y = vector.Y;
+            return result;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static explicit operator Vector3(Vector2F vector)
         {
             Vector3 result;
@@ -386,13 +395,22 @@ namespace KoraGame
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static explicit operator Vector4F(Vector2F vector)
+        public static explicit operator Vector4(Vector2F vector)
         {
-            Vector4F result;
+            Vector4 result;
             result.X = vector.X;
             result.Y = vector.Y;
             result.Z = 0f;
             result.W = 0f;
+            return result;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static explicit operator Vector2F(Vector2 vector)
+        {
+            Vector2F result;
+            result.X = vector.X;
+            result.Y = vector.Y;
             return result;
         }
         #endregion
