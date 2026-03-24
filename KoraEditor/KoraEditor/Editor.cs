@@ -1,53 +1,100 @@
-﻿using SDL;
+﻿using ImGuiNET;
+using KoraGame;
+using KoraGame.Graphics;
+using SDL;
 using System.Runtime.CompilerServices;
 
 [assembly: InternalsVisibleTo("KoraEditor-Windows")]
 
 namespace KoraEditor
 {
-    public sealed class Editor
+    public sealed class Editor : Game
     {
         // Private
-        private static Editor instance;
+        private ImGuiContext gui = null;
 
-        private bool quit = false;
+        private ulong lastFrameTime = 0;
+        private ulong performanceFrequency = 0;
 
         // Properties
-        internal static Editor Instance => instance;
+        internal ImGuiContext Gui => gui;
 
-        public bool Quit => quit;
-
-        // Constructor
-        internal Editor()
+        // Properties
+        public string EditorBasePath
         {
-            instance = this;
+            get
+            {
+#if DEBUG
+                return Path.GetFullPath(Path.Combine(Environment.CurrentDirectory, "../../../../"));
+#else
+                // Get path next to executable
+                return Environment.CurrentDirectory;
+#endif
+            }
         }
 
-        ~Editor()
+        public string EditorContentPath
         {
-            if (instance == this)
-                instance = null;
+            get
+            {
+                return Path.Combine(EditorBasePath, "Content");
+            }
         }
-
         // Methods
-        internal void DoInitialize()
+        internal override void DoInitialize()
         {
+            base.DoInitialize();
 
+
+            // Create scripting
+            Debug.Log("Initialize scripting", LogFilter.Script);
+            this.scriptable = new ScriptableProvider();
+
+            // Create the screen
+            Debug.Log("Initialize graphics", LogFilter.Graphics);
+            this.screen = new Screen("KoraEditor", 1280, 720, false);
+
+            Debug.Log($"Use screen resolution: '{screen.Width} x {screen.Height}', FullScreen = '{screen.Fullscreen}'", LogFilter.Graphics);
+
+            // Create graphics            
+            this.graphics = new GraphicsDevice(this.screen);
+
+            Debug.Log($"Use graphics API: '{graphics.GetDeviceDriverName()}'", LogFilter.Graphics);
+
+            // Create assets
+            Debug.Log($"Initialize assets", LogFilter.Assets);
+            this.assets = new AssetProvider(scriptable, graphics, EditorContentPath, false);
+
+            Debug.Log($"Use assets directory: '{assets.AssetDirectory}'", LogFilter.Assets);
+
+            // Init gui
+            gui = new ImGuiContext();
+            gui.Initialize(graphics, assets);
         }
 
-        internal void DoUpdate()
+        internal override void DoUpdate()
         {
+            base.DoUpdate();
 
+            // Render the editor
+            DoRender();
         }
 
-        internal void DoShutdown()
+        internal void DoRender()
         {
+            gui.BeginFrame();
 
+            gui.EndFrame();
         }
 
-        internal void DoEvent(in SDL_Event evt)
+        internal override void DoShutdown()
         {
+            base.DoShutdown();
+        }
 
+        internal override void DoEvent(in SDL_Event evt)
+        {
+            base.DoEvent(evt);
         }
     }
 }

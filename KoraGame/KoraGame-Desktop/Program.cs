@@ -37,7 +37,7 @@ internal unsafe static class Program
     internal static SDL_AppResult AppInit(IntPtr* appState, int argc, byte** argv)
     {
         // Create the game
-        Game game = new Game();
+        Game game = new GameApp();
 
         // Initialize the game
         game.DoInitialize();
