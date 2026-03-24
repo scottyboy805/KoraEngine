@@ -1,6 +1,6 @@
 <Solution>
   <Folder Name="/Player/">
-    <Project Path="Desktop/Desktop.csproj" Id="35e3328a-57f5-43f9-96c5-3f415f5bd84a" />
+    <Project Path="KoraGame-Desktop/KoraGame-Desktop.csproj" Id="35e3328a-57f5-43f9-96c5-3f415f5bd84a" />
   </Folder>
   <Project Path="KoraGame/KoraGame.csproj" />
 </Solution>

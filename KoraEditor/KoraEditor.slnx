@@ -1,0 +1,7 @@
+<Solution>
+  <Folder Name="/Editor/">
+    <Project Path="KoraEditor-Windows/KoraEditor-Windows.csproj" />
+  </Folder>
+  <Project Path="../KoraGame/KoraGame/KoraGame.csproj" />
+  <Project Path="KoraEditor/KoraEditor.csproj" />
+</Solution>

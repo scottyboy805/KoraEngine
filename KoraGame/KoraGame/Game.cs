@@ -6,7 +6,7 @@ using KoraGame.Physics;
 using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 
-[assembly: InternalsVisibleTo("Desktop")]
+[assembly: InternalsVisibleTo("KoraGame-Desktop")]
 
 namespace KoraGame
 {
