@@ -47,6 +47,7 @@ namespace KoraEditor
         {
             base.DoInitialize();
 
+            
 
             // Create scripting
             Debug.Log("Initialize scripting", LogFilter.Script);
@@ -54,7 +55,7 @@ namespace KoraEditor
 
             // Create the screen
             Debug.Log("Initialize graphics", LogFilter.Graphics);
-            this.screen = new Screen("KoraEditor", 1280, 720, false);
+            this.screen = new Screen("KoraEditor", 1920, 1080, false);
 
             Debug.Log($"Use screen resolution: '{screen.Width} x {screen.Height}', FullScreen = '{screen.Fullscreen}'", LogFilter.Graphics);
 
@@ -68,6 +69,12 @@ namespace KoraEditor
             this.editorAssets = new AssetProvider(scriptable, graphics, EditorContentPath, false);
 
             Debug.Log($"Use assets directory: '{editorAssets.AssetDirectory}'", LogFilter.Assets);
+
+            // Ensure SDL text input is enabled so we receive SDL_TEXTINPUT events
+            unsafe
+            {
+                SDL3.SDL_StartTextInput(screen.sdlWindow);
+            }
 
             // Init gui
             gui = new ImGuiContext();

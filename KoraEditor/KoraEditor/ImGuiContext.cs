@@ -62,6 +62,7 @@ namespace KoraEditor
 
                 io.Fonts.SetTexID((IntPtr)fontTexture.gpuTexture);
             }
+            
 
             // Load shader
             shader = await assets.LoadAsync<Shader>("Shader/imgui.shader.json");
@@ -150,19 +151,22 @@ namespace KoraEditor
             if (drawPtr.CmdListsCount == 0 || shader == null)
                 return;
 
-            // Check size
-            if (drawPtr.TotalVtxCount > vertexBuffer.Size)
+            // Check size (compare required bytes, not element counts)
+            uint requiredVertexBytes = (uint)(drawPtr.TotalVtxCount * sizeof(ImDrawVert));
+            if (requiredVertexBytes > vertexBuffer.Size)
             {
-                // Resize vertex buffer
-                vertexBuffer = new GraphicsBuffer(graphics, GraphicsBufferUsage.Vertex, (uint)(drawPtr.TotalVtxCount * sizeof(ImDrawVert)));
-                return;
+                // Grow buffer with some headroom to avoid frequent reallocations
+                uint newSize = Math.Max(requiredVertexBytes, vertexBuffer.Size * 2);
+                if (newSize == 0) newSize = requiredVertexBytes;
+                vertexBuffer = new GraphicsBuffer(graphics, GraphicsBufferUsage.Vertex, newSize);
             }
 
-            if (drawPtr.TotalIdxCount > indexBuffer.Size)
+            uint requiredIndexBytes = (uint)(drawPtr.TotalIdxCount * sizeof(ushort));
+            if (requiredIndexBytes > indexBuffer.Size)
             {
-                // Resize index buffer
-                indexBuffer = new GraphicsBuffer(graphics, GraphicsBufferUsage.Index, (uint)(drawPtr.TotalIdxCount * sizeof(ushort)));
-                return;
+                uint newSize = Math.Max(requiredIndexBytes, indexBuffer.Size * 2);
+                if (newSize == 0) newSize = requiredIndexBytes;
+                indexBuffer = new GraphicsBuffer(graphics, GraphicsBufferUsage.Index, newSize);
             }
 
             Matrix4F mat = Matrix4F.Orthographic(0.0f,
