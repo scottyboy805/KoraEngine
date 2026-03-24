@@ -7,6 +7,7 @@ using System.Runtime.CompilerServices;
 
 [assembly: InternalsVisibleTo("KoraGame-Desktop")]
 [assembly: InternalsVisibleTo("KoraEditor")]
+[assembly: InternalsVisibleTo("KoraPipeline")]
 
 namespace KoraGame
 {

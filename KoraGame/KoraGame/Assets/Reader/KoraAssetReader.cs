@@ -2,13 +2,13 @@
 namespace KoraGame.Assets
 {
     [AssetImporter(AssetExtension)]
-    internal sealed class S3DAssetReader : IAssetImporter
+    internal sealed class KoraAssetReader : IAssetImporter
     {
         // Public
-        public const string AssetExtension = ".s3dasset";
-        public const int AssetMagic = (('S' & 0xFF))            // Simple 3d asset
-                                    | (('3' & 0xFF) << 8)
-                                    | (('D' & 0xFF) << 16)
+        public const string AssetExtension = ".asset";
+        public const int AssetMagic = (('K' & 0xFF))            // Kora asset
+                                    | (('O' & 0xFF) << 8)
+                                    | (('R' & 0xFF) << 16)
                                     | (('A' & 0xFF) << 24);
 
         public const int FileVersion = 100;
@@ -17,16 +17,16 @@ namespace KoraGame.Assets
         public async Task<GameElement> ImportAsync(AssetReadContext context, Stream stream, CancellationToken cancellationToken)
         {
             // Check header
-            S3DAssetReader.CheckS3DFormat(stream, AssetMagic);
+            KoraAssetReader.CheckS3DFormat(stream, AssetMagic);
 
             // Create reader
             BinaryReader reader = new BinaryReader(stream);
 
             // Try to read header
-            PackedAssetHeader header = S3DAssetReader.ReadHeader(reader, AssetMagic);
+            PackedAssetHeader header = KoraAssetReader.ReadHeader(reader, AssetMagic);
 
             // Try to read asset entry
-            PackedAssetEntryHeader assetHeader = S3DAssetReader.ReadAssetHeader(reader);
+            PackedAssetEntryHeader assetHeader = KoraAssetReader.ReadAssetHeader(reader);
 
             // Try to read the dependency table
             ReadStringTable(reader, context.ReferencedExternalObjects);

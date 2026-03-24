@@ -4,16 +4,15 @@
     <TargetFramework>net10.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>disable</Nullable>
-    <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="ImGui.NET" Version="1.91.6.1" />
+    <ProjectReference Include="..\..\KoraGame\KoraGame\KoraGame.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\..\KoraGame\KoraGame\KoraGame.csproj" />
-    <ProjectReference Include="..\..\KoraPipeline\KoraPipeline\KoraPipeline.csproj" />
-  </ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="BCnEncoder.Net" Version="2.2.1" />
+		<PackageReference Include="StbImageSharp" Version="2.30.15" />
+	</ItemGroup>
 
 </Project>
