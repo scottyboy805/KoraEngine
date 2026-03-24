@@ -43,7 +43,7 @@ namespace KoraEditor
                 io.Fonts.GetTexDataAsRGBA32(out byte* pixels, out int width, out int height);
 
                 // Create texture
-                int size = sizeof(byte) * width * height;
+                int size = sizeof(Color32) * width * height;
 
                 fontTexture = new Texture(graphics, (uint)width, (uint)height, TextureFormat.R8G8B8A8Unorm);
                 fontTexture.MapMemory((ptr) =>
