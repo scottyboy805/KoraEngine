@@ -14,9 +14,6 @@ namespace KoraEditor
         private AssetProvider editorAssets = null;
         private ImGuiContext gui = null;        
 
-        private ulong lastFrameTime = 0;
-        private ulong performanceFrequency = 0;
-
         // Properties
         public AssetProvider EditorAssets => editorAssets;
         internal ImGuiContext Gui => gui;

@@ -3,6 +3,7 @@ using KoraGame;
 using KoraGame.Graphics;
 using SDL;
 using System.Numerics;
+using System.Runtime.InteropServices;
 
 namespace KoraEditor
 {
@@ -16,9 +17,27 @@ namespace KoraEditor
         private Shader shader;
         private Material material;
 
+        private float uiScale = 1f;
+        private float fontSize = 18;
+
         // Public
+        public const float DefaultUIScale = 1.75f;                              // Global scale of UI elements
+        public const float UISharpen = 3f;                                      // Render oversize and then reduce to create crisper image
+
         public const uint DefaultVertexBufferSize = sizeof(float) * 4098;
         public const uint DefaultIndexBufferSize = sizeof(ushort) * 4098;
+
+        // Properties
+        public float UIScale
+        {
+            get => uiScale;
+            set
+            {
+                uiScale = value;
+                ImGui.GetIO().FontGlobalScale = uiScale / UISharpen;
+                ImGui.GetStyle().ScaleAllSizes(uiScale / UISharpen);
+            }
+        }
 
         // Methods
         public async void Initialize(GraphicsDevice graphics, AssetProvider assets)
@@ -31,6 +50,26 @@ namespace KoraEditor
 
             // Go to dark style
             ImGui.StyleColorsDark();
+
+
+            // Try to load a system font, fall back to default
+            string fontPath = null;
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                fontPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Fonts), "segoeui.ttf");
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+                fontPath = "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf";
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+                fontPath = "/Library/Fonts/Arial.ttf";
+
+            if (fontPath != null && File.Exists(fontPath))
+            {
+                // size is in pixels (or use 0 to auto-scale with io.FontGlobalScale)
+                io.Fonts.AddFontFromFileTTF(fontPath, fontSize * UISharpen);
+            }
+            else
+            {
+                io.Fonts.AddFontDefault();
+            }
 
 
             // Create buffers
@@ -62,7 +101,6 @@ namespace KoraEditor
 
                 io.Fonts.SetTexID((IntPtr)fontTexture.gpuTexture);
             }
-            
 
             // Load shader
             shader = await assets.LoadAsync<Shader>("Shader/imgui.shader.json");
@@ -72,6 +110,10 @@ namespace KoraEditor
             material.Name = "ImGui Material";
             material.Shader = shader;
             material.SetTexture("FontTexture", fontTexture);
+
+            // Update scale
+            UIScale = DefaultUIScale;
+            ApplyTheme();
         }
 
         public void HandleSDLEvent(SDL_Event e)
@@ -297,6 +339,64 @@ namespace KoraEditor
             }
             // End render pass
             cmd.EndRenderPass();
+        }
+
+        private void ApplyTheme()
+        {
+            var style = ImGui.GetStyle();
+            style.ScaleAllSizes(uiScale);
+
+            // metrics
+            style.WindowRounding = 4f;
+            style.FrameRounding = 3f;
+            style.GrabRounding = 3f;
+            style.FrameBorderSize = 0.0f;
+            style.WindowBorderSize = 0.0f;
+            style.PopupRounding = 3f;
+            style.ItemSpacing = new Vector2(8, 6);
+            style.ItemInnerSpacing = new Vector2(6, 4);
+            style.WindowPadding = new Vector2(10, 8);
+            style.FramePadding = new Vector2(8, 6);
+
+            // palette (Visual Studio dark-ish)
+            var c = style.Colors;
+            c[(int)ImGuiCol.Text] = Hex(0xD4D4D4);
+            c[(int)ImGuiCol.TextDisabled] = Hex(0x6C6C6C);
+            c[(int)ImGuiCol.WindowBg] = Hex(0x1E1E1E); // main background
+            c[(int)ImGuiCol.ChildBg] = Hex(0x252526);
+            c[(int)ImGuiCol.PopupBg] = Hex(0x252526);
+            c[(int)ImGuiCol.Border] = Hex(0x3C3C3C);
+            c[(int)ImGuiCol.FrameBg] = Hex(0x2D2D30);
+            c[(int)ImGuiCol.FrameBgHovered] = Hex(0x3A3D41);
+            c[(int)ImGuiCol.FrameBgActive] = Hex(0x007ACC);
+            c[(int)ImGuiCol.TitleBg] = Hex(0x2D2D30);
+            c[(int)ImGuiCol.TitleBgActive] = Hex(0x2D2D30);
+            c[(int)ImGuiCol.MenuBarBg] = Hex(0x2D2D30);
+            c[(int)ImGuiCol.ScrollbarBg] = Hex(0x101010, 0.3f);
+            c[(int)ImGuiCol.ScrollbarGrab] = Hex(0x2D2D30);
+            c[(int)ImGuiCol.CheckMark] = Hex(0x00A3FF);
+            c[(int)ImGuiCol.SliderGrab] = Hex(0x007ACC);
+            c[(int)ImGuiCol.Button] = Hex(0x2D2D30);
+            c[(int)ImGuiCol.ButtonHovered] = Hex(0x3A3D41);
+            c[(int)ImGuiCol.ButtonActive] = Hex(0x007ACC);
+            c[(int)ImGuiCol.Header] = Hex(0x2D2D30);
+            c[(int)ImGuiCol.HeaderHovered] = Hex(0x3A3D41);
+            c[(int)ImGuiCol.HeaderActive] = Hex(0x007ACC);
+            c[(int)ImGuiCol.Separator] = Hex(0x3C3C3C);
+            c[(int)ImGuiCol.PopupBg] = Hex(0x252526);
+            c[(int)ImGuiCol.Tab] = Hex(0x252526);
+            c[(int)ImGuiCol.TabHovered] = Hex(0x3A3D41);
+            //c[(int)ImGuiCol.TabActive] = Hex(0x2D2D30);
+            //c[(int)ImGuiCol.TabUnfocused] = Hex(0x252526);
+            //c[(int)ImGuiCol.TabUnfocusedActive] = Hex(0x2D2D30);
+            c[(int)ImGuiCol.PlotLines] = Hex(0x00A3FF);
+            c[(int)ImGuiCol.PlotLinesHovered] = Hex(0x66B3FF);
+            c[(int)ImGuiCol.TextSelectedBg] = Hex(0x264F78, 0.9f);
+        }
+
+        private static Vector4 Hex(uint hex, float a = 1.0f)
+        {
+            return new Vector4(((hex >> 16) & 0xFF) / 255f, ((hex >> 8) & 0xFF) / 255f, (hex & 0xFF) / 255f, a);
         }
 
         private static ImGuiKey GetSDLMappedScancode(SDL_Scancode scancode)
