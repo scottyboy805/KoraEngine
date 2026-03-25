@@ -1,75 +1,176 @@
 ﻿using ImGuiNET;
 using KoraGame;
+using KoraGame.Graphics;
 using System.Numerics;
 
 namespace KoraEditor.UI
 {
     public static class Gui
     {
+        // Private
+        private static int idCounter = 1;
+
         // Methods
+        internal static void NewFrame()
+        {
+            idCounter = 1;
+        }
+
         public static void Label(GuiContent content)
         {
+            BeginControl(content);
             ImGui.Text(content.Text);
-            DoContent(content);
+            EndControl(content);
         }
 
         public static void Button(GuiContent content, Action onClick)
-        {            
+        {
+            BeginControl(content);
             if (ImGui.Button(content.Text))
                 onClick();
-            DoContent(content);
+            EndControl(content);
         }
 
-        public static void Toggle(GuiContent content, ref bool value)
+        public unsafe static void Image(Texture texture, Vector2F size, GuiContent content = default)
         {
-            ImGui.Checkbox(content.Text, ref value);
-            DoContent(content);
+            BeginControl(content);
+            ImGui.Image((IntPtr)texture.gpuTexture, (Vector2)size);
+            EndControl(content);
         }
 
-        public static void Input(GuiContent content, ref string value)
+        public static bool Toggle(ref bool value, GuiContent content = default)
         {
-            ImGui.InputText(content.Text, ref value, 256);
-            DoContent(content);
+            BeginControl(content);
+            bool changed = ImGui.Checkbox("", ref value);
+            EndControl(content);
+            return changed;
         }
 
-        public static void InputNumber(GuiContent content, ref int value)
+        public static bool Input(ref string value, uint maxLength = 256, GuiContent content = default)
         {
-            ImGui.InputInt(content.Text, ref value);
-            DoContent(content);
+            BeginControl(content);
+            bool changed = ImGui.InputText("", ref value, maxLength);
+            EndControl(content);
+            return changed;
         }
 
-        public static void InputNumber(GuiContent content, ref float value)
+        public static bool InputMultiline(ref string value, uint maxLength = 1024, GuiContent content = default)
         {
-            ImGui.InputFloat(content.Text, ref value);
-            DoContent(content);
+            BeginControl(content);
+            bool changed = ImGui.InputTextMultiline("", ref value, maxLength, new Vector2(-1, 100));
+            EndControl(content);
+            return changed;
+        }
+
+        public static bool InputNumber(ref int value, GuiContent content = default)
+        {
+            BeginControl(content);
+            bool changed = ImGui.InputInt("", ref value);
+            EndControl(content);
+            return changed;
+        }
+
+        public static bool InputNumber(ref float value, GuiContent content = default)
+        {
+            BeginControl(content);
+            bool changed = ImGui.InputFloat("", ref value);
+            EndControl(content);
+            return changed;
         }   
 
-        public static void Slider(GuiContent content, ref int value, int min, int max)
+        public static bool Slider(ref int value, int min, int max, GuiContent content = default)
         {
-            ImGui.SliderInt(content.Text, ref value, min, max);
-            DoContent(content);
+            BeginControl(content);
+            bool changed = ImGui.SliderInt("", ref value, min, max);
+            EndControl(content);
+            return changed;
         }
 
-        public static void Slider(GuiContent content, ref float value, float min, float max)
+        public static bool Slider(ref float value, float min, float max, GuiContent content = default)
         {
-            ImGui.SliderFloat(content.Text, ref value, min, max);
-            DoContent(content);
+            BeginControl(content);
+            bool changed = ImGui.SliderFloat("", ref value, min, max);
+            EndControl(content);
+            return changed;
         }
 
-        public static void ColorPicker(GuiContent content, ref Color color)
+        public static bool ColorPicker(ref Color color, GuiContent content = default)
         {
+            BeginControl(content);
             Vector4 colorVec = (Vector4)color;
-            if (ImGui.ColorPicker4(content.Text, ref colorVec))
+            bool changed = false;
+            if (ImGui.ColorPicker4("", ref colorVec))
+            {
                 color = (Color)colorVec;
-            DoContent(content);
+                changed = true;
+            }
+            EndControl(content);
+            return changed;
         }
 
-        public static void ColorPicker(GuiContent content, ref Color32 color)
+        public static bool ColorPicker(ref Color32 color, GuiContent content = default)
         {
+            BeginControl(content);
             Vector4 colorVec = (Vector4)(Color)color;
-            if (ImGui.ColorPicker4(content.Text, ref colorVec))
+            bool changed = false;
+            if (ImGui.ColorPicker4("", ref colorVec))
+            {
                 color = (Color32)(Color)colorVec;
-            DoContent(content);
+                changed = true;
+            }
+            EndControl(content);
+            return changed;
+        }
+
+        public static bool Popup(ref int selected, string[] items, GuiContent content = default)
+        {
+            // Check for any
+            if(items == null || items.Length == 0)
+                return false;                       
+
+            BeginControl(content);
+            bool changed = ImGui.Combo("", ref selected, items, items.Length);
+            EndControl(content);
+
+            return changed;
+        }
+
+        public static bool EnumPopup(ref Enum value, GuiContent content = default)
+        {
+            BeginControl(content);
+
+            // Get the option names
+            string[] names = Enum.GetNames(value.GetType());
+
+            // Display combo
+            int current = Array.IndexOf(names, value.ToString());
+            bool changed = ImGui.Combo("", ref current, names, names.Length);
+
+            // Update changed
+            if(changed == true)
+                value = (Enum)Enum.Parse(value.GetType(), names[current]);
+
+            EndControl(content);
+            return changed;
+        }
+
+        public static bool EnumPopup<T>(ref T value, GuiContent content = default) where T : Enum
+        {
+            BeginControl(content);
+
+            // Get the option names
+            string[] names = Enum.GetNames(value.GetType());
+
+            // Display combo
+            int current = Array.IndexOf(names, value.ToString());
+            bool changed = ImGui.Combo("", ref current, names, names.Length);
+
+            // Update changed
+            if (changed == true)
+                value = (T)Enum.Parse(value.GetType(), names[current]);
+
+            EndControl(content);
+            return changed;
         }
 
         public static void Separator()
@@ -82,13 +183,26 @@ namespace KoraEditor.UI
             ImGui.Spacing();
         }
 
-        private static void DoContent(GuiContent content)
+        private static void BeginControl(in GuiContent content)
         {
-            // Tooltip
-            if (content.Tooltip != null)
-                ImGui.SetItemTooltip(content.Tooltip);
+            // Get id
+            if (string.IsNullOrEmpty(content.Id) == false)
+            {
+                ImGui.PushID(content.Id);
+            }
+            else
+            {
+                ImGui.PushID(idCounter++);
+            }
         }
 
+        private static void EndControl(in GuiContent content)
+        {
+            // Tooltip
+            if (string.IsNullOrEmpty(content.Tooltip) == false)
+                ImGui.SetItemTooltip(content.Tooltip);
 
+            ImGui.PopID();
+        }
     }
 }

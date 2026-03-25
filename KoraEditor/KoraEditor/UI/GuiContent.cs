@@ -3,28 +3,20 @@ namespace KoraEditor.UI
 {
     public struct GuiContent
     {
-        // Private
-        private string text;
-        private string tooltip;
+        // Public
+        public string Text;
+        public string Tooltip;
+        public string Id;
 
-        // Properties
-        public string Text
-        {
-            get => text;
-            set => text = value != null ? value : string.Empty;
-        }
-
-        public string Tooltip
-        {
-            get => tooltip;
-            set => tooltip = value;
-        }
+        // Public
+        public static readonly GuiContent Empty = new GuiContent(string.Empty);
 
         // Constructor
-        public GuiContent(string text, string tooltip = "")
+        public GuiContent(string text, string tooltip = null, string id = null)
         {
             this.Text = text;
-            this.tooltip = tooltip;
+            this.Tooltip = tooltip;
+            this.Id = id;
         }
 
         // Methods

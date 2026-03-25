@@ -1,4 +1,5 @@
-﻿using System.Runtime.Serialization;
+﻿using System.Runtime.InteropServices;
+using System.Runtime.Serialization;
 
 namespace KoraGame
 {
@@ -12,6 +13,8 @@ namespace KoraGame
         private bool isDestroying = false;
         private bool isDestroyed = false;
         private bool isInstance = false;
+
+        private GCHandle weakHandle = default;
 
         // Internal
         internal readonly Type elementType;
@@ -30,6 +33,19 @@ namespace KoraGame
 
         public virtual bool IsAsset => !isInstance;
 
+        internal GCHandle WeakHandle
+        {
+            get
+            {
+                // Create the handle
+                if (weakHandle.IsAllocated == false && this.isDestroyed == false)
+                    weakHandle = GCHandle.Alloc(this, GCHandleType.Weak);
+
+                // Get the weak handle
+                return weakHandle;
+            }
+        }
+
         // Constructor
         protected GameElement()
         {
@@ -44,6 +60,13 @@ namespace KoraGame
 
             this.name = name;
             this.isInstance = true;
+        }
+
+        ~GameElement()
+        {
+            // Free handle
+            if (weakHandle.IsAllocated == true)
+                weakHandle.Free();
         }
 
         // Methods
@@ -128,6 +151,16 @@ namespace KoraGame
 
             // Trigger object destroy
             element.OnDestroy();
+        }
+
+        internal static T FromWeakHandle<T>(in GCHandle handle) where T : GameElement
+        {
+            // Try to get referenced object as T
+            if (handle.IsAllocated == true && handle.Target != null && handle.Target is T t)
+                return t;
+
+            // handle is invald or was collected
+            return null;
         }
 
         public static bool operator==(GameElement a, GameElement b)

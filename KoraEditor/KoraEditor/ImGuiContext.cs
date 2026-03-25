@@ -1,4 +1,5 @@
 ﻿using ImGuiNET;
+using KoraEditor.UI;
 using KoraGame;
 using KoraGame.Graphics;
 using SDL;
@@ -174,6 +175,9 @@ namespace KoraEditor
 
             ImGui.End();
 
+            // Start new ui frame
+            Gui.NewFrame();
+
             ImGui.ShowDemoWindow();
         }
 
@@ -321,6 +325,10 @@ namespace KoraEditor
                     {
                         ImDrawCmdPtr cmdPtr = listPtr.CmdBuffer[j];
                         Vector4 clip = cmdPtr.ClipRect;
+
+                        // Bind texture
+                        SDL_GPUTexture* tex = (SDL_GPUTexture*)cmdPtr.TextureId;
+
 
                         // Set clip
                         SDL_Rect clipRect = new SDL_Rect
