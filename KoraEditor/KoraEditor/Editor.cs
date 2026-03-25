@@ -11,12 +11,15 @@ namespace KoraEditor
     {
         // Private
         private Project project = null;
+        private Selection selection = new();
         private AssetProvider editorAssets = null;
         private ImGuiContext gui = null;
 
         private Menu menuBar = new();
 
         // Properties
+        public Project Project => project;
+        public Selection Selection => selection;
         public AssetProvider EditorAssets => editorAssets;
         internal ImGuiContext Gui => gui;
 
@@ -86,6 +89,9 @@ namespace KoraEditor
             // Init menu
             menuBar.RebuildMenu();
 
+
+            // Init editors
+            PropertyEditor.InitializePropertyEditors();
             //EditorWindow.Open<ConsoleWindow>();
         }
 

@@ -4,7 +4,7 @@ using System.Numerics;
 
 namespace KoraEditor
 {
-    public abstract class EditorWindow
+    public abstract class EditorWindow : EditorContext
     {
         // Internal
         internal static readonly List<EditorWindow> openWindows = new();
@@ -64,14 +64,29 @@ namespace KoraEditor
 
         public void Close()
         {
-            if(openWindows.Contains(this) == true)
+            if (openWindows.Contains(this) == true)
+            {
                 openWindows.Remove(this);
+
+                // Do close
+                try
+                {
+                    OnClose();
+                }
+                catch(Exception e)
+                {
+                    Debug.LogException(e);
+                }
+            }
         }
 
         public void Repaint()
         {
             repaint = true;
         }
+
+        protected virtual void OnOpen() { }
+        protected virtual void OnClose() { }
 
         protected virtual void OnGui()
         {
@@ -95,6 +110,17 @@ namespace KoraEditor
             // Create a new window
             window = new T();
             openWindows.Add(window);
+
+            // Do window open
+            try
+            {
+                window.OnOpen();
+            }
+            catch (Exception e)
+            {
+                Debug.LogException(e);
+            }
+
             return window;
         }
     }

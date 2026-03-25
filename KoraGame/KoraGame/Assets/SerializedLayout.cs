@@ -1,4 +1,5 @@
-﻿using System.Reflection;
+﻿using System.Collections;
+using System.Reflection;
 using System.Runtime.Serialization;
 
 namespace KoraGame
@@ -166,6 +167,11 @@ namespace KoraGame
             {
                 serializeField.SetValue(instance, value);
             }
+
+            public override T GetAttribute<T>()
+            {
+                return serializeField.GetCustomAttribute<T>();
+            }
         }
         internal sealed class SerializedProperty : SerializedElement
         {
@@ -189,11 +195,20 @@ namespace KoraGame
             {
                 serializeProperty.SetValue(instance, value);
             }
+
+            public override T GetAttribute<T>()
+            {
+                return serializeProperty.GetCustomAttribute<T>();
+            }
         }
 
         // Public
         public readonly string ElementName;
         public readonly Type ElementType;
+
+        // Properties
+        public bool IsArray => ElementType.IsArray == true || typeof(IList).IsAssignableFrom(ElementType) == true;
+        public bool IsObject => ElementType.IsPrimitive == false && ElementType.IsEnum == false && ElementType != typeof(string);
 
         // Constructor
         protected SerializedElement(string name, Type type)
@@ -205,6 +220,11 @@ namespace KoraGame
         // Methods
         public abstract object GetValue(object instance);
         public abstract void SetValue(object instance, object value);
+        public abstract T GetAttribute<T>() where T : Attribute;
+        public bool HasAttribute<T>() where T : Attribute
+        {
+            return GetAttribute<T>() != null;
+        }
 
         protected static string GetSerializeMemberName(MemberInfo member)
         {

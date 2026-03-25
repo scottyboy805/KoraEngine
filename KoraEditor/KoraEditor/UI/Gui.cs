@@ -5,10 +5,17 @@ using System.Numerics;
 
 namespace KoraEditor.UI
 {
+    public enum GuiLayout
+    {
+        Vertical,
+        Horizontal,
+    }
+
     public static class Gui
     {
         // Private
         private static int idCounter = 1;
+        private static Stack<GuiLayout> layouts = new();
 
         // Methods
         internal static void NewFrame()
@@ -31,10 +38,18 @@ namespace KoraEditor.UI
             EndControl(content);
         }
 
-        public unsafe static void Image(Texture texture, Vector2F size, GuiContent content = default)
+        public static void Image(Texture texture, Vector2F size, GuiContent content = default)
         {
             BeginControl(content);
-            ImGui.Image(texture.WeakPtr, (Vector2)size);
+            ImGui.Image(texture != null ? texture.WeakPtr : IntPtr.Zero, (Vector2)size);
+            EndControl(content);
+        }
+
+        public static void ImageButton(Texture texture, Vector2F size, Action onClick, GuiContent content = default)
+        {
+            BeginControl(content);
+            if (ImGui.ImageButton("", texture != null ? texture.WeakPtr : IntPtr.Zero, (Vector2)size))
+                onClick();
             EndControl(content);
         }
 
@@ -175,16 +190,47 @@ namespace KoraEditor.UI
 
         public static void Separator()
         {
+            BeginControl(default);
             ImGui.Separator();
+            EndControl(default);
         }
 
         public static void Space()
         {
+            BeginControl(default);
             ImGui.Spacing();
+            EndControl(default);
+        }
+
+        public static void BeginLayout(GuiLayout layout = GuiLayout.Vertical, Vector2F size = default, string id = null)
+        {
+            // Push layout
+            layouts.Push(layout);
+
+            // Get layout flags
+            ImGuiChildFlags flags = /*ImGuiChildFlags.AutoResizeX | */ImGuiChildFlags.AutoResizeY;
+
+            ImGui.BeginChild(string.IsNullOrEmpty(id) == true
+                ? (idCounter++).ToString()
+                : id, (Vector2)size, flags);
+        }
+
+        public static void EndLayout()
+        {
+            // Pop layout
+            if (layouts.Count == 0)
+                throw new InvalidOperationException("Attempted to end too many layouts");
+
+            ImGui.EndChild();
+            layouts.Pop();
         }
 
         private static void BeginControl(in GuiContent content)
         {
+            // Check layout
+            if(layouts.Count > 0 && layouts.Peek() == GuiLayout.Horizontal)
+                ImGui.SameLine();
+
             // Get id
             if (string.IsNullOrEmpty(content.Id) == false)
             {
