@@ -1,5 +1,6 @@
 ﻿using KoraGame;
 using KoraEditor.UI;
+using KoraGame.Graphics;
 
 namespace KoraEditor
 {
@@ -15,7 +16,13 @@ namespace KoraEditor
         float val = 0.5f;
         MyEnum e = MyEnum.Val2;
 
+        Texture icon;
         // Methods
+        public ConsoleWindow()
+        {
+            icon = ((Editor)Editor.Instance).EditorAssets.LoadAsync<Texture>("Icon/WGPU-Logo.png").Result;
+        }
+
         protected override void OnGui()
         {
             
@@ -27,6 +34,8 @@ namespace KoraEditor
 
             if (Gui.EnumPopup(ref e))
                 Debug.Log("Changed");
+
+            Gui.Image(icon, new Vector2F(500, 500));
         }
 
         [Menu("Window/Console", "Ctrl+Shift+C")]

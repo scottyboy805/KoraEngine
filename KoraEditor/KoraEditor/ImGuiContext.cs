@@ -100,7 +100,7 @@ namespace KoraEditor
                     uploadCmd.Submit();
                 }
 
-                io.Fonts.SetTexID((IntPtr)fontTexture.gpuTexture);
+                io.Fonts.SetTexID(fontTexture.WeakPtr);
             }
 
             // Load shader
@@ -110,7 +110,7 @@ namespace KoraEditor
             material = new Material();
             material.Name = "ImGui Material";
             material.Shader = shader;
-            material.SetTexture("FontTexture", fontTexture);
+            material.MainTexture = fontTexture;
 
             // Update scale
             UIScale = DefaultUIScale;
@@ -317,6 +317,8 @@ namespace KoraEditor
                 vertexOffset = 0;
                 indexOffset = 0;
 
+                IntPtr lastTexture = IntPtr.Zero;
+
                 for (int i = 0; i < drawPtr.CmdListsCount; i++)
                 {
                     ImDrawListPtr listPtr = drawPtr.CmdLists[i];
@@ -326,8 +328,17 @@ namespace KoraEditor
                         ImDrawCmdPtr cmdPtr = listPtr.CmdBuffer[j];
                         Vector4 clip = cmdPtr.ClipRect;
 
-                        // Bind texture
-                        SDL_GPUTexture* tex = (SDL_GPUTexture*)cmdPtr.TextureId;
+                        if (lastTexture != cmdPtr.TextureId)
+                        {
+                            // Bind texture
+                            Texture tex = Texture.FromWeakPtr<Texture>(cmdPtr.TextureId);
+
+                            material.MainTexture = tex;
+                            material.Bind(cmd, MeshVertexElements.Position2 | MeshVertexElements.UV | MeshVertexElements.Color32);
+
+                            // Set last
+                            lastTexture = cmdPtr.TextureId;
+                        }
 
 
                         // Set clip

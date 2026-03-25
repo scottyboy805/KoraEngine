@@ -26,7 +26,7 @@
 			"Type": 1
 		},
 		{
-			"Name": "FontTexture",
+			"Name": "Texture",
 			"Location": 0,
 			"Stage": 0,
 			"Type": 2

@@ -46,6 +46,19 @@ namespace KoraGame
             }
         }
 
+        internal IntPtr WeakPtr
+        {
+            get
+            {
+                GCHandle handle = WeakHandle;
+
+                // Get ptr or null
+                return handle.IsAllocated == true
+                    ? GCHandle.ToIntPtr(handle) 
+                    : IntPtr.Zero;
+            }
+        }
+
         // Constructor
         protected GameElement()
         {
@@ -160,6 +173,19 @@ namespace KoraGame
                 return t;
 
             // handle is invald or was collected
+            return null;
+        }
+
+        internal static T FromWeakPtr<T>(in IntPtr ptr) where T : GameElement
+        {
+            if(ptr != IntPtr.Zero)
+            {
+                // Get from intptr
+                GCHandle handle = GCHandle.FromIntPtr(ptr);
+
+                // Try to get object
+                return FromWeakHandle<T>(handle);
+            }
             return null;
         }
 

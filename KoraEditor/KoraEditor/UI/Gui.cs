@@ -34,7 +34,7 @@ namespace KoraEditor.UI
         public unsafe static void Image(Texture texture, Vector2F size, GuiContent content = default)
         {
             BeginControl(content);
-            ImGui.Image((IntPtr)texture.gpuTexture, (Vector2)size);
+            ImGui.Image(texture.WeakPtr, (Vector2)size);
             EndControl(content);
         }
 
