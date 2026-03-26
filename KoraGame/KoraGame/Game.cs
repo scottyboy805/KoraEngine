@@ -196,5 +196,35 @@ namespace KoraGame
             // Will be destroyed at the end of the frame
             destroyElements.Enqueue(element);
         }
+
+        internal static void DoEvent(Action action)
+        {
+            try
+            {
+                if (action != null)
+                    action.Invoke();
+            }
+            catch (Exception e) { Debug.LogException(e); }
+        }
+
+        internal static void DoEvent<T>(Action<T> action, T arg0)
+        {
+            try
+            {
+                if (action != null)
+                    action.Invoke(arg0);
+            }
+            catch (Exception e) { Debug.LogException(e); }
+        }
+
+        internal static void DoEvent<T0, T1>(Action<T0, T1> action, T0 arg0, T1 arg1)
+        {
+            try
+            {
+                if (action != null)
+                    action.Invoke(arg0, arg1);
+            }
+            catch (Exception e) { Debug.LogException(e); }
+        }
     }
 }

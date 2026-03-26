@@ -9,6 +9,7 @@ namespace KoraEditor
         private readonly Editor editor = null;
 
         // Properties
+        public Editor Editor => editor;
         public Project Project => editor?.Project;
         public Selection Selection => editor?.Selection;
         public AssetProvider Assets => editor?.Assets;

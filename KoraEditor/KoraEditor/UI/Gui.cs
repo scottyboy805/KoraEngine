@@ -225,6 +225,36 @@ namespace KoraEditor.UI
             layouts.Pop();
         }
 
+        public static bool BeginTreeNode(GuiContent content, bool selected = false, Texture icon = null)
+        {
+            ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags.None;
+
+            // Check for selected
+            if(selected == true)
+                flags |= ImGuiTreeNodeFlags.Selected;
+
+            BeginControl(content);
+            bool expanded = ImGui.TreeNodeEx("", flags);
+
+            // Image
+            if(icon != null)
+            {
+                ImGui.SameLine();
+                ImGui.Image(icon.WeakPtr, new Vector2(32, 32));
+            }
+
+            // Label
+            ImGui.SameLine();
+            Label(content);
+            EndControl(content);
+            return expanded;
+        }
+
+        public static void EndTreeNode()
+        {
+            ImGui.TreePop();
+        }
+
         private static void BeginControl(in GuiContent content)
         {
             // Check layout

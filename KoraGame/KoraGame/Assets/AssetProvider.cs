@@ -12,7 +12,7 @@ namespace KoraGame
         void OnDeserialize();
     }
 
-    public sealed class AssetProvider
+    public class AssetProvider
     {
         // Private
         private const int webDefaultTimeoutSeconds = 5;         // 5 Seconds
@@ -47,7 +47,7 @@ namespace KoraGame
         }
 
         // Methods
-        public void Unload(GameElement element)
+        public virtual void Unload(GameElement element)
         {
             // Check for null - but not destroyed
             if (element is null)
@@ -68,7 +68,7 @@ namespace KoraGame
                 loadedAssets.Remove(cacheKey.Key, out _);
         }
 
-        public void UnloadAll()
+        public virtual void UnloadAll()
         {
             // Process all cached
             foreach(var cacheKey in loadedAssets)
@@ -88,7 +88,7 @@ namespace KoraGame
             loadedAssets.Clear();
         }
 
-        public async Task<T> LoadAsync<T>(string assetRelativePath, string assetOrPakName = null, CancellationToken cancellationToken = default) where T : GameElement
+        public virtual async Task<T> LoadAsync<T>(string assetRelativePath, string assetOrPakName = null, CancellationToken cancellationToken = default) where T : GameElement
         {
             // Check for cached
             if (loadedAssets.TryGetValue((assetRelativePath, typeof(T)), out GameElement element) == true)
@@ -107,7 +107,7 @@ namespace KoraGame
             return await LoadContextAsync(context, assetRelativePath, assetOrPakName, cancellationToken, false) as T;
         }
 
-        public async Task<GameElement> LoadAsync(string assetRelativePath, Type assetType = null, string assetOrPakName = null, CancellationToken cancellationToken = default)
+        public virtual async Task<GameElement> LoadAsync(string assetRelativePath, Type assetType = null, string assetOrPakName = null, CancellationToken cancellationToken = default)
         {
             // Check type
             if (assetType == null)
@@ -283,7 +283,7 @@ namespace KoraGame
             return loadedPaks.Values.FirstOrDefault(p => p.assetPaths.Contains(assetName));
         }
 
-        internal string GetAssetPath(GameElement element)
+        public virtual string GetAssetPath(GameElement element)
         {
             foreach (var cacheKey in loadedAssets)
             {

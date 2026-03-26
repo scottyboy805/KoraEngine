@@ -30,12 +30,12 @@ namespace KoraGame
         public string Name => name;
         public string ProjectPath => projectPath;
         public string ProjectFolder => projectFolder;
-        public string ContentFolder => contentFolder;
+        public string AssetsFolder => contentFolder;
         public string LibraryFolder => libraryFolder;
         public string ScriptFolder => scriptFolder;
 
 
-        public string ContentBuildFolder => Path.Combine(LibraryFolder, "content-build");
+        public string ContentBuildFolder => Path.Combine(LibraryFolder, "assets-build");
         public string ScriptBuildFolder => Path.Combine(LibraryFolder, "script-build");
         public string ScriptIntermediateFolder => Path.Combine(LibraryFolder, "script-obj");
 
