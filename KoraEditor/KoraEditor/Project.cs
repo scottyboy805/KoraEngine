@@ -9,19 +9,19 @@ namespace KoraGame
         // Private        
         private readonly string projectPath;
         private readonly string projectFolder;
-        private readonly string contentFolder;
+        private readonly string assetsFolder;
         private readonly string libraryFolder;
         private readonly string scriptFolder;
 
         [DataMember(Name = "Name")]
         private string name;
-        [DataMember(Name = "Version")]
-        private Version version = new Version(1, 0, 0);
+        //[DataMember(Name = "Version")]
+        //private Version version = new Version(1, 0, 0);
         [DataMember(Name = "DeveloperName")]
         private string developerName = "";
 
-        [DataMember(Name = "EditorVersion")]
-        private Version editorVersion = new Version(1, 0, 0);
+        //[DataMember(Name = "EditorVersion")]
+        //private Version editorVersion = new Version(1, 0, 0);
 
         // Public
         public const string FileExtension = ".koragame";
@@ -30,7 +30,7 @@ namespace KoraGame
         public string Name => name;
         public string ProjectPath => projectPath;
         public string ProjectFolder => projectFolder;
-        public string AssetsFolder => contentFolder;
+        public string AssetsFolder => assetsFolder;
         public string LibraryFolder => libraryFolder;
         public string ScriptFolder => scriptFolder;
 
@@ -54,9 +54,9 @@ namespace KoraGame
             if (mustExist == true && File.Exists(projectPath) == false)
                 throw new ArgumentException("Project path does not exist: " + projectPath);
 
-            this.projectPath = projectPath;
+            this.projectPath = Path.GetFullPath(projectPath);
             this.projectFolder = Directory.GetParent(projectPath).FullName;
-            this.contentFolder = Path.Combine(projectFolder, "Content");
+            this.assetsFolder = Path.Combine(projectFolder, "Assets");
             this.libraryFolder = Path.Combine(projectFolder, "Library");
             this.scriptFolder = Path.Combine(projectFolder, "Scripts");
 
@@ -64,8 +64,8 @@ namespace KoraGame
 
 
             // Create content on demand
-            if (Directory.Exists(contentFolder) == false)
-                Directory.CreateDirectory(contentFolder);
+            if (Directory.Exists(assetsFolder) == false)
+                Directory.CreateDirectory(assetsFolder);
 
             // Create library folder on demand
             if (Directory.Exists(libraryFolder) == false)

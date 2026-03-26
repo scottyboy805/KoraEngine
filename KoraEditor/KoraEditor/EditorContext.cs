@@ -1,5 +1,6 @@
 ﻿
 using KoraGame;
+using KoraPipeline;
 
 namespace KoraEditor
 {
@@ -12,7 +13,7 @@ namespace KoraEditor
         public Editor Editor => editor;
         public Project Project => editor?.Project;
         public Selection Selection => editor?.Selection;
-        public AssetProvider Assets => editor?.Assets;
+        public AssetDatabase AssetDatabase => editor?.AssetDatabase;
         public AssetProvider EditorAssets => editor?.EditorAssets;
 
         // Constructor

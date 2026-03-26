@@ -71,7 +71,7 @@ namespace KoraPipeline
             return newPath;
         }
 
-        public void RefreshContent()
+        public void Refresh()
         {
             // Process all asset files
             foreach (string file in Directory.EnumerateFiles(AssetDirectory, "*.*", SearchOption.AllDirectories)
@@ -95,7 +95,7 @@ namespace KoraPipeline
                 {
                     // Check for content file
                     if (File.Exists(fullPath + AssetMetadata.AssetMetaExtension) == true)
-                        File.Decrypt(fullPath + AssetMetadata.AssetMetaExtension);
+                        File.Delete(fullPath + AssetMetadata.AssetMetaExtension);
 
                     // Remove from cache
                     assetPaths.Remove(contentPath.Key);
@@ -321,6 +321,13 @@ namespace KoraPipeline
             using (Process.Start("explorer", "\"" + fullPath.Replace('/', '\\') + "\"")) ;
         }
 
+        public bool IsFolder(string path)
+        {
+            string fullPath = CheckAssetPath(path);
+
+            return (File.GetAttributes(fullPath) & FileAttributes.Directory) != 0;
+        }
+
         private AssetMetadata GetOrCreateMetadata(string assetPath)
         {
             // Check the path
@@ -392,7 +399,7 @@ namespace KoraPipeline
         private void OnAssetWatcherDeleted(object sender, FileSystemEventArgs e)
         {
             // Do a full refresh to scan for deleted content
-            RefreshContent();
+            Refresh();
         }
 
         private string CheckAssetPath(string path, string hintName = null)

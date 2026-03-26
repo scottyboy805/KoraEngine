@@ -225,6 +225,49 @@ namespace KoraEditor.UI
             layouts.Pop();
         }
 
+        public static void BeginTableLayout(int columns, string id = null)
+        {
+            ImGui.BeginTable(string.IsNullOrEmpty(id) == true
+                ? (idCounter++).ToString()
+                : id, columns, ImGuiTableFlags.Resizable);
+
+            // Start first column
+            ImGui.TableNextColumn();
+        }
+
+        public static void BeginTableLayout(IList<string> columnNames, string id = null)
+        {
+            ImGui.BeginTable(string.IsNullOrEmpty(id) == true
+                ? (idCounter++).ToString()
+                : id, columnNames.Count, ImGuiTableFlags.Borders);
+
+            // Create headers
+            foreach(string header in columnNames)
+                ImGui.TableSetupColumn(header);
+
+            // Draw headers
+            ImGui.TableHeadersRow();
+
+            // Start first column
+            ImGui.TableNextColumn();
+        }
+
+        public static void EndTableLayout()
+        {
+            ImGui.EndTable();
+        }
+
+        public static void ColumnSeparator()
+        {
+            ImGui.TableNextColumn();
+        }
+
+        public static void RowSeparator()
+        {
+            ImGui.TableNextRow();
+            ImGui.TableNextColumn();
+        }
+
         public static bool BeginTreeNode(GuiContent content, bool selected = false, Texture icon = null)
         {
             ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags.None;

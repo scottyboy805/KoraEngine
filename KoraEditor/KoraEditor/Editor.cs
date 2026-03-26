@@ -3,6 +3,7 @@ using KoraGame.Graphics;
 using KoraPipeline;
 using SDL;
 using System.Runtime.CompilerServices;
+using System.Security.Cryptography;
 
 [assembly: InternalsVisibleTo("KoraEditor-Windows")]
 
@@ -11,16 +12,19 @@ namespace KoraEditor
     public sealed class Editor : Game
     {
         // Private
-        private Project project = null;
-        private Selection selection = new();
+        private Project project = null;        
+        private AssetDatabase assetDatabase = null;
         private AssetProvider editorAssets = null;
-        private ImGuiContext gui = null;
 
+        private ImGuiContext gui = null;
         private Menu menuBar = new();
+        private Selection selection = new();
+        
 
         // Properties
         public Project Project => project;
         public Selection Selection => selection;
+        public AssetDatabase AssetDatabase => assetDatabase;
         public AssetProvider EditorAssets => editorAssets;
         internal ImGuiContext Gui => gui;
 
@@ -94,6 +98,10 @@ namespace KoraEditor
             // Init editors
             PropertyEditor.InitializePropertyEditors();
             //EditorWindow.Open<ConsoleWindow>();
+
+
+            // For testing
+            OpenProject("../../../../../ExampleProject/ExampleProject.koragame");
         }
 
         internal override void DoUpdate()
@@ -225,12 +233,17 @@ namespace KoraEditor
             // Close current project
             CloseProject();
 
+            Debug.Log($"Open project: {openProject.ProjectPath}", LogFilter.Editor);
+
             // Load new project
             project = openProject;
             project.Load();
 
             // Init assets
-            assets = new AssetDatabase(scriptable, graphics, project.AssetsFolder, false);
+            assets = assetDatabase = new AssetDatabase(scriptable, graphics, project.AssetsFolder, false);
+
+            // Refresh assets
+            assetDatabase.Refresh();
         }
 
         [Menu("File/Close Project")]
