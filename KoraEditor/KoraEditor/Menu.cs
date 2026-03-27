@@ -14,6 +14,7 @@ namespace KoraEditor
             public string Shortcut;
             public List<MenuNode> Children = new();
             public MethodInfo Action;
+            public bool SeparatorBefore;
 
             // Properties
             public bool IsLeaf => Action != null;
@@ -33,6 +34,13 @@ namespace KoraEditor
                 var parts = attr.MenuTree ?? Array.Empty<string>();
                 if (parts.Length == 0)
                     continue;
+
+                // Check for static
+                if(method.IsStatic == false)
+                {
+                    Debug.LogError("Menu action method must be static: " + method.ToString());
+                    continue;
+                }
 
                 var nodes = rootNodes;
                 MenuNode current = null;
@@ -54,6 +62,7 @@ namespace KoraEditor
                 {
                     current.Action = method;
                     current.Shortcut = attr.Shortcut;
+                    current.SeparatorBefore = attr.SeparatorBefore;
                 }
             }
         }
@@ -72,6 +81,9 @@ namespace KoraEditor
 
             void RenderNode(MenuNode node)
             {
+                if (node.SeparatorBefore == true)
+                    ImGui.Separator();
+
                 if (node.Children.Count > 0)
                 {
                     if (ImGui.BeginMenu(node.Name))

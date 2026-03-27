@@ -3,7 +3,7 @@ using System.Runtime.Serialization;
 
 namespace KoraGame
 {
-    public sealed class Scene : GameElement
+    public class Scene : GameElement
     {
         // Private
         private bool active = false;

@@ -14,13 +14,14 @@ namespace KoraEditor
         public Project Project => editor?.Project;
         public Selection Selection => editor?.Selection;
         public AssetDatabase AssetDatabase => editor?.AssetDatabase;
+        public Scene EditorScene => editor?.EditorScene;
         public AssetProvider EditorAssets => editor?.EditorAssets;
 
         // Constructor
         protected EditorContext()
         {
             // Try to get editor
-            editor = (Editor)Editor.Instance;
+            editor = Editor.EditorInstance;
         }
     }
 }

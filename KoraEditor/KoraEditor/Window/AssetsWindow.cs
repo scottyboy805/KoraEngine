@@ -31,6 +31,15 @@ namespace KoraEditor
 
             // Rebuid the tree
             RebuildAssetTree();
+
+            // Listen for events
+            Editor.OnProjectChanged += RebuildAssetTree;
+        }
+
+        protected override void OnClose()
+        {
+            // Remove events
+            Editor.OnProjectChanged -= RebuildAssetTree;
         }
 
         protected override void OnGui()
@@ -68,7 +77,10 @@ namespace KoraEditor
 
         private void OnProjectTreeGui()
         {
-            OnAssetTreeGui(rootAssetNode);
+            if (Editor.IsProjectOpen == true)
+            {
+                OnAssetTreeGui(rootAssetNode);
+            }
         }
 
         private void OnProjectViewHeaderGui()
@@ -109,12 +121,15 @@ namespace KoraEditor
             // Select icon
             Texture icon = null;
 
-            if(node.IsFolder == true)
+            // Check for folder
+            bool isFolder = node.IsFolder;
+
+            if(isFolder == true)
                 icon = node.Children.Count > 0
                     ? folderNormalIcon : folderOpenIcon;
 
             // Display the node
-            if (Gui.BeginTreeNode(node.Name, false, icon) == true)
+            if (Gui.BeginTreeNode(node.Name, false, isFolder == false, icon) == true)
             {
                 // Display children
                 foreach(var child in node.Children)
@@ -137,6 +152,10 @@ namespace KoraEditor
         {
             // Clear sub nodes
             rootAssetNode.Children.Clear();
+
+            // Check for no project
+            if (Editor.IsProjectOpen == false)
+                return;
 
             // Search in folder
             IEnumerable<string> assetGuids = AssetDatabase.SearchAssets(null, null, SearchOption.AllDirectories);

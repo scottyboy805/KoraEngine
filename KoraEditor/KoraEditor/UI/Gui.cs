@@ -268,13 +268,17 @@ namespace KoraEditor.UI
             ImGui.TableNextColumn();
         }
 
-        public static bool BeginTreeNode(GuiContent content, bool selected = false, Texture icon = null)
+        public static bool BeginTreeNode(GuiContent content, bool selected = false, bool isLeaf = false, Texture icon = null)
         {
             ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags.None;
 
             // Check for selected
             if(selected == true)
                 flags |= ImGuiTreeNodeFlags.Selected;
+
+            // Check for leaf
+            if (isLeaf == true)
+                flags |= ImGuiTreeNodeFlags.Leaf;
 
             BeginControl(content);
             bool expanded = ImGui.TreeNodeEx("", flags);

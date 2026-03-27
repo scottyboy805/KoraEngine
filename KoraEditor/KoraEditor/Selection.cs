@@ -88,6 +88,11 @@ namespace KoraEditor
             return default;
         }
 
+        public bool IsSelected<T>(T obj)
+        {
+            return selectedObjects.Contains(obj);
+        }
+
         public void Clear()
         {
             Select<object>((object)null);

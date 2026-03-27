@@ -1,9 +1,9 @@
-﻿using KoraGame;
+﻿using KoraEditor.UI;
+using KoraGame;
 using KoraGame.Graphics;
 using KoraPipeline;
 using SDL;
 using System.Runtime.CompilerServices;
-using System.Security.Cryptography;
 
 [assembly: InternalsVisibleTo("KoraEditor-Windows")]
 
@@ -11,24 +11,36 @@ namespace KoraEditor
 {
     public sealed class Editor : Game
     {
-        // Private
-        private Project project = null;        
-        private AssetDatabase assetDatabase = null;
-        private AssetProvider editorAssets = null;
+        // Events
+        public event Action OnProjectChanged;
+        public event Action OnProjectOpened;
+        public event Action OnProjectClosed;
 
+        public event Action OnScenesChanged;
+        public event Action OnSceneOpened;
+        public event Action OnSceneClosed;
+
+        // Private
+        private Project project = null;
+        private Selection selection = new();
+        private AssetDatabase assetDatabase = null;
+        private EditorScene editorScene = null;
+
+        private AssetProvider editorAssets = null;
         private ImGuiContext gui = null;
         private Menu menuBar = new();
-        private Selection selection = new();
-        
 
         // Properties
         public Project Project => project;
         public Selection Selection => selection;
         public AssetDatabase AssetDatabase => assetDatabase;
+        public EditorScene EditorScene => editorScene;
         public AssetProvider EditorAssets => editorAssets;
         internal ImGuiContext Gui => gui;
 
         // Properties
+        internal static Editor EditorInstance => Instance as Editor;
+
         public string EditorBasePath
         {
             get
@@ -42,15 +54,16 @@ namespace KoraEditor
             }
         }
 
-        public string EditorContentPath
+        public string EditorAssetsPath
         {
             get
             {
-                return Path.Combine(EditorBasePath, "Content");
+                return Path.Combine(EditorBasePath, "Assets");
             }
         }
 
         public bool IsProjectOpen => project != null;
+        public bool IsSceneOpen => editorScene != null;
 
         // Methods
         internal override void DoInitialize()
@@ -76,7 +89,7 @@ namespace KoraEditor
 
             // Create assets
             Debug.Log($"Initialize assets", LogFilter.Assets);
-            this.editorAssets = new AssetProvider(scriptable, graphics, EditorContentPath, false);
+            this.editorAssets = new AssetProvider(scriptable, graphics, EditorAssetsPath, false);
 
             Debug.Log($"Use assets directory: '{editorAssets.AssetDirectory}'", LogFilter.Assets);
 
@@ -140,71 +153,129 @@ namespace KoraEditor
         }
 
         // Project
-        //#region IODialog
-        //public bool ShowSaveFileDialog(ref string fileName, string title, string filter, string directory = null)
-        //{
-        //    SaveFileDialog saveFileDialog = new SaveFileDialog();
-        //    saveFileDialog.FileName = fileName;
-        //    saveFileDialog.Title = title;
-        //    saveFileDialog.Filter = filter;
-
-        //    if (directory != null)
-        //        saveFileDialog.DefaultDirectory = directory;
-
-        //    // Check for success
-        //    if (saveFileDialog.ShowDialog() == true)
-        //    {
-        //        fileName = saveFileDialog.FileName;
-        //        return true;
-        //    }
-        //    fileName = null;
-        //    return false;
-        //}
-
-        //public bool ShowOpenFileDialog(ref string fileName, string title, string filter, string directory = null)
-        //{
-        //    OpenFileDialog openFileDialog = new OpenFileDialog();
-        //    openFileDialog.FileName = fileName;
-        //    openFileDialog.Title = title;
-        //    openFileDialog.Filter = filter;
-
-        //    if (directory != null)
-        //        openFileDialog.DefaultDirectory = directory;
-
-        //    // Check for success
-        //    if (openFileDialog.ShowDialog() == true)
-        //    {
-        //        fileName = openFileDialog.FileName;
-        //        return true;
-        //    }
-        //    fileName = null;
-        //    return false;
-        //}
-
-        //public bool ShowOpenFolderDialog(ref string folderName, string title, string directory = null)
-        //{
-        //    OpenFolderDialog openFolderDialog = new OpenFolderDialog();
-        //    openFolderDialog.FolderName = folderName;
-        //    openFolderDialog.Title = title;
-
-        //    if (directory != null)
-        //        openFolderDialog.DefaultDirectory = directory;
-
-        //    // Check for success
-        //    if (openFolderDialog.ShowDialog() == true)
-        //    {
-        //        folderName = openFolderDialog.FolderName;
-        //        return true;
-        //    }
-        //    folderName = null;
-        //    return false;
-        //}
-        //#endregion
-
-        public void NewProject()
+        #region IODialog
+        public static bool ShowSaveFileDialog(out string fileName, string filter, string directory = null)
         {
+            bool done = false;
+            string file = null;
 
+            // Run dialog on a background thread
+            ThreadPool.QueueUserWorkItem((obj) =>
+            {
+                FileDialog.ShowSaveFileDialog((filename) =>
+                {
+                    done = true;
+                    file = filename;
+                }, filter, directory);
+            });
+
+            // Wait for done
+            while (done == false)
+                Thread.Sleep(10);
+
+            // Get result
+            fileName = file;
+            return string.IsNullOrEmpty(file) == false;
         }
+
+        public static bool ShowOpenFileDialog(ref string fileName, string filter, string directory = null)
+        {
+            bool done = false;
+            string[] files = null;
+
+            // Run dialog on a background thread
+            ThreadPool.QueueUserWorkItem((obj) =>
+            {
+                FileDialog.ShowOpenFileDialog((filenames) =>
+                {
+                    done = true;
+                    files = filenames;
+                }, filter, directory, false);
+            });
+
+            // Wait for done
+            while (done == false)
+                Thread.Sleep(10);
+
+            // Get result
+            fileName = files != null && files.Length > 0 ? files[0] : null;
+            return string.IsNullOrEmpty(fileName) == false;
+        }
+
+        public static bool ShowOpenFilesDialog(ref string[] fileNames, string filter, string directory = null)
+        {
+            bool done = false;
+            string[] files = null;
+
+            // Run dialog on a background thread
+            ThreadPool.QueueUserWorkItem((obj) =>
+            {
+                FileDialog.ShowOpenFileDialog((filenames) =>
+                {
+                    done = true;
+                    files = filenames;
+                }, filter, directory, true);
+            });
+
+            // Wait for done
+            while (done == false)
+                Thread.Sleep(10);
+
+            // Get result
+            fileNames = files;
+            return files != null && files.Length > 0;
+        }
+
+        public static bool ShowOpenFolderDialog(ref string folderName, string title, string directory = null)
+        {
+            bool done = false;
+            string[] folders = null;
+
+            // Run dialog on a background thread
+            ThreadPool.QueueUserWorkItem((obj) =>
+            {
+                FileDialog.ShowOpenFolderDialog((filenames) =>
+                {
+                    done = true;
+                    folders = filenames;
+                }, directory, false);
+            });
+
+            // Wait for done
+            while (done == false)
+                Thread.Sleep(10);
+
+            // Get result
+            folderName = folders != null && folders.Length > 0 ? folders[0] : null;
+            return string.IsNullOrEmpty(folderName) == false;
+        }
+
+        public static bool ShowOpenFoldersDialog(ref string[] folderNames, string filter, string directory = null)
+        {
+            bool done = false;
+            string[] folders = null;
+
+            // Run dialog on a background thread
+            ThreadPool.QueueUserWorkItem((obj) =>
+            {
+                FileDialog.ShowOpenFolderDialog((filenames) =>
+                {
+                    done = true;
+                    folders = filenames;
+                }, directory, true);
+            });
+
+            // Wait for done
+            while (done == false)
+                Thread.Sleep(10);
+
+            // Get result
+            folderNames = folders;
+            return folders != null && folders.Length > 0;
+        }
+        #endregion
+
+
 
         public void NewProject(string projectPath)
         {
@@ -217,13 +288,7 @@ namespace KoraEditor
 
             // Open the project
             OpenProject(projectPath);
-        }
-
-        [Menu("File/Open Project", "Ctrl+O")]
-        public void OpenProject()
-        {
-            Debug.Log("Open project");
-        }
+        }        
 
         public void OpenProject(string projectPath)
         {
@@ -244,12 +309,18 @@ namespace KoraEditor
 
             // Refresh assets
             assetDatabase.Refresh();
+
+            // Update title
+            Screen.Title = $"KoraEditor ({project.Name})";
+
+            // Do events
+            DoEvent(OnProjectChanged);
+            DoEvent(OnProjectOpened);
         }
 
-        [Menu("File/Close Project")]
         public void CloseProject()
         {
-            if(project != null)
+            if (project != null)
             {
                 // Save and close
                 project.Save();
@@ -257,7 +328,120 @@ namespace KoraEditor
 
                 // Clear assets
                 assets = null;
+                assetDatabase = null;
+
+                // Update title
+                Screen.Title = "Kora Editor";
+
+                // Do events
+                DoEvent(OnProjectChanged);
+                DoEvent(OnProjectClosed);
             }
         }
+
+        public void NewScene()
+        {
+            CloseScene();
+            editorScene = new EditorScene("New Scene");
+
+            // Do events
+            DoEvent(OnScenesChanged);
+            DoEvent(OnSceneOpened);
+        }
+
+        public void OpenScene(string scenePath)
+        {
+            CloseScene();
+
+            // Try to load the scene
+            editorScene = assetDatabase.LoadAsync<EditorScene>(scenePath).Result;
+
+            // Do events
+            DoEvent(OnScenesChanged);
+            DoEvent(OnSceneOpened);
+        }
+
+        public void SaveScene()
+        {
+            if (IsSceneOpen == true && assetDatabase.IsAssetDirty(scene) == true)
+                ;// TODO
+        }
+
+        private void CloseScene()
+        {
+            // Save changes
+            SaveScene();
+
+            // Do events
+            DoEvent(OnScenesChanged);
+            DoEvent(OnSceneOpened);
+        }
+
+        #region MenuActions_File
+        [Menu("File/New Project")]
+        internal static void NewProjectAction()
+        {
+            if (ShowSaveFileDialog(out string projectPath, Project.FileExtension.TrimStart('.')) == true)
+            {
+                // Create the project
+                EditorInstance?.NewProject(projectPath);
+            }
+        }
+
+        [Menu("File/Open Project", "Ctrl+O")]
+        internal static void OpenProjectAction()
+        {
+            string projectPath = null;
+            if (ShowOpenFileDialog(ref projectPath, "Open Project", Project.FileExtension.TrimStart('.')) == true)
+            {
+                // Open the project
+                EditorInstance?.OpenProject(projectPath);
+            }
+        }
+
+        [Menu("File/Close Project")]
+        internal static void CloseProjectAction()
+        {
+            EditorInstance?.CloseProject();
+        }
+
+        [Menu("File/New Scene", "", true)]
+        internal static void NewSceneAction()
+        {
+            EditorInstance?.NewScene();
+        }
+
+        [Menu("File/Open Scene")]
+        internal static void OpenSceneAction()
+        {
+            string scenePath = null;
+            if (EditorInstance?.IsProjectOpen == true && ShowOpenFileDialog(ref scenePath, "kscene", EditorInstance.project.AssetsFolder) == true)
+            {
+                // Open the scene
+                EditorInstance?.OpenScene(scenePath);
+            }
+        }
+
+        [Menu("File/Save Scene")]
+        internal static void SaveSceneAction()
+        {
+            EditorInstance?.SaveScene();
+        }
+
+        [Menu("File/Quit", "", true)]
+        internal static void ExitAction()
+        {
+            EditorInstance?.quit = true;
+        }
+        #endregion
+
+        #region MenuActions_GameObject
+        [Menu("GameObject/Empty")]
+        internal static void CreateEmptyGameObject()
+        {
+            if (EditorInstance != null && EditorInstance.IsSceneOpen == true)
+                EditorInstance.editorScene.gameObjects.Add(new GameObject("New Game Object"));
+        }
+        #endregion
     }
 }

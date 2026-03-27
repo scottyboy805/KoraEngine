@@ -19,6 +19,7 @@ namespace KoraPipeline
         private Dictionary<string, AssetMetadata> assetMetas = new();   // Guid, Meta
         private Dictionary<string, string> assetPaths = new();          // Path, Guid
         private Dictionary<GameElement, string> assetGuids = new();     // Element, Guid        
+        private HashSet<string> assetDirtyGuids = new();
 
         // Constructor
         public AssetDatabase(ScriptableProvider scriptable, GraphicsDevice graphics, string assetDirectory, bool useWebRequest) 
@@ -326,6 +327,49 @@ namespace KoraPipeline
             string fullPath = CheckAssetPath(path);
 
             return (File.GetAttributes(fullPath) & FileAttributes.Directory) != 0;
+        }
+
+        public bool IsAssetDirty(string guid)
+        {
+            // Check empty
+            if(string.IsNullOrEmpty(guid)) 
+                return false;
+
+            return assetDirtyGuids.Contains(guid);
+        }
+
+        public bool IsAssetDirty(GameElement element)
+        {
+            // Check for null
+            if (element == null)
+                return false;
+
+            // Try to lookup guid and then path
+            if (assetGuids.TryGetValue(element, out string guid) == true && assetDirtyGuids.Contains(guid) == true)
+                return true;
+
+            return false;
+        }
+
+        public void SetAssetDirty(string guid)
+        {
+            // Check empty
+            if (string.IsNullOrEmpty(guid))
+                return;
+
+            if (assetDirtyGuids.Contains(guid) == false)
+                assetDirtyGuids.Add(guid);
+        }
+
+        public void SetAssetDirty(GameElement element)
+        {
+            // Check for null
+            if (element == null)
+                return;
+
+            // Try to lookup guid and then path
+            if (assetGuids.TryGetValue(element, out string guid) == true && assetDirtyGuids.Contains(guid) == false)
+                assetDirtyGuids.Add(guid);
         }
 
         private AssetMetadata GetOrCreateMetadata(string assetPath)

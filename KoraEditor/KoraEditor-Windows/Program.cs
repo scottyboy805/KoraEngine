@@ -79,6 +79,10 @@ internal unsafe static class Program
         // Update the game
         editor.DoUpdate();
 
+        // Exit app
+        if (editor.Quit == true)
+            return SDL_AppResult.SDL_APP_SUCCESS;
+
         // Continue the game
         return SDL_AppResult.SDL_APP_CONTINUE;
     }

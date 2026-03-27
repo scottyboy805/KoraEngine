@@ -68,6 +68,7 @@ namespace KoraGame
             }
         }
         public GameObject Parent => parent;
+        public IReadOnlyList<GameObject> Children => children != null ? children : Array.Empty<GameObject>();
         public bool HasChildren => children != null;
         public bool HasComponents => components != null;
 
