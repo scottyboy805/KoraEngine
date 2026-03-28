@@ -113,8 +113,11 @@ namespace KoraEditor
             //EditorWindow.Open<ConsoleWindow>();
 
 
+
             // For testing
             OpenProject("../../../../../ExampleProject/ExampleProject.koragame");
+
+            
         }
 
         internal override void DoUpdate()
@@ -178,7 +181,7 @@ namespace KoraEditor
             return string.IsNullOrEmpty(file) == false;
         }
 
-        public static bool ShowOpenFileDialog(ref string fileName, string filter, string directory = null)
+        public static bool ShowOpenFileDialog(out string fileName, string filter, string directory = null)
         {
             bool done = false;
             string[] files = null;
@@ -202,7 +205,7 @@ namespace KoraEditor
             return string.IsNullOrEmpty(fileName) == false;
         }
 
-        public static bool ShowOpenFilesDialog(ref string[] fileNames, string filter, string directory = null)
+        public static bool ShowOpenFilesDialog(out string[] fileNames, string filter, string directory = null)
         {
             bool done = false;
             string[] files = null;
@@ -226,7 +229,7 @@ namespace KoraEditor
             return files != null && files.Length > 0;
         }
 
-        public static bool ShowOpenFolderDialog(ref string folderName, string title, string directory = null)
+        public static bool ShowOpenFolderDialog(out string folderName, string title, string directory = null)
         {
             bool done = false;
             string[] folders = null;
@@ -250,7 +253,7 @@ namespace KoraEditor
             return string.IsNullOrEmpty(folderName) == false;
         }
 
-        public static bool ShowOpenFoldersDialog(ref string[] folderNames, string filter, string directory = null)
+        public static bool ShowOpenFoldersDialog(out string[] folderNames, string filter, string directory = null)
         {
             bool done = false;
             string[] folders = null;
@@ -275,10 +278,74 @@ namespace KoraEditor
         }
         #endregion
 
+        #region PopupDialog
+        public static bool ShowPopupDialog(string title, string text, string confirm)
+        {
+            // Create single button
+            PopupDialog.DialogButton[] buttons =
+            {
+                new PopupDialog.DialogButton
+                {
+                    Text = confirm,
+                    Flags = SDL_MessageBoxButtonFlags.SDL_MESSAGEBOX_BUTTON_RETURNKEY_DEFAULT,
+                }
+            };
+
+            // Show dialog
+            return PopupDialog.ShowPopupDialog(title, text, 0, buttons) == 0;
+        }
+
+        public static bool ShowPopupDialog(string title, string text, string confirm, string cancel)
+        {
+            // Create 2 buttons
+            PopupDialog.DialogButton[] buttons =
+            {
+                new PopupDialog.DialogButton
+                {
+                    Text = confirm,
+                    Flags = SDL_MessageBoxButtonFlags.SDL_MESSAGEBOX_BUTTON_RETURNKEY_DEFAULT,
+                },
+                new PopupDialog.DialogButton
+                {
+                    Text = cancel,
+                    Flags = SDL_MessageBoxButtonFlags.SDL_MESSAGEBOX_BUTTON_ESCAPEKEY_DEFAULT,
+                }
+            };
+
+            // Show dialog
+            return PopupDialog.ShowPopupDialog(title, text, 0, buttons) == 0;
+        }
+
+        public static bool ShowPopupDialog(string title, string text, string yes, string no, string cancel)
+        {
+            // Create 2 buttons
+            PopupDialog.DialogButton[] buttons =
+            {
+                new PopupDialog.DialogButton
+                {
+                    Text = yes,
+                    Flags = SDL_MessageBoxButtonFlags.SDL_MESSAGEBOX_BUTTON_RETURNKEY_DEFAULT,
+                },
+                new PopupDialog.DialogButton
+                {
+                    Text = no,
+                    Flags = 0,
+                },
+                new PopupDialog.DialogButton
+                {
+                    Text = cancel,
+                    Flags = SDL_MessageBoxButtonFlags.SDL_MESSAGEBOX_BUTTON_ESCAPEKEY_DEFAULT,
+                }
+            };
+
+            // Show dialog
+            return PopupDialog.ShowPopupDialog(title, text, 0, buttons) == 0;
+        }
+        #endregion
 
 
         public void NewProject(string projectPath)
-        {
+        {            
             // Close current project
             CloseProject();
 
@@ -312,7 +379,7 @@ namespace KoraEditor
 
             // Update title
             Screen.Title = $"KoraEditor ({project.Name})";
-
+            
             // Do events
             DoEvent(OnProjectChanged);
             DoEvent(OnProjectOpened);
@@ -391,8 +458,7 @@ namespace KoraEditor
         [Menu("File/Open Project", "Ctrl+O")]
         internal static void OpenProjectAction()
         {
-            string projectPath = null;
-            if (ShowOpenFileDialog(ref projectPath, "Open Project", Project.FileExtension.TrimStart('.')) == true)
+            if (ShowOpenFileDialog(out string projectPath, Project.FileExtension.TrimStart('.')) == true)
             {
                 // Open the project
                 EditorInstance?.OpenProject(projectPath);
@@ -414,8 +480,7 @@ namespace KoraEditor
         [Menu("File/Open Scene")]
         internal static void OpenSceneAction()
         {
-            string scenePath = null;
-            if (EditorInstance?.IsProjectOpen == true && ShowOpenFileDialog(ref scenePath, "kscene", EditorInstance.project.AssetsFolder) == true)
+            if (EditorInstance?.IsProjectOpen == true && ShowOpenFileDialog(out string scenePath, "kscene", EditorInstance.project.AssetsFolder) == true)
             {
                 // Open the scene
                 EditorInstance?.OpenScene(scenePath);

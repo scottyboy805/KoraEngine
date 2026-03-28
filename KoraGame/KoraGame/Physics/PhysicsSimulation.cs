@@ -38,16 +38,16 @@ namespace KoraGame.Physics
                 ? Environment.ProcessorCount - 2
                 : Environment.ProcessorCount - 1));
 
-            World.Capacity worldCapacity = new World.Capacity
-            {
-                BodyCount = 64000,
-                ContactCount = 64000,
-                ConstraintCount = 32000,
-                SmallConstraintCount = 32000,
-            };
+            //World.Capacity worldCapacity = new World.Capacity
+            //{
+            //    BodyCount = 64000,
+            //    ContactCount = 64000,
+            //    ConstraintCount = 32000,
+            //    SmallConstraintCount = 32000,
+            //};
 
             // Create the world
-            physicsWorld = new World(worldCapacity);
+            physicsWorld = new World();//worldCapacity);
 
             // Set gravity
             physicsWorld.Gravity = gravity.Jitter();

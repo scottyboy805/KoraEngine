@@ -213,16 +213,25 @@ namespace KoraEditor.UI
         }
 
         [UnmanagedCallersOnly(CallConvs = new[] { typeof(CallConvCdecl) })]
-        private static void MultiPathDialogCallback(IntPtr userData, byte** files, int fileCount)
+        private static void MultiPathDialogCallback(IntPtr userData, byte** files, int filterIndex)
         {
             // Check id
             if (userData == IntPtr.Zero)
                 return;
 
-            // Create array
-            string[] fileNames = new string[fileCount];
+            // Get length
+            int length = 0;
 
-            for (int i = 0; i < fileCount; i++)
+            byte** fileCount = files;
+            while(fileCount != null && fileCount[length] != null)
+                length++;
+
+            // Create array
+            string[] fileNames = files != null
+                ? new string[length]
+                : null;
+
+            for (int i = 0; i < length; i++)
             {
                 // Get managed string
                 fileNames[i] = files != null

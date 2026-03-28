@@ -1,12 +1,11 @@
 ﻿using ImGuiNET;
-using KoraEditor.UI;
 using KoraGame;
 using KoraGame.Graphics;
 using SDL;
 using System.Numerics;
 using System.Runtime.InteropServices;
 
-namespace KoraEditor
+namespace KoraEditor.UI
 {
     internal sealed class ImGuiContext
     {

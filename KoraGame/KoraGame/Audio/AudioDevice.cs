@@ -9,11 +9,11 @@ namespace KoraGame.Audio
         internal readonly MIX_Mixer* mixer;
 
         // Properties
-        public float MasterVolume
-        {
-            get => SDL3_mixer.MIX_GetMasterGain(mixer);
-            set => SDL3_mixer.MIX_SetMasterGain(mixer, value);
-        }
+        //public float MasterVolume
+        //{
+        //    get => SDL3_mixer.mix_setg.MIX_GetMasterGain(mixer);
+        //    set => SDL3_mixer.MIX_SetMasterGain(mixer, value);
+        //}
 
         // Constructor
         public AudioDevice()
