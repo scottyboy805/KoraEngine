@@ -9,6 +9,12 @@ namespace KoraEditor
         // Private
         private Texture plusIcon;
 
+        // Constructor
+        public HierarchyWindow()
+        {
+            Title = "Hierarchy";
+        }
+
         // Methods
         protected async override void OnOpen()
         {
@@ -49,7 +55,11 @@ namespace KoraEditor
             bool isLeaf = obj.HasChildren == false;
 
             // Display the node
-            if (Gui.BeginTreeNode(obj.Name, selected, isLeaf) == true)
+            if (Gui.BeginTreeNode(obj.Name, selected, isLeaf, null, () =>
+            {
+                // Select the object
+                Selection.Select(obj);
+            }) == true)
             {
                 // Display children
                 foreach (var child in obj.Children)

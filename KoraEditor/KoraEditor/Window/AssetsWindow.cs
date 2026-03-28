@@ -23,6 +23,12 @@ namespace KoraEditor
         private AssetNode rootAssetNode = new AssetNode { Name = "Assets", IsFolder = true };
         private float previewSize = 0.5f;
 
+        // Constructor
+        public AssetsWindow()
+        {
+            Title = "Assets";
+        }
+
         // Methods
         protected async override void OnOpen()
         {

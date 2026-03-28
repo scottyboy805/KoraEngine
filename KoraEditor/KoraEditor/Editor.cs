@@ -112,10 +112,16 @@ namespace KoraEditor
             PropertyEditor.InitializePropertyEditors();
             //EditorWindow.Open<ConsoleWindow>();
 
-
-
             // For testing
             OpenProject("../../../../../ExampleProject/ExampleProject.koragame");
+
+
+            AssetsWindow.Open();
+            HierarchyWindow.Open();
+            PropertiesWindow.Open();
+
+
+            
 
             
         }
@@ -377,6 +383,10 @@ namespace KoraEditor
             // Refresh assets
             assetDatabase.Refresh();
 
+            // Open scene
+            if (IsSceneOpen == false)
+                NewScene();
+
             // Update title
             Screen.Title = $"KoraEditor ({project.Name})";
             
@@ -497,15 +507,6 @@ namespace KoraEditor
         internal static void ExitAction()
         {
             EditorInstance?.quit = true;
-        }
-        #endregion
-
-        #region MenuActions_GameObject
-        [Menu("GameObject/Empty")]
-        internal static void CreateEmptyGameObject()
-        {
-            if (EditorInstance != null && EditorInstance.IsSceneOpen == true)
-                EditorInstance.editorScene.gameObjects.Add(new GameObject("New Game Object"));
         }
         #endregion
     }

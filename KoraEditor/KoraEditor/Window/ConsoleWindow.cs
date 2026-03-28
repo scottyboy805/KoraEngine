@@ -29,6 +29,7 @@ namespace KoraEditor
         // Methods
         public ConsoleWindow()
         {
+            Title = "Console";
             icon = ((Editor)Editor.Instance).EditorAssets.LoadAsync<Texture>("Icon/WGPU-Logo.png").Result;
         }
 

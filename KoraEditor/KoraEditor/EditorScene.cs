@@ -23,7 +23,7 @@ namespace KoraEditor
         {
             // Generate name
             if (name == null)
-                name = "New Game Object";
+                name = GetNewObjectName("Game Object");
 
             // Create object
             GameObject go = new GameObject(name, false);
@@ -31,8 +31,11 @@ namespace KoraEditor
             // Add to scene
             gameObjects.Add(go);
 
-            // Mark as dirty
+            // Select the new object
+            Editor.EditorInstance?.Selection.Select(go);
 
+            // Mark as dirty
+            SetDirty();
 
             // Do event
             Editor.DoEvent(OnGameObjectModified, go);
@@ -47,7 +50,22 @@ namespace KoraEditor
                 Editor.EditorInstance.AssetDatabase.SetAssetDirty(this);
         }
 
+        private string GetNewObjectName(string baseName)
+        {
+            int counter = 1;
+            string currentName = baseName;
+
+            // Check for exists
+            while(gameObjects.Any(g => g.Name == currentName) == true)
+            {
+                currentName = baseName + " " + counter.ToString();
+                counter++;
+            }
+            return currentName;
+        }
+
         #region MenuActions_GameObject
+        [Menu("GameObject/Empty")]
         public static void CreateEmptyObjectAction()
         {
             EditorSceneInstance?.CreateEmptyObject();

@@ -268,9 +268,9 @@ namespace KoraEditor.UI
             ImGui.TableNextColumn();
         }
 
-        public static bool BeginTreeNode(GuiContent content, bool selected = false, bool isLeaf = false, Texture icon = null)
+        public static bool BeginTreeNode(GuiContent content, bool selected = false, bool isLeaf = false, Texture icon = null, Action onSelect = null)
         {
-            ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags.None;
+            ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags.SpanFullWidth;
 
             // Check for selected
             if(selected == true)
@@ -282,6 +282,10 @@ namespace KoraEditor.UI
 
             BeginControl(content);
             bool expanded = ImGui.TreeNodeEx("", flags);
+
+            // Trigger click
+            if (onSelect != null && ImGui.IsItemClicked(ImGuiMouseButton.Left) == true)
+                onSelect();
 
             // Image
             if(icon != null)
