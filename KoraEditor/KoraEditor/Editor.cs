@@ -110,6 +110,7 @@ namespace KoraEditor
 
             // Init editors
             PropertyEditor.InitializePropertyEditors();
+            ElementEditor.InitializePropertyEditors();
             //EditorWindow.Open<ConsoleWindow>();
 
             // For testing

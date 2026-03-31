@@ -1,6 +1,9 @@
 ﻿using KoraGame;
 using KoraGame.Graphics;
 using System.Diagnostics;
+using System.Runtime.CompilerServices;
+
+[assembly: InternalsVisibleTo("KoraEditor")]
 
 namespace KoraPipeline
 {
@@ -480,7 +483,7 @@ namespace KoraPipeline
 
             // Check for rooted
             if (Path.IsPathRooted(path) == true)
-                throw new ArgumentException("Path must be relative to the content folder");
+                throw new ArgumentException("Path must be relative to the assets folder");
         }
 
         internal static string JoinAssetPath(string a, string b)

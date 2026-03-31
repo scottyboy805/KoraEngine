@@ -3,34 +3,34 @@ using System.Reflection;
 
 namespace KoraEditor
 {
-    public abstract class PropertyEditor : EditorContext
+    public abstract class ElementEditor : EditorContext
     {
         // Private
-        private static readonly Dictionary<Type, PropertyEditor> specificPropertyEditors = new ();
-        private static readonly List<(Type, PropertyEditor)> derivedPropertyEditors = new ();
+        private static readonly Dictionary<Type, ElementEditor> specificElementEditors = new();
+        private static readonly List<(Type, ElementEditor)> derivedElementEditors = new();
 
-        private EditorSerializedElement element;
+        private EditorSerializedLayout layout;
         private bool isModified = false;
 
         // Properties
-        public EditorSerializedElement Element => element;
+        public EditorSerializedLayout Layout => layout;
 
         // Methods
         protected virtual void OnCreate() { }
         protected abstract void OnGui();
 
-        public bool DrawEditorGui(EditorSerializedElement element)
+        public bool DrawEditorGui(EditorSerializedLayout layout)
         {
-            // Check for element
-            if (element == null)
+            // Check for null
+            if (layout == null)
                 return false;
 
             // Check type
-            if (IsEditorFor(element.ElementType) == false)
+            if (IsEditorFor(layout.SerializeType) == false)
                 return false;
 
             // Set layout and state
-            this.element = element;
+            this.layout = layout;
             this.isModified = false;
 
             // Draw gui
@@ -43,7 +43,7 @@ namespace KoraEditor
         public void SetModified()
         {
             this.isModified = true;
-            this.element?.Layout.SetModified();
+            this.layout?.SetModified();
         }
 
         public bool IsEditorFor(Type type)
@@ -51,24 +51,24 @@ namespace KoraEditor
             return ForType(type) == this;
         }
 
-        public static PropertyEditor ForType<T>()
+        public static ElementEditor ForType<T>()
         {
             return ForType(typeof(T));
         }
 
-        public static PropertyEditor ForType(Type type)
+        public static ElementEditor ForType(Type type)
         {
             // Check for null
             if (type == null)
                 return null;
 
-            PropertyEditor propertyEditor = null;
+            ElementEditor propertyEditor = null;
 
             // Check for specified
-            if (specificPropertyEditors.TryGetValue(type, out propertyEditor) == false)
+            if (specificElementEditors.TryGetValue(type, out propertyEditor) == false)
             {
                 // Try to get derived
-                foreach ((Type, PropertyEditor) derivedPropertyEditor in derivedPropertyEditors)
+                foreach ((Type, ElementEditor) derivedPropertyEditor in derivedElementEditors)
                 {
                     // Check for found
                     if (derivedPropertyEditor.Item1.IsAssignableFrom(type) == true)
@@ -86,7 +86,7 @@ namespace KoraEditor
         internal static void InitializePropertyEditors()
         {
             // Get this assembly name
-            Assembly thisAsm = typeof(PropertyEditor).Assembly;
+            Assembly thisAsm = typeof(ElementEditor).Assembly;
             AssemblyName thisName = thisAsm.GetName();
 
             // Process all assemblies
@@ -136,38 +136,38 @@ namespace KoraEditor
                 foreach (Type type in checkTypes)
                 {
                     // Check for attribute
-                    if (type.IsDefined(typeof(PropertyEditorForAttribute)) == true)
+                    if (type.IsDefined(typeof(ElementEditorForAttribute)) == true)
                     {
                         // Get the attribute
-                        PropertyEditorForAttribute attrib = type.GetCustomAttribute<PropertyEditorForAttribute>();
+                        ElementEditorForAttribute attrib = type.GetCustomAttribute<ElementEditorForAttribute>();
 
                         // Check for type
-                        if (typeof(PropertyEditor).IsAssignableFrom(type) == false)
+                        if (typeof(ElementEditor).IsAssignableFrom(type) == false)
                         {
-                            Debug.LogError($"Property editor '{type}' must derive from '{typeof(PropertyEditor)}'");
+                            Debug.LogError($"Element editor '{type}' must derive from '{typeof(ElementEditor)}'");
                             break;
                         }
 
                         // Create instance of editor
-                        PropertyEditor propertyEditor = (PropertyEditor)Activator.CreateInstance(type);
+                        ElementEditor propertyEditor = (ElementEditor)Activator.CreateInstance(type);
 
                         // Check for specific
                         if (attrib.ForDerivedTypes == false)
                         {
                             // Check for already added
-                            if (specificPropertyEditors.ContainsKey(attrib.ForType) == true)
+                            if (specificElementEditors.ContainsKey(attrib.ForType) == true)
                             {
-                                Debug.LogError("A property editor already exists for type: " + attrib.ForType);
+                                Debug.LogError("An element editor already exists for type: " + attrib.ForType);
                                 continue;
                             }
 
-                            specificPropertyEditors[attrib.ForType] = propertyEditor;
+                            specificElementEditors[attrib.ForType] = propertyEditor;
                         }
                         // Add derived
                         else
                         {
                             // Add to derived
-                            derivedPropertyEditors.Add((attrib.ForType, propertyEditor));
+                            derivedElementEditors.Add((attrib.ForType, propertyEditor));
                         }
                     }
                 }

@@ -25,8 +25,8 @@ namespace KoraEditor
                     // Set value
                     Element.SetValue(value);
 
-                    // Repaint
-                    Repaint();
+                    // Set modified
+                    SetModified();
                 }
             }
             Gui.EndLayout();

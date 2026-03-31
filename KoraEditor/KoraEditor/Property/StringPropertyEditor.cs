@@ -28,8 +28,8 @@ namespace KoraEditor
                     // Set value
                     Element.SetValue(stringValue);
 
-                    // Repaint
-                    Repaint();
+                    // Set modified
+                    SetModified();
                 }
             }
             Gui.EndLayout();

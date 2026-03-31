@@ -2,15 +2,16 @@
 
 namespace KoraEditor
 {
-    public sealed class SerializedElement
+    public sealed class EditorSerializedElement
     {
         // Private
-        private KoraGame.SerializedElement element;
-        private SerializedLayout root;
-        private List<SerializedElement> childElements;
+        private SerializedElement element;
+        private EditorSerializedLayout root;
+        private List<EditorSerializedElement> childElements;
         private object[] instances;
 
         // Properties
+        public EditorSerializedLayout Layout => root;
         public string ElementName => element.ElementName;
         public Type ElementType => element.ElementType;
         public bool IsVisible => element.HasAttribute<EditorHiddenAttribute>() == false;
@@ -18,11 +19,11 @@ namespace KoraEditor
         public bool IsEditingMultiple => instances.Length > 1;
         public bool IsArray => element.IsArray;
         public bool IsObject => element.IsObject;
-        public IEnumerable<SerializedElement> ChildElements => childElements;
-        public IEnumerable<SerializedElement> VisibleChildElements => childElements.Where(e => e.IsVisible);
+        public IEnumerable<EditorSerializedElement> ChildElements => childElements;
+        public IEnumerable<EditorSerializedElement> VisibleChildElements => childElements.Where(e => e.IsVisible);
 
         // Constructor
-        internal SerializedElement(KoraGame.SerializedElement element, SerializedLayout root, object[] instances)
+        internal EditorSerializedElement(SerializedElement element, EditorSerializedLayout root, object[] instances)
         {
             this.element = element;
             this.root = root;
@@ -64,6 +65,11 @@ namespace KoraEditor
 
             // Mark as modified
             root.SetModified();
+        }
+
+        public T GetValue<T>()
+        {
+            return GetValue<T>(out _);
         }
 
         public T GetValue<T>(out bool isMixed)
@@ -131,7 +137,7 @@ namespace KoraEditor
             return false;
         }
 
-        public SerializedElement FindChildElement(string name, bool includeHidden = false)
+        public EditorSerializedElement FindChildElement(string name, bool includeHidden = false)
         {
             return childElements.FirstOrDefault(e => e.ElementName == name && e.IsVisible == true || includeHidden == true);
         }
