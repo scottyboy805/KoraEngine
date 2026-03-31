@@ -1,4 +1,5 @@
-﻿using KoraGame;
+﻿using KoraEditor.UI;
+using KoraGame;
 using System.Reflection;
 
 namespace KoraEditor
@@ -6,33 +7,52 @@ namespace KoraEditor
     public abstract class PropertyEditor : EditorContext
     {
         // Private
-        private static readonly Dictionary<Type, PropertyEditor> specificPropertyEditors = new ();
-        private static readonly List<(Type, PropertyEditor)> derivedPropertyEditors = new ();
+        private static readonly Dictionary<Type, Type> specificPropertyEditors = new ();  // Edit Type, PropertyEditor Type
+        private static readonly List<(Type, Type)> derivedPropertyEditors = new ();       // Edit Type, PropertyEditor Type
 
         private EditorSerializedElement element;
         private bool isModified = false;
+        private float[] columnSizes = new float[1];
 
         // Properties
         public EditorSerializedElement Element => element;
+        public float PropertyLabelWidth => Gui.PropertyLableWidth;
+        public float PropertyValueWidth => Gui.PropertyValueWidth;
 
         // Methods
         protected virtual void OnCreate() { }
-        protected abstract void OnGui();
-
-        public bool DrawEditorGui(EditorSerializedElement element)
+        protected virtual void OnGui() 
         {
-            // Check for element
-            if (element == null)
-                return false;
+            // Update column size
+            columnSizes[0] = Gui.PropertyLableWidth;
 
-            // Check type
-            if (IsEditorFor(element.ElementType) == false)
-                return false;
+            // Start table
+            Gui.BeginTableLayout(2, columnSizes);
+            {
+                // Display label
+                OnLabelGui();
 
-            // Set layout and state
-            this.element = element;
-            this.isModified = false;
+                // Column separator
+                Gui.ColumnSeparator();
 
+                // Display value
+                OnValueGui();
+            }
+            Gui.EndTableLayout();
+        }
+
+        protected virtual void OnLabelGui()
+        {
+            Gui.PropertyLabel(element);
+        }
+
+        protected virtual void OnValueGui()
+        {
+            Gui.Label("Property editor not implemented");
+        }
+
+        public bool DrawEditorGui()
+        {
             // Draw gui
             OnGui();
 
@@ -46,29 +66,49 @@ namespace KoraEditor
             this.element?.Layout.SetModified();
         }
 
-        public bool IsEditorFor(Type type)
+        public static PropertyEditor ForElement(EditorSerializedElement element)
         {
-            return ForType(type) == this;
+            // Check for null
+            if (element == null)
+                return null;
+
+            // Lookup type
+            Type propertyEditorType = GetPropertyEditorType(element.ElementType);
+
+            // Check for no editor
+            if (propertyEditorType == null)
+                return null;
+
+            // Create instance
+            PropertyEditor editor = (PropertyEditor)Activator.CreateInstance(propertyEditorType);
+            editor.element = element;
+
+            // Create editor
+            try
+            {
+                editor.OnCreate();
+            }
+            catch (Exception e)
+            {
+                Debug.LogException(e);
+            }
+
+            return editor;
         }
 
-        public static PropertyEditor ForType<T>()
-        {
-            return ForType(typeof(T));
-        }
-
-        public static PropertyEditor ForType(Type type)
+        private static Type GetPropertyEditorType(Type type)
         {
             // Check for null
             if (type == null)
                 return null;
 
-            PropertyEditor propertyEditor = null;
+            Type propertyEditor = null;
 
             // Check for specified
             if (specificPropertyEditors.TryGetValue(type, out propertyEditor) == false)
             {
                 // Try to get derived
-                foreach ((Type, PropertyEditor) derivedPropertyEditor in derivedPropertyEditors)
+                foreach ((Type, Type) derivedPropertyEditor in derivedPropertyEditors)
                 {
                     // Check for found
                     if (derivedPropertyEditor.Item1.IsAssignableFrom(type) == true)
@@ -147,10 +187,6 @@ namespace KoraEditor
                             Debug.LogError($"Property editor '{type}' must derive from '{typeof(PropertyEditor)}'");
                             break;
                         }
-
-                        // Create instance of editor
-                        PropertyEditor propertyEditor = (PropertyEditor)Activator.CreateInstance(type);
-
                         // Check for specific
                         if (attrib.ForDerivedTypes == false)
                         {
@@ -161,13 +197,13 @@ namespace KoraEditor
                                 continue;
                             }
 
-                            specificPropertyEditors[attrib.ForType] = propertyEditor;
+                            specificPropertyEditors[attrib.ForType] = type;
                         }
                         // Add derived
                         else
                         {
                             // Add to derived
-                            derivedPropertyEditors.Add((attrib.ForType, propertyEditor));
+                            derivedPropertyEditors.Add((attrib.ForType, type));
                         }
                     }
                 }

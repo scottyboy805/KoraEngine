@@ -39,7 +39,7 @@ namespace KoraEditor
                 if (displayedEditor != null && displayedLayout != null)
                 {
                     // Display the drawer
-                    bool modified = displayedEditor.DrawEditorGui(displayedLayout);
+                    bool modified = displayedEditor.DrawEditorGui();
 
                     // Check for modified
                     if (modified == true)
@@ -63,17 +63,11 @@ namespace KoraEditor
             // Create editor from selection
             Type mainType = Selection.SelectedType;
 
-            // Try to get drawer
-            ElementEditor editor = ElementEditor.ForType(mainType);
-
-            // Check for any
-            if(editor != null)
-            {
-                this.displayedEditor = editor;
-            }
-
             // Create serialized layout from selection
             this.displayedLayout = new EditorSerializedLayout(mainType, Selection.GetSelected().ToArray());
+
+            // Create drawer from layout
+            this.displayedEditor = ElementEditor.ForLayout(displayedLayout);
         }
 
         [Menu("Window/Properties")]

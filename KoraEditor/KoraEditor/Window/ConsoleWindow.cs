@@ -65,7 +65,6 @@ namespace KoraEditor
                 // Clear button
                 Gui.Button(new GuiContent("Clear", "Clear all console messages"), Clear);
                 Gui.Space();
-                Gui.Separator();
 
                 // Search input
                 Gui.Label("Search:");

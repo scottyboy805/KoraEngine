@@ -13,9 +13,24 @@ namespace KoraEditor.UI
 
     public static class Gui
     {
+        // Type
+        private struct GuiStyle
+        {
+            // Public
+            public Color? NormalColor;
+            public Color? HoverColor;
+            public Color? ActiveColor;
+        }
+
         // Private
         private static int idCounter = 1;
         private static Stack<GuiLayout> layouts = new();
+        private static Stack<GuiStyle> styles = new();
+
+        // Properties
+        public static Vector2F AvailableSize => (Vector2F)ImGui.GetContentRegionAvail();
+        public static float PropertyLableWidth => AvailableSize.X * 0.4f;
+        public static float PropertyValueWidth => AvailableSize.X * 0.6f;
 
         // Methods
         internal static void NewFrame()
@@ -23,16 +38,40 @@ namespace KoraEditor.UI
             idCounter = 1;
         }
 
+        public static void ItemWidth(float width)
+        {
+            ImGui.PushItemWidth(width);
+        }
+
+        public static void NextItemColor(Color? normal = null, Color? hover = null, Color? active = null)
+        {
+            if (normal == null && hover == null && active == null)
+                return;
+
+            // Push the style
+            styles.Push(new GuiStyle
+            {
+                NormalColor = normal,
+                HoverColor = hover,
+                ActiveColor = active
+            });
+        }
+
         public static void Label(GuiContent content)
         {
-            BeginControl(content);
+            BeginControl(content, ImGuiCol.Text, null, null);
             ImGui.Text(content.Text);
             EndControl(content);
         }
 
+        public static void PropertyLabel(EditorSerializedElement element)
+        {
+            Label(element.ElementName);
+        }
+
         public static void Button(GuiContent content, Action onClick)
         {
-            BeginControl(content);
+            BeginControl(content, ImGuiCol.Button, ImGuiCol.ButtonHovered, ImGuiCol.ButtonActive);
             if (ImGui.Button(content.Text))
                 onClick();
             EndControl(content);
@@ -40,14 +79,14 @@ namespace KoraEditor.UI
 
         public static void Image(Texture texture, Vector2F size, GuiContent content = default)
         {
-            BeginControl(content);
+            BeginControl(content, null, null, null);
             ImGui.Image(texture != null ? texture.WeakPtr : IntPtr.Zero, (Vector2)size);
             EndControl(content);
         }
 
         public static void ImageButton(Texture texture, Vector2F size, Action onClick, GuiContent content = default)
         {
-            BeginControl(content);
+            BeginControl(content, ImGuiCol.Button, ImGuiCol.ButtonHovered, ImGuiCol.ButtonHovered);
             if (ImGui.ImageButton("", texture != null ? texture.WeakPtr : IntPtr.Zero, (Vector2)size))
                 onClick();
             EndControl(content);
@@ -55,7 +94,7 @@ namespace KoraEditor.UI
 
         public static bool Toggle(ref bool value, GuiContent content = default)
         {
-            BeginControl(content);
+            BeginControl(content, ImGuiCol.CheckMark, null, null);
             bool changed = ImGui.Checkbox("", ref value);
             EndControl(content);
             return changed;
@@ -63,15 +102,15 @@ namespace KoraEditor.UI
 
         public static bool Input(ref string value, uint maxLength = 256, GuiContent content = default)
         {
-            BeginControl(content);
+            BeginControl(content, ImGuiCol.Text, null, null);
             bool changed = ImGui.InputText("", ref value, maxLength);
             EndControl(content);
             return changed;
         }
 
         public static bool InputMultiline(ref string value, uint maxLength = 1024, GuiContent content = default)
-        {
-            BeginControl(content);
+        {            
+            BeginControl(content, ImGuiCol.Text, null, null);
             bool changed = ImGui.InputTextMultiline("", ref value, maxLength, new Vector2(-1, 100));
             EndControl(content);
             return changed;
@@ -79,7 +118,7 @@ namespace KoraEditor.UI
 
         public static bool InputNumber(ref int value, GuiContent content = default)
         {
-            BeginControl(content);
+            BeginControl(content, ImGuiCol.Text, null, null);
             bool changed = ImGui.InputInt("", ref value);
             EndControl(content);
             return changed;
@@ -87,7 +126,7 @@ namespace KoraEditor.UI
 
         public static bool InputNumber(ref float value, GuiContent content = default)
         {
-            BeginControl(content);
+            BeginControl(content, ImGuiCol.Text, null, null);
             bool changed = ImGui.InputFloat("", ref value);
             EndControl(content);
             return changed;
@@ -95,7 +134,7 @@ namespace KoraEditor.UI
 
         public static bool Slider(ref int value, int min, int max, GuiContent content = default)
         {
-            BeginControl(content);
+            BeginControl(content, ImGuiCol.SliderGrab, null, ImGuiCol.SliderGrabActive);
             bool changed = ImGui.SliderInt("", ref value, min, max);
             EndControl(content);
             return changed;
@@ -103,7 +142,7 @@ namespace KoraEditor.UI
 
         public static bool Slider(ref float value, float min, float max, GuiContent content = default)
         {
-            BeginControl(content);
+            BeginControl(content, ImGuiCol.SliderGrab, null, ImGuiCol.SliderGrabActive);
             bool changed = ImGui.SliderFloat("", ref value, min, max);
             EndControl(content);
             return changed;
@@ -111,7 +150,7 @@ namespace KoraEditor.UI
 
         public static bool ColorPicker(ref Color color, GuiContent content = default)
         {
-            BeginControl(content);
+            BeginControl(content, null, null, null);
             Vector4 colorVec = (Vector4)color;
             bool changed = false;
             if (ImGui.ColorPicker4("", ref colorVec))
@@ -125,7 +164,7 @@ namespace KoraEditor.UI
 
         public static bool ColorPicker(ref Color32 color, GuiContent content = default)
         {
-            BeginControl(content);
+            BeginControl(content, null, null, null);
             Vector4 colorVec = (Vector4)(Color)color;
             bool changed = false;
             if (ImGui.ColorPicker4("", ref colorVec))
@@ -143,7 +182,7 @@ namespace KoraEditor.UI
             if(items == null || items.Length == 0)
                 return false;                       
 
-            BeginControl(content);
+            BeginControl(content, ImGuiCol.Text, null, null);
             bool changed = ImGui.Combo("", ref selected, items, items.Length);
             EndControl(content);
 
@@ -152,7 +191,7 @@ namespace KoraEditor.UI
 
         public static bool EnumPopup(ref Enum value, GuiContent content = default)
         {
-            BeginControl(content);
+            BeginControl(content, ImGuiCol.Text, null, null);
 
             // Get the option names
             string[] names = Enum.GetNames(value.GetType());
@@ -171,7 +210,7 @@ namespace KoraEditor.UI
 
         public static bool EnumPopup<T>(ref T value, GuiContent content = default) where T : Enum
         {
-            BeginControl(content);
+            BeginControl(content, ImGuiCol.Text, null, null);
 
             // Get the option names
             string[] names = Enum.GetNames(value.GetType());
@@ -188,16 +227,9 @@ namespace KoraEditor.UI
             return changed;
         }
 
-        public static void Separator()
-        {
-            BeginControl(default);
-            ImGui.Separator();
-            EndControl(default);
-        }
-
         public static void Space()
         {
-            BeginControl(default);
+            BeginControl(default, null, null, null);
             ImGui.Spacing();
             EndControl(default);
         }
@@ -208,7 +240,7 @@ namespace KoraEditor.UI
             layouts.Push(layout);
 
             // Get layout flags
-            ImGuiChildFlags flags = /*ImGuiChildFlags.AutoResizeX | */ImGuiChildFlags.AutoResizeY;
+            ImGuiChildFlags flags = /*ImGuiChildFlags.AutoResizeX | */ImGuiChildFlags.AutoResizeY | ImGuiChildFlags.NavFlattened;
 
             ImGui.BeginChild(string.IsNullOrEmpty(id) == true
                 ? (idCounter++).ToString()
@@ -225,24 +257,55 @@ namespace KoraEditor.UI
             layouts.Pop();
         }
 
-        public static void BeginTableLayout(int columns, string id = null)
+        public static void BeginTableLayout(int columns, IList<float> columnWidths = null, string id = null)
         {
+            // Check resizable
+            ImGuiTableFlags flags = ImGuiTableFlags.None;
+
+            // Check resizable
+            if (columnWidths == null)
+                flags |= ImGuiTableFlags.Resizable;
+
+            // Create table
             ImGui.BeginTable(string.IsNullOrEmpty(id) == true
                 ? (idCounter++).ToString()
-                : id, columns, ImGuiTableFlags.Resizable);
+                : id, columns, flags);
+
+            // Setup columns widths
+            if(columnWidths != null)
+            {
+                for (int i = 0; i < columns && i < columnWidths.Count; i++)
+                    ImGui.TableSetupColumn(i.ToString(), ImGuiTableColumnFlags.WidthFixed, columnWidths[i]);
+            }
 
             // Start first column
             ImGui.TableNextColumn();
         }
 
-        public static void BeginTableLayout(IList<string> columnNames, string id = null)
+        public static void BeginTableLayout(IList<string> columnNames, IList<float> columnWidths = null, string id = null)
         {
+            // Check resizable
+            ImGuiTableFlags flags = ImGuiTableFlags.None;
+
+            // Check resizable
+            if (columnWidths == null)
+                flags |= ImGuiTableFlags.Resizable;
+
+            // Create table
+
             ImGui.BeginTable(string.IsNullOrEmpty(id) == true
                 ? (idCounter++).ToString()
                 : id, columnNames.Count, ImGuiTableFlags.Borders);
 
+            // Setup columns widths
+            if (columnWidths != null)
+            {
+                for (int i = 0; i < columnNames.Count && i < columnWidths.Count; i++)
+                    ImGui.SetColumnWidth(i, columnWidths[i]);
+            }
+
             // Create headers
-            foreach(string header in columnNames)
+            foreach (string header in columnNames)
                 ImGui.TableSetupColumn(header);
 
             // Draw headers
@@ -280,7 +343,7 @@ namespace KoraEditor.UI
             if (isLeaf == true)
                 flags |= ImGuiTreeNodeFlags.Leaf;
 
-            BeginControl(content);
+            BeginControl(content, null, null, null);
             bool expanded = ImGui.TreeNodeEx("", flags);
 
             // Trigger click
@@ -306,7 +369,7 @@ namespace KoraEditor.UI
             ImGui.TreePop();
         }
 
-        private static void BeginControl(in GuiContent content)
+        private static void BeginControl(in GuiContent content, ImGuiCol? normal, ImGuiCol? hover, ImGuiCol? active)
         {
             // Check layout
             if(layouts.Count > 0 && layouts.Peek() == GuiLayout.Horizontal)
@@ -321,6 +384,24 @@ namespace KoraEditor.UI
             {
                 ImGui.PushID(idCounter++);
             }
+
+            // Push styles
+            if(styles.Count > 0)
+            {
+                GuiStyle style = styles.Peek();
+
+                // Push normal color style
+                if(style.NormalColor != null && normal != null)
+                    ImGui.PushStyleColor(normal.Value, (Vector4)style.NormalColor.Value);
+
+                // Push hover color style
+                if(style.HoverColor != null && hover != null)
+                    ImGui.PushStyleColor(hover.Value, (Vector4)style.HoverColor.Value);
+
+                // Push active color style
+                if(style.ActiveColor != null && active != null)
+                    ImGui.PushStyleColor(active.Value, (Vector4)style.ActiveColor.Value);
+            }
         }
 
         private static void EndControl(in GuiContent content)
@@ -330,6 +411,22 @@ namespace KoraEditor.UI
                 ImGui.SetItemTooltip(content.Tooltip);
 
             ImGui.PopID();
+
+            // Pop styles
+            if(styles.Count > 0)
+            {
+                GuiStyle style = styles.Pop();
+
+                // Count styles
+                int count = 0;
+
+                if (style.NormalColor != null) count++;
+                if (style.HoverColor != null) count++;
+                if (style.ActiveColor != null) count++;
+
+                // Pop styles
+                ImGui.PopStyleColor(count);
+            }
         }
     }
 }

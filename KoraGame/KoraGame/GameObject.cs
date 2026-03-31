@@ -11,9 +11,13 @@ namespace KoraGame
         // Private
         [DataMember(Name = "Active")]
         private bool active = false;
+
+        [EditorHidden]
         //[DataMember(Name = "Children")]
         private List<GameObject> children = null;
-        [DataMember(Name = "Components")]
+
+        [EditorHidden]
+        [DataMember(Name = "Components")]        
         private List<Component> components = null;
 
         private Scene scene = null;

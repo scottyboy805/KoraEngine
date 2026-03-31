@@ -2,6 +2,7 @@
 
 namespace KoraEditor
 {
+    [PropertyEditorFor(typeof(string))]
     internal sealed class StringPropertyEditor : PropertyEditor
     {
         // Private
@@ -18,21 +19,16 @@ namespace KoraEditor
                 stringValue = "---";
         }
 
-        protected override void OnGui()
+        protected override void OnValueGui()
         {
-            Gui.BeginLayout(GuiLayout.Horizontal);
+            if (Gui.Input(ref stringValue) == true)
             {
-                Gui.Label(Element.ElementName);
-                if (Gui.Input(ref stringValue) == true)
-                {
-                    // Set value
-                    Element.SetValue(stringValue);
+                // Set value
+                Element.SetValue(stringValue);
 
-                    // Set modified
-                    SetModified();
-                }
+                // Set modified
+                SetModified();
             }
-            Gui.EndLayout();
         }
     }
 }

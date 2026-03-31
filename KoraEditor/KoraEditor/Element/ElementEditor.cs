@@ -6,8 +6,8 @@ namespace KoraEditor
     public abstract class ElementEditor : EditorContext
     {
         // Private
-        private static readonly Dictionary<Type, ElementEditor> specificElementEditors = new();
-        private static readonly List<(Type, ElementEditor)> derivedElementEditors = new();
+        private static readonly Dictionary<Type, Type> specificElementEditors = new(); // Edit Type, ElementEditor Type
+        private static readonly List<(Type, Type)> derivedElementEditors = new();      // Edit Type, ElementEditor Type
 
         private EditorSerializedLayout layout;
         private bool isModified = false;
@@ -19,20 +19,8 @@ namespace KoraEditor
         protected virtual void OnCreate() { }
         protected abstract void OnGui();
 
-        public bool DrawEditorGui(EditorSerializedLayout layout)
+        public bool DrawEditorGui()
         {
-            // Check for null
-            if (layout == null)
-                return false;
-
-            // Check type
-            if (IsEditorFor(layout.SerializeType) == false)
-                return false;
-
-            // Set layout and state
-            this.layout = layout;
-            this.isModified = false;
-
             // Draw gui
             OnGui();
 
@@ -46,41 +34,96 @@ namespace KoraEditor
             this.layout?.SetModified();
         }
 
-        public bool IsEditorFor(Type type)
+        public IEnumerable<PropertyEditor> GetPropertyEditors(bool visible)
         {
-            return ForType(type) == this;
+            // Select elements
+            IEnumerable<EditorSerializedElement> elements = visible == true
+                ? layout.VisibleElements
+                : layout.Elements;
+
+            // Create editor for element
+            return elements
+                .Select(PropertyEditor.ForElement)
+                .Where(e => e != null);
         }
 
-        public static ElementEditor ForType<T>()
+        public static ElementEditor ForElement(object element)
         {
-            return ForType(typeof(T));
+            // Check for null
+            if (element == null)
+                return null;
+
+            // Create layout
+            EditorSerializedLayout layout = new EditorSerializedLayout(element.GetType(), new[] { element });
+
+            // Creat editor
+            return ForLayout(layout);
         }
 
-        public static ElementEditor ForType(Type type)
+        public static ElementEditor ForElements(Type editType, object[] elements)
+        {
+            // Check for null
+            if (editType == null || elements == null)
+                return null;
+
+            // Create layout
+            EditorSerializedLayout layout = new EditorSerializedLayout(editType, new[] { elements });
+
+            // Creat editor
+            return ForLayout(layout);
+        }
+
+        public static ElementEditor ForLayout(EditorSerializedLayout layout)
+        {
+            // Check for null
+            if (layout == null)
+                return null;
+
+            // Lookup type
+            Type elementEditorType = GetElementEditorType(layout.SerializeType);
+
+            // Create instance
+            ElementEditor editor = (ElementEditor)Activator.CreateInstance(elementEditorType);
+            editor.layout = layout;
+
+            // Create editor
+            try
+            {
+                editor.OnCreate();
+            }
+            catch (Exception e)
+            {
+                Debug.LogException(e);
+            }
+
+            return editor;
+        }
+
+        private static Type GetElementEditorType(Type type)
         {
             // Check for null
             if (type == null)
                 return null;
 
-            ElementEditor propertyEditor = null;
+            Type propertyEditorType = null;
 
             // Check for specified
-            if (specificElementEditors.TryGetValue(type, out propertyEditor) == false)
+            if (specificElementEditors.TryGetValue(type, out propertyEditorType) == false)
             {
                 // Try to get derived
-                foreach ((Type, ElementEditor) derivedPropertyEditor in derivedElementEditors)
+                foreach ((Type, Type) derivedPropertyEditor in derivedElementEditors)
                 {
                     // Check for found
                     if (derivedPropertyEditor.Item1.IsAssignableFrom(type) == true)
                     {
-                        propertyEditor = derivedPropertyEditor.Item2;
+                        propertyEditorType = derivedPropertyEditor.Item2;
                         break;
                     }
                 }
             }
 
             // Get property editor
-            return propertyEditor;
+            return propertyEditorType;
         }
 
         internal static void InitializePropertyEditors()
@@ -148,9 +191,6 @@ namespace KoraEditor
                             break;
                         }
 
-                        // Create instance of editor
-                        ElementEditor propertyEditor = (ElementEditor)Activator.CreateInstance(type);
-
                         // Check for specific
                         if (attrib.ForDerivedTypes == false)
                         {
@@ -161,13 +201,13 @@ namespace KoraEditor
                                 continue;
                             }
 
-                            specificElementEditors[attrib.ForType] = propertyEditor;
+                            specificElementEditors[attrib.ForType] = type;
                         }
                         // Add derived
                         else
                         {
                             // Add to derived
-                            derivedElementEditors.Add((attrib.ForType, propertyEditor));
+                            derivedElementEditors.Add((attrib.ForType, type));
                         }
                     }
                 }
