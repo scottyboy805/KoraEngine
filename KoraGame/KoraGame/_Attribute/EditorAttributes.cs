@@ -20,6 +20,22 @@ namespace KoraGame
     }
 
     /// <summary>
+    /// Used to give a field or property a different display name in the editor.
+    /// </summary>
+    [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property, AllowMultiple = false)]
+    public sealed class EditorNameAttribute : Attribute
+    {
+        // Public
+        public readonly string DisplayName;
+
+        // Constructor
+        public EditorNameAttribute(string displayName)
+        {
+            this.DisplayName = displayName;
+        }
+    }
+
+    /// <summary>
     /// Used to give a UI tooltip for a field or property in the editor. This is useful for providing additional information about the field or property to the user, such as what it does or how it should be used.
     /// </summary>
     [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property, AllowMultiple = false)]

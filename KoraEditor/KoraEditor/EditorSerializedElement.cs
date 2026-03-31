@@ -1,4 +1,5 @@
 ﻿using KoraGame;
+using System.Text.RegularExpressions;
 
 namespace KoraEditor
 {
@@ -12,6 +13,32 @@ namespace KoraEditor
 
         // Properties
         public EditorSerializedLayout Layout => root;
+        public string DisplayName
+        {
+            get
+            {
+                // Get the name attribute
+                if (element.HasAttribute<EditorNameAttribute>() == true)
+                    return element.GetAttribute<EditorNameAttribute>().DisplayName;
+
+                // Add space before capital letters (except the first one)
+                var result = Regex.Replace(element.ElementName, "(\\B[A-Z])", " $1");
+
+                // Capitalize first letter
+                return char.ToUpper(result[0]) + result.Substring(1);
+            }
+        }
+        public string Tooltip
+        {
+            get
+            {
+                // Get the tooltip value
+                if (element.HasAttribute<EditorTooltipAttribute>() == true)
+                    return element.GetAttribute<EditorTooltipAttribute>().Tooltip;
+
+                return null;
+            }
+        }
         public string ElementName => element.ElementName;
         public Type ElementType => element.ElementType;
         public bool IsVisible => element.HasAttribute<EditorHiddenAttribute>() == false;

@@ -28,7 +28,8 @@ namespace KoraGame
         private Vector3F localScale = Vector3F.One;
         private Matrix4F? localToWorldMatrix = null;
         private Matrix4F? worldToLocalMatrix = null;
-
+        [DataMember]
+        public TypeCode t;
         // Properties
         public bool Active => active;
         public bool ActiveInScene
@@ -77,6 +78,8 @@ namespace KoraGame
         public bool HasComponents => components != null;
 
         [DataMember]
+        [EditorName("Position")]
+        [EditorTooltip("Position in local space")]
         public Vector3F LocalPosition
         {
             get => localPosition;
@@ -98,12 +101,15 @@ namespace KoraGame
         }
 
         [DataMember]
+        [EditorName("Rotation")]
+        [EditorTooltip("Rotation in local space")]
         public Vector3F LocalEuler
         {
             set { }
         }
 
         [DataMember]
+        [EditorName("Scale")]
         public Vector3F LocalScale
         {
             get => localScale;

@@ -2,6 +2,7 @@
 
 namespace KoraEditor
 {
+    [PropertyEditorFor(typeof(Enum), true)]
     internal sealed class EnumPropertyEditor : PropertyEditor
     {
         // Private
@@ -15,21 +16,16 @@ namespace KoraEditor
             value = Element.GetValue<Enum>(out isMixed);
         }
 
-        protected override void OnGui()
+        protected override void OnValueGui()
         {
-            Gui.BeginLayout(GuiLayout.Horizontal);
+            if (Gui.EnumPopup(ref value) == true)
             {
-                Gui.Label(Element.ElementName);
-                if (Gui.EnumPopup(ref value) == true)
-                {
-                    // Set value
-                    Element.SetValue(value);
+                // Set value
+                Element.SetValue(value);
 
-                    // Set modified
-                    SetModified();
-                }
+                // Set modified
+                SetModified();
             }
-            Gui.EndLayout();
         }
     }
 }

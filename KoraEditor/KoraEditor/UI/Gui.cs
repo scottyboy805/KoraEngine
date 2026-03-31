@@ -66,7 +66,12 @@ namespace KoraEditor.UI
 
         public static void PropertyLabel(EditorSerializedElement element)
         {
-            Label(element.ElementName);
+            // Create content
+            GuiContent content = new GuiContent(
+                element.DisplayName,
+                element.Tooltip);
+
+            Label(content);
         }
 
         public static void Button(GuiContent content, Action onClick)
