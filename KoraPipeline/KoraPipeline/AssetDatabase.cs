@@ -166,6 +166,34 @@ namespace KoraPipeline
             }
         }
 
+        public IEnumerable<string> SearchFolders(string searchFolder = null, string search = null, SearchOption option = SearchOption.TopDirectoryOnly)
+        {
+            // Get full search path
+            if (string.IsNullOrEmpty(searchFolder) == true)
+            {
+                searchFolder = AssetDirectory;
+
+            }
+            else
+            {
+                CheckAssetPathValid(searchFolder, nameof(searchFolder));
+                searchFolder = Path.Combine(AssetDirectory, searchFolder);
+            }
+
+            // Check for empty search
+            if (string.IsNullOrEmpty(search) == true)
+            {
+                search = "*.*";
+            }
+
+            // Get Directories
+            foreach(string fullPath in Directory.EnumerateDirectories(searchFolder, search, option))
+            {
+                // Get the relative path
+                yield return GetAssetRelativePath(fullPath);
+            }
+        }
+
         public void Import(string assetOrFolderPath)
         {
             // Make sure path is valid and exists

@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace KoraGame
 {
     [DataContract]
-    [EditorIcon("Icon/Object")]
+    [EditorIcon("Icon/Object.png")]
     public sealed class GameObject : GameElement
     {
         // Private

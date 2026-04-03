@@ -11,9 +11,10 @@ namespace KoraEditor
     {
         // Private
         private ElementEditor[] componentElementEditors = null;
+        private Texture deleteTexture;
 
         // Methods
-        protected override void OnCreate()
+        protected async override void OnCreate()
         {
             // Create base ui
             base.OnCreate();
@@ -25,6 +26,9 @@ namespace KoraEditor
             componentElementEditors = componentsElement.ChildProperties
                 .Select(e => e.CreateEditor())
                 .ToArray();
+
+            // Load ions
+            deleteTexture = await Editor.LoadEditorIconAsync("Icon/Close.png");
         }
 
         protected override void OnGui()
@@ -49,7 +53,12 @@ namespace KoraEditor
                     // Component header
                     Gui.BeginLayout(GuiLayoutOptions.Horizontal | GuiLayoutOptions.Continue | GuiLayoutOptions.Empty);
                     {
-                        Gui.Label("Testing");
+                        //Gui.Label("Testing");
+
+                        // Push to end
+                        //Gui.Position += new Vector2F(500, 0f);
+
+                        Gui.ImageButton(deleteTexture, new Vector2F(24, 24));
                     }
                     Gui.EndLayout();
 

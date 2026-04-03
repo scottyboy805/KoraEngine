@@ -19,7 +19,7 @@ namespace KoraEditor
         protected async override void OnOpen()
         {
             // Load icons
-            plusIcon = await EditorAssets.LoadAsync<Texture>("Icon/Plus.png");
+            plusIcon = await Editor.LoadEditorIconAsync("Icon/Plus.png");
         }
 
         protected override void OnGui()

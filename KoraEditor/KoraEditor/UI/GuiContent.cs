@@ -25,6 +25,14 @@ namespace KoraEditor.UI
             this.Id = id;
         }
 
+        public GuiContent(Texture icon, string tooltip = null, string id = null)
+        {
+            this.Text = "";
+            this.Tooltip = tooltip;
+            this.Icon = icon;
+            this.Id = id;
+        }
+
         // Methods
         public static implicit operator GuiContent(string text)
         {

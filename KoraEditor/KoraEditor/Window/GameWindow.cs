@@ -109,7 +109,7 @@ namespace KoraEditor
 
         protected override void OnGui()
         {
-            Gui.DrawRectangle(Position + new Vector2F(0, 50), Size - new Vector2F(0, 48), Color.Black);
+            Gui.DrawRectangle(Position + new Vector2F(0, 40), Size - new Vector2F(0, 40), Color.Black);
 
             // Display the toolbar
             OnGameToolbarGui();

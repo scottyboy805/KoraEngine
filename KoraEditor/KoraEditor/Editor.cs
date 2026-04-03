@@ -174,6 +174,11 @@ namespace KoraEditor
         }
 
         // Project
+        public Task<Texture> LoadEditorIconAsync(string iconPath)
+        {
+            return editorAssets.LoadAsync<Texture>(iconPath);
+        }
+
         public async Task<Texture> LoadEditorIconAsync(GameElement element)
         {
             // Check for null

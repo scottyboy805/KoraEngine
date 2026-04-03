@@ -33,8 +33,6 @@ namespace KoraEditor
         {
             if (Selection.HasAnySelection == true)
             {
-                Gui.Label(Selection.GetSelectedElement().ToString());
-
                 // Display the editor
                 if (displayedEditor != null && displayedLayout != null)
                 {

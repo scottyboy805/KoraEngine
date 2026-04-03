@@ -156,6 +156,35 @@ namespace KoraEditor.UI
             return changed;
         }
 
+        public static bool ToggleSwitch(ref bool value, GuiContent content = default)
+        {
+            Position += new Vector2F(0, 20);
+
+            BeginControl(content, ImGuiCol.CheckMark, null, null);
+            Vector2 p = ImGui.GetCursorScreenPos();
+            ImDrawListPtr draw = ImGui.GetWindowDrawList();
+            float w = 50, h = 25;
+            float r = h * 0.5f;
+
+            bool changed = false;
+            ImGui.Button("", new Vector2(w, h));
+            if(ImGui.IsItemClicked())
+            {
+                value = !value;
+                changed = true;
+            }
+
+            Color32 bgCol = value ? Color32.CornflowerBlue : new Color32(150, 150, 150, 255);
+            draw.AddRectFilled(p, p + new Vector2(w, h), bgCol.RGBA, r);
+
+            float cx = value ? p.X + w - r : p.X + r;
+            float cy = p.Y + r;
+            draw.AddCircleFilled(new Vector2(cx, cy), r - 2, new Color32(255, 255, 255, 255).RGBA);
+
+            EndControl(content);
+            return changed;
+        }
+
         public static bool Input(ref string value, uint maxLength = 256, GuiContent content = default)
         {
             // Check for null
@@ -414,7 +443,7 @@ namespace KoraEditor.UI
 
         public static bool BeginTreeNode(GuiContent content, GuiTreeOptions options = 0, Action onSelect = null)
         {
-            ImGuiTreeNodeFlags flags = (ImGuiTreeNodeFlags)options | ImGuiTreeNodeFlags.SpanFullWidth;
+            ImGuiTreeNodeFlags flags = (ImGuiTreeNodeFlags)options | ImGuiTreeNodeFlags.SpanFullWidth | ImGuiTreeNodeFlags.OpenOnArrow;
 
             BeginControl(content, null, null, null);
             bool expanded = ImGui.TreeNodeEx("", flags);
@@ -426,9 +455,12 @@ namespace KoraEditor.UI
             // Image
             if(content.Icon != null)
             {
+                float iconSize = (options & GuiTreeOptions.Framed) != 0
+                    ? 32f : 24f;
+
                 ImGui.SameLine();
                 Position += new Vector2F(0, 4);
-                ImGui.Image(content.IconPtr, new Vector2(32, 32));
+                ImGui.Image(content.IconPtr, new Vector2(iconSize));
             }
 
             // Label

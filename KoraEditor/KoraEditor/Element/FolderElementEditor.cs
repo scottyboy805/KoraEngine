@@ -9,18 +9,19 @@ namespace KoraEditor
     {
         // Private
         private Texture folderNormalIcon;
-        private Texture folderOpenIcon;
+        private Texture folderEmptyIcon;
 
         private EditorSerializedProperty pathElement;
 
         // Methods
         protected async override void OnCreate()
         {
-            folderNormalIcon = await EditorAssets.LoadAsync<Texture>("Icon/FolderNormal.png");
-            folderOpenIcon = await EditorAssets.LoadAsync<Texture>("Icon/FolderOpen.png");
-
             // Get the folder
             pathElement = Layout.FindProperty(nameof(EditorFolder.FolderPath));
+
+            // Load icons
+            folderNormalIcon = await EditorAssets.LoadAsync<Texture>("Icon/FolderNormal.png");
+            folderEmptyIcon = await EditorAssets.LoadAsync<Texture>("Icon/FolderEmpty.png");
         }
 
         protected override void OnGui()

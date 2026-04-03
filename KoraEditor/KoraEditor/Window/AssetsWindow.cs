@@ -1,4 +1,5 @@
 ﻿using KoraEditor.UI;
+using KoraGame;
 using KoraGame.Graphics;
 
 namespace KoraEditor
@@ -10,6 +11,7 @@ namespace KoraEditor
         {
             // Public
             public string Name;
+            public string Path;
             public bool IsFolder;
             public List<AssetNode> Children = new();
         }
@@ -17,11 +19,18 @@ namespace KoraEditor
         // Private
         private static readonly string[] detailColumnNames = { "Name", "Type", "Size", "Modified" };
 
-        private Texture folderNormalIcon;
-        private Texture folderOpenIcon;
+        private Texture navigateBack;
+        private Texture navigateForward;
+        private Texture navigateUp;
 
-        private AssetNode rootAssetNode = new AssetNode { Name = "Assets", IsFolder = true };
+        private Texture folderNormalIcon;
+        private Texture folderEmptyIcon;
+
+        private AssetNode rootAssetNode = new AssetNode { Name = "Assets", Path = "Assets", IsFolder = true };
         private float previewSize = 0.5f;
+
+        // Public
+        public const int iconSize = 24;
 
         // Constructor
         public AssetsWindow()
@@ -32,8 +41,12 @@ namespace KoraEditor
         // Methods
         protected async override void OnOpen()
         {
-            folderNormalIcon = await EditorAssets.LoadAsync<Texture>("Icon/FolderNormal.png");
-            folderOpenIcon = await EditorAssets.LoadAsync<Texture>("Icon/FolderOpen.png");
+            navigateBack = await Editor.LoadEditorIconAsync("Icon/Left.png");
+            navigateForward = await Editor.LoadEditorIconAsync("Icon/Right.png");
+            navigateUp = await Editor.LoadEditorIconAsync("Icon/Up.png");
+
+            folderNormalIcon = await Editor.LoadEditorIconAsync("Icon/FolderNormal.png");
+            folderEmptyIcon = await Editor.LoadEditorIconAsync("Icon/FolderEmpty.png");
 
             // Rebuid the tree
             RebuildAssetTree();
@@ -50,10 +63,11 @@ namespace KoraEditor
 
         protected override void OnGui()
         {
+            //OnProjectViewHeaderGui();
             // Display preview area
             Gui.BeginTableLayout(1);
             {
-                OnProjectViewHeaderGui();
+                
 
                 Gui.BeginTableLayout(2);
                 {
@@ -63,10 +77,10 @@ namespace KoraEditor
                     // H separator
                     Gui.ColumnSeparator();
 
-                
+                    OnProjectViewHeaderGui();
 
                     // Check grid size
-                    if(previewSize <= 0)
+                    if (previewSize <= 0)
                     {
                         OnProjectViewDetailsGui();
                     }
@@ -89,10 +103,16 @@ namespace KoraEditor
             }
         }
 
+        bool on;
         private void OnProjectViewHeaderGui()
         {
-            Gui.BeginLayout(GuiLayoutOptions.Horizontal);
+            Gui.BeginLayout(GuiLayoutOptions.Horizontal | GuiLayoutOptions.Frame | GuiLayoutOptions.Empty);
             {
+                // Navigate buttons
+                Gui.ImageButton(new GuiContent(navigateBack, "Back"), new Vector2F(24f));
+                Gui.ImageButton(new GuiContent(navigateForward, "Forward"), new Vector2F(24f));
+                Gui.ImageButton(new GuiContent(navigateUp, "Go up a level"), new Vector2F(24f));
+
                 Gui.Button("Path A", () => { });
                 Gui.Button("Path B", () => { });
                 Gui.Button("Path C", () => { });
@@ -132,7 +152,7 @@ namespace KoraEditor
 
             if(isFolder == true)
                 icon = node.Children.Count > 0
-                    ? folderNormalIcon : folderOpenIcon;
+                    ? folderNormalIcon : folderEmptyIcon;
 
             GuiTreeOptions options = 0;
 
@@ -140,7 +160,12 @@ namespace KoraEditor
                 options |= GuiTreeOptions.NoArrow;
 
             // Display the node
-            if (Gui.BeginTreeNode(new GuiContent(node.Name, null, icon), options) == true)
+            if (Gui.BeginTreeNode(new GuiContent(node.Name, null, icon), options, () =>
+            {
+                // Select the folder
+                Selection.Select(new EditorFolder(node.Path));
+                Debug.Log("Path = " + node.Path);
+            }) == true)
             {
                 // Display children
                 foreach(var child in node.Children)
@@ -158,7 +183,6 @@ namespace KoraEditor
         }
 
 
-
         private void RebuildAssetTree()
         {
             // Clear sub nodes
@@ -167,6 +191,14 @@ namespace KoraEditor
             // Check for no project
             if (Editor.IsProjectOpen == false)
                 return;
+
+            // Find all folders
+            //foreach (string folder in AssetDatabase.SearchFolders())
+            //{
+            //    RebuildAssetTreeNode(folder, rootAssetNode);
+            //}
+            RebuildAssetTreeNode("", rootAssetNode);
+            return;
 
             // Search in folder
             IEnumerable<string> assetGuids = AssetDatabase.SearchAssets(null, null, SearchOption.AllDirectories);
@@ -181,9 +213,6 @@ namespace KoraEditor
                 if (string.IsNullOrEmpty(assetPath))
                     continue;
 
-                // Check for folder
-                bool isFolder = AssetDatabase.IsFolder(assetPath);
-
                 // Split into parts
                 string[] parts = assetPath.Split(new[] { '/' }, StringSplitOptions.RemoveEmptyEntries);
 
@@ -193,16 +222,23 @@ namespace KoraEditor
                 {
                     string part = parts[i];
                     // Intermediate parts are folders. The last part is a folder only if AssetDatabase reports it as such.
-                    bool partIsFolder = (i < parts.Length - 1) || isFolder;
+                    bool isFolder = (i < parts.Length - 1);
 
                     // Try to find existing child
                     AssetNode child = parent.Children.FirstOrDefault(c => string.Equals(c.Name, part, StringComparison.OrdinalIgnoreCase)
-                        && c.IsFolder == partIsFolder);
+                        && c.IsFolder == isFolder);
 
                     // Create if missing
                     if (child == null)
                     {
-                        child = new AssetNode { Name = part, IsFolder = partIsFolder };
+                        string path = "";
+                        for(int j = 0; j < i; j++)
+                        {
+                            path += parts[j];
+                            if(j < i - 1) path += "/";
+                        }    
+
+                        child = new AssetNode { Name = part, Path = path, IsFolder = isFolder };
                         parent.Children.Add(child);
                     }
 
@@ -224,6 +260,51 @@ namespace KoraEditor
             }
 
             SortNodes(rootAssetNode);
+        }
+
+        private void RebuildAssetTreeNode(string searchPath, AssetNode parent)
+        {
+            // Find all folders
+            foreach(string folder in AssetDatabase.SearchFolders(searchPath))
+            {
+                // Get the folder name
+                string folderName = Path.GetFileName(folder);
+
+                // Create a new node
+                AssetNode current = new AssetNode
+                {
+                    Name = folderName,
+                    Path = KoraPipeline.AssetDatabase.JoinAssetPath(parent.Path, folderName),
+                    IsFolder = true,
+                };
+
+                // Add the node
+                parent.Children.Add(current);
+
+                // Visit children
+                RebuildAssetTreeNode(KoraPipeline.AssetDatabase.JoinAssetPath(searchPath, folderName), current);
+            }
+
+            // Find all assets
+            foreach (string assetGuid in AssetDatabase.SearchAssets(searchPath))
+            {
+                // Get asset path
+                string assetPath = AssetDatabase.GetAssetPath(assetGuid);
+
+                // Get the asset name
+                string assetName = Path.GetFileName(assetPath);
+
+                // Create a new node
+                AssetNode leaf = new AssetNode
+                {
+                    Name = assetName,
+                    Path = KoraPipeline.AssetDatabase.JoinAssetPath(parent.Path, assetName),
+                    IsFolder = false,
+                };
+
+                // Add the node
+                parent.Children.Add(leaf);
+            }
         }
 
         [Menu("Window/Assets")]
