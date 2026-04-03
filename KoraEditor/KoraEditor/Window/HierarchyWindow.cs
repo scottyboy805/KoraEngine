@@ -48,14 +48,18 @@ namespace KoraEditor
 
         private void OnGameElementTreeGui(GameObject obj)
         {
+            GuiTreeOptions options = 0;
+
             // Check selected
-            bool selected = Selection.IsSelected(obj);
+            if (Selection.IsSelected(obj) == true)
+                options |= GuiTreeOptions.Selected;
 
             // Check for leaf
-            bool isLeaf = obj.HasChildren == false;
+            if (obj.HasChildren == false)
+                options |= GuiTreeOptions.NoArrow;
 
             // Display the node
-            if (Gui.BeginTreeNode(obj.Name, selected, isLeaf, null, () =>
+            if (Gui.BeginTreeNode(obj.Name, options, null, () =>
             {
                 // Select the object
                 Selection.Select(obj);

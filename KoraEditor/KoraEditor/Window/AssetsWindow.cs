@@ -134,8 +134,13 @@ namespace KoraEditor
                 icon = node.Children.Count > 0
                     ? folderNormalIcon : folderOpenIcon;
 
+            GuiTreeOptions options = 0;
+
+            if (isFolder == false)
+                options |= GuiTreeOptions.NoArrow;
+
             // Display the node
-            if (Gui.BeginTreeNode(node.Name, false, isFolder == false, icon) == true)
+            if (Gui.BeginTreeNode(node.Name, options, icon) == true)
             {
                 // Display children
                 foreach(var child in node.Children)

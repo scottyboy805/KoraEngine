@@ -11,6 +11,15 @@ namespace KoraEditor.UI
         Horizontal,
     }
 
+    public enum GuiTreeOptions
+    {
+        None = 0,
+        Selected = 1,
+        Framed = 2,
+        OpenDefault = 0x20,
+        NoArrow = 0x100,
+    }
+
     public static class Gui
     {
         // Type
@@ -107,6 +116,10 @@ namespace KoraEditor.UI
 
         public static bool Input(ref string value, uint maxLength = 256, GuiContent content = default)
         {
+            // Check for null
+            if (value == null)
+                value = "";
+
             BeginControl(content, ImGuiCol.Text, null, null);
             bool changed = ImGui.InputText("", ref value, maxLength);
             EndControl(content);
@@ -336,17 +349,9 @@ namespace KoraEditor.UI
             ImGui.TableNextColumn();
         }
 
-        public static bool BeginTreeNode(GuiContent content, bool selected = false, bool isLeaf = false, Texture icon = null, Action onSelect = null)
+        public static bool BeginTreeNode(GuiContent content, GuiTreeOptions options = 0, Texture icon = null, Action onSelect = null)
         {
-            ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags.SpanFullWidth;
-
-            // Check for selected
-            if(selected == true)
-                flags |= ImGuiTreeNodeFlags.Selected;
-
-            // Check for leaf
-            if (isLeaf == true)
-                flags |= ImGuiTreeNodeFlags.Leaf;
+            ImGuiTreeNodeFlags flags = (ImGuiTreeNodeFlags)options | ImGuiTreeNodeFlags.SpanFullWidth;
 
             BeginControl(content, null, null, null);
             bool expanded = ImGui.TreeNodeEx("", flags);

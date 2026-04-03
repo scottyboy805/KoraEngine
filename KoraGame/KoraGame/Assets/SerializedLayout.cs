@@ -201,6 +201,39 @@ namespace KoraGame
                 return serializeProperty.GetCustomAttribute<T>();
             }
         }
+        internal sealed class SerializedArrayElement : SerializedElement
+        {
+            // Private
+            private readonly int index;
+
+            // Constructor
+            public SerializedArrayElement(Type elementType, int index)
+                : base(index.ToString(), elementType)
+            {
+                this.index = index;
+            }
+
+            // Methods
+            public override object GetValue(object instance)
+            {
+                if (instance is IList list)
+                    return list[index];
+
+                return null;
+            }
+
+            public override void SetValue(object instance, object value)
+            {
+                if (instance is IList list)
+                    list[index] = value;
+            }
+
+            public override T GetAttribute<T>()
+            {
+                // No attributes for arrays
+                return null;
+            }
+        }
 
         // Public
         public readonly string ElementName;
@@ -236,6 +269,27 @@ namespace KoraGame
                 return attrib.Name;
 
             return member.Name;
+        }
+
+        public static Type GetArrayElementType(IList list)
+        {
+            // Get type
+            Type listType = list != null ? list.GetType() : null;
+
+            // Check for any
+            if (listType != null)
+            {
+                // Check for array
+                if (list is Array)
+                    return listType.GetElementType();
+
+                // Check for list
+                if (listType.IsGenericType == true && typeof(List<>).IsAssignableFrom(listType.GetGenericTypeDefinition()) == true)
+                    return listType.GetGenericArguments()[0];
+            }
+
+            // Unknown
+            throw new ArgumentException("Unable to find array element type");
         }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using KoraGame;
+using KoraGame.Graphics;
 
 namespace KoraEditor
 {
@@ -27,6 +28,7 @@ namespace KoraEditor
 
             // Create object
             GameObject go = new GameObject(name, false);
+            go.AddComponent<MeshRenderer>();
 
             // Add to scene
             gameObjects.Add(go);

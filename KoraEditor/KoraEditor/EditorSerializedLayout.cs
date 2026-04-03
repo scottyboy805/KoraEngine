@@ -27,7 +27,7 @@ namespace KoraEditor
         // Methods
         public EditorSerializedElement FindElement(string name, bool includeHidden = false)
         {
-            return elements.FirstOrDefault(e => e.ElementName == name && e.IsVisible == true || includeHidden == true);
+            return elements.FirstOrDefault(e => e.ElementName == name && (e.IsVisible == true || includeHidden == true));
         }
 
         /// <summary>

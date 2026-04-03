@@ -42,6 +42,12 @@ namespace KoraEditor
                 : layout.Elements;
 
             // Create editor for element
+            return GetPropertyEditors(elements);
+        }
+
+        public IEnumerable<PropertyEditor> GetPropertyEditors(IEnumerable<EditorSerializedElement> elements)
+        {
+            // Create editor for element
             return elements
                 .Select(PropertyEditor.ForElement)
                 .Where(e => e != null);
@@ -67,7 +73,7 @@ namespace KoraEditor
                 return null;
 
             // Create layout
-            EditorSerializedLayout layout = new EditorSerializedLayout(editType, new[] { elements });
+            EditorSerializedLayout layout = new EditorSerializedLayout(editType, elements);
 
             // Creat editor
             return ForLayout(layout);
@@ -182,7 +188,7 @@ namespace KoraEditor
                     if (type.IsDefined(typeof(ElementEditorForAttribute)) == true)
                     {
                         // Get the attribute
-                        ElementEditorForAttribute attrib = type.GetCustomAttribute<ElementEditorForAttribute>();
+                        ElementEditorForAttribute attrib = type.GetCustomAttribute<ElementEditorForAttribute>(false);
 
                         // Check for type
                         if (typeof(ElementEditor).IsAssignableFrom(type) == false)

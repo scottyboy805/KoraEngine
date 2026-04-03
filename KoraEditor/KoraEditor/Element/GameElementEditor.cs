@@ -3,7 +3,7 @@
 namespace KoraEditor.Element
 {
     [ElementEditorFor(typeof(GameElement), true)]
-    internal sealed class GameElementEditor : ElementEditor
+    internal class GameElementEditor : ElementEditor
     {
         // Private
         private PropertyEditor[] propertyEditors = null;

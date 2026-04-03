@@ -1,4 +1,6 @@
 ﻿using KoraGame;
+using System.Collections;
+using System.Runtime.InteropServices.Marshalling;
 using System.Text.RegularExpressions;
 
 namespace KoraEditor
@@ -46,8 +48,8 @@ namespace KoraEditor
         public bool IsEditingMultiple => instances.Length > 1;
         public bool IsArray => element.IsArray;
         public bool IsObject => element.IsObject;
-        public IEnumerable<EditorSerializedElement> ChildElements => childElements;
-        public IEnumerable<EditorSerializedElement> VisibleChildElements => childElements.Where(e => e.IsVisible);
+        public IEnumerable<EditorSerializedElement> ChildElements => childElements != null ? childElements : Array.Empty<EditorSerializedElement>();
+        public IEnumerable<EditorSerializedElement> VisibleChildElements => ChildElements.Where(e => e.IsVisible);
 
         // Constructor
         internal EditorSerializedElement(SerializedElement element, EditorSerializedLayout root, object[] instances)
@@ -55,7 +57,51 @@ namespace KoraEditor
             this.element = element;
             this.root = root;
             this.instances = instances;
+
             // Create child elements
+            if(element.IsArray == true)
+            {
+                // Get the element
+                IList[] arrayInstances = instances
+                    .Select(e => element.GetValue(e) as IList)
+                    .ToArray();
+
+                // Get max length
+                int length = arrayInstances.Max(e => e.Count);
+
+                // Check for any
+                if (length > 0)
+                {
+                    // Create child elements
+                    this.childElements = new List<EditorSerializedElement>(length);
+
+                    // Get element type
+                    Type arrayElementType = SerializedElement.GetArrayElementType(arrayInstances.First());
+
+                    // Create all elements
+                    for (int i = 0; i < length; i++)
+                    {
+                        // Get instances
+                        object[] arrayElementInstances = arrayInstances.Select(a => a[i]).ToArray();
+
+                        // Find the first explicit type if possible
+                        Type firstExplicitArrayElementType = arrayElementInstances
+                            .Where(e => e != null)
+                            .Select(e => e.GetType())
+                            .FirstOrDefault();
+
+                        // Select element type
+                        if (firstExplicitArrayElementType != null && arrayElementInstances.All(i => i.GetType() == firstExplicitArrayElementType) == true)
+                            arrayElementType = firstExplicitArrayElementType;
+
+                        // Create the array element item
+                        SerializedElement.SerializedArrayElement arrayElement = new SerializedElement.SerializedArrayElement(arrayElementType, i);
+
+                        // Create all elements
+                        childElements.Add(new EditorSerializedElement(arrayElement, root, arrayElementInstances));
+                    }
+                }
+            }
             //childElements = new List<SerializedElement>();
             //foreach (KoraGame.SerializedElement child in element..ChildElements)
             //{
@@ -72,6 +118,11 @@ namespace KoraEditor
         public override string ToString()
         {
             return string.Format("Serialize Property ({0}): {1}", ElementName, ElementType);
+        }
+
+        public ElementEditor CreateEditor()
+        {
+            return ElementEditor.ForElements(ElementType, instances);
         }
 
         public void SetValue<T>(in T value)
