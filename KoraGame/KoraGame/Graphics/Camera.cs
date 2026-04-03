@@ -3,6 +3,7 @@ using System.Runtime.Serialization;
 
 namespace KoraGame.Graphics
 {
+    [EditorIcon("Icon/Camera.png")]
     public sealed class Camera : Component
     {
         // Private

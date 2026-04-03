@@ -1,11 +1,11 @@
 ﻿using KoraGame.Graphics;
-using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 
 namespace KoraGame
 {
     [DataContract]
+    [EditorIcon("Icon/Object")]
     public sealed class GameObject : GameElement
     {
         // Private

@@ -2,6 +2,7 @@
 using KoraEditor.Element;
 using KoraEditor.UI;
 using KoraGame;
+using KoraGame.Graphics;
 
 namespace KoraEditor
 {
@@ -36,9 +37,16 @@ namespace KoraEditor
             {
                 foreach(ElementEditor editor in componentElementEditors)
                 {
-                    // Draw foldout
-                    bool expanded = Gui.BeginTreeNode(editor.Layout.DisplayName, GuiTreeOptions.Framed);
+                    // Create content
+                    GuiContent content = new GuiContent(
+                        editor.Layout.DisplayName,
+                        editor.Layout.SerializeType.FullName,
+                        editor.Icon);
 
+                    // Draw foldout
+                    bool expanded = Gui.BeginTreeNode(content, GuiTreeOptions.Framed);
+
+                    // Component header
                     Gui.BeginLayout(GuiLayoutOptions.Horizontal | GuiLayoutOptions.Continue | GuiLayoutOptions.Empty);
                     {
                         Gui.Label("Testing");

@@ -1,4 +1,5 @@
 ﻿using KoraGame;
+using KoraGame.Graphics;
 using System.Reflection;
 
 namespace KoraEditor
@@ -10,10 +11,12 @@ namespace KoraEditor
         private static readonly List<(Type, Type)> derivedElementEditors = new();      // Edit Type, ElementEditor Type
 
         private EditorSerializedLayout layout;
+        private Texture icon = null;
         private bool isModified = false;
 
         // Properties
         public EditorSerializedLayout Layout => layout;
+        public Texture Icon => icon;
 
         // Methods
         protected virtual void OnCreate() { }
@@ -91,6 +94,14 @@ namespace KoraEditor
             // Create instance
             ElementEditor editor = (ElementEditor)Activator.CreateInstance(elementEditorType);
             editor.layout = layout;
+
+            // Start loading icon
+            Task.Run(async () =>
+            {
+                // Wait for load icon
+                editor.icon = await editor.Editor.LoadEditorIconAsync(layout.EditingInstances
+                    .FirstOrDefault(i => i is GameElement) as GameElement);
+            });
 
             // Create editor
             try

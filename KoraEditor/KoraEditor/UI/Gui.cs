@@ -427,6 +427,7 @@ namespace KoraEditor.UI
             if(content.Icon != null)
             {
                 ImGui.SameLine();
+                Position += new Vector2F(0, 4);
                 ImGui.Image(content.IconPtr, new Vector2(32, 32));
             }
 

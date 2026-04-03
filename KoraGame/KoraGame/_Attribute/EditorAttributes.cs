@@ -51,6 +51,19 @@ namespace KoraGame
         }
     }
 
+    [AttributeUsage(AttributeTargets.Class, AllowMultiple = false)]
+    public sealed class EditorIconAttribute : Attribute
+    {
+        // Public
+        public readonly string Path;
+
+        // Constructor
+        public EditorIconAttribute(string path)
+        {
+            this.Path = path;
+        }
+    }
+
     /// <summary>
     /// Used to specify that a UI editor for a field or property should be a slider with a specified range. This is useful for fields that have a known range of valid values, such as a percentage or a value that should be clamped between two limits.
     /// </summary>

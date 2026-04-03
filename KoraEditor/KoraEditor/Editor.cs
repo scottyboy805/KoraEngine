@@ -3,6 +3,7 @@ using KoraGame;
 using KoraGame.Graphics;
 using KoraPipeline;
 using SDL;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 
 [assembly: InternalsVisibleTo("KoraEditor-Windows")]
@@ -173,6 +174,34 @@ namespace KoraEditor
         }
 
         // Project
+        public async Task<Texture> LoadEditorIconAsync(GameElement element)
+        {
+            // Check for null
+            if (element == null)
+                return null;
+
+            // Check for attribute
+            EditorIconAttribute attribute = element.elementType.GetCustomAttribute<EditorIconAttribute>();
+
+            // Check for any
+            if (attribute == null)
+                return null;
+
+            // Get load path
+            string loadPath = attribute.Path;
+
+            // Check for any
+            if (string.IsNullOrWhiteSpace(loadPath) == true)
+                return null;
+
+            // Select location - built in components load from editor and user components load from project
+            AssetProvider provider = element.elementType.Assembly == typeof(Game).Assembly
+                ? editorAssets : assetDatabase;
+
+            // Load the asset
+            return await provider.LoadAsync<Texture>(loadPath);
+        }
+
         #region IODialog
         public static bool ShowSaveFileDialog(out string fileName, string filter, string directory = null)
         {

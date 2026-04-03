@@ -3,6 +3,7 @@ using System.Runtime.Serialization;
 
 namespace KoraGame.Physics
 {
+    [EditorIcon("Icon/WireBox.png")]
     public sealed class BoxCollider : Collider
     {
         // Private

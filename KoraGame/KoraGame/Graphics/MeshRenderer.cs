@@ -2,6 +2,7 @@
 
 namespace KoraGame.Graphics
 {
+    [EditorIcon("Icon/Mesh.png")]
     public class MeshRenderer : Renderer
     {
         // Private
