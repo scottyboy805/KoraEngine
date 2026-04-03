@@ -73,7 +73,7 @@ namespace KoraEditor.UI
             EndControl(content);
         }
 
-        public static void PropertyLabel(EditorSerializedElement element)
+        public static void PropertyLabel(EditorSerializedProperty element)
         {
             // Create content
             GuiContent content = new GuiContent(
@@ -83,25 +83,25 @@ namespace KoraEditor.UI
             Label(content);
         }
 
-        public static void Button(GuiContent content, Action onClick)
+        public static void Button(GuiContent content, Action onClick = null)
         {
             BeginControl(content, ImGuiCol.Button, ImGuiCol.ButtonHovered, ImGuiCol.ButtonActive);
-            if (ImGui.Button(content.Text))
+            if (ImGui.Button(content.Text) == true && onClick != null)
                 onClick();
             EndControl(content);
         }
 
-        public static void Image(Texture texture, Vector2F size, GuiContent content = default)
+        public static void Image(GuiContent content, Vector2F size)
         {
             BeginControl(content, null, null, null);
-            ImGui.Image(texture != null ? texture.WeakPtr : IntPtr.Zero, (Vector2)size);
+            ImGui.Image(content.IconPtr, (Vector2)size);
             EndControl(content);
         }
 
-        public static void ImageButton(Texture texture, Vector2F size, Action onClick, GuiContent content = default)
+        public static void ImageButton(GuiContent content, Vector2F size, Action onClick = null)
         {
             BeginControl(content, ImGuiCol.Button, ImGuiCol.ButtonHovered, ImGuiCol.ButtonHovered);
-            if (ImGui.ImageButton("", texture != null ? texture.WeakPtr : IntPtr.Zero, (Vector2)size))
+            if (ImGui.ImageButton("", content.IconPtr, (Vector2)size) && onClick != null)
                 onClick();
             EndControl(content);
         }
@@ -349,7 +349,7 @@ namespace KoraEditor.UI
             ImGui.TableNextColumn();
         }
 
-        public static bool BeginTreeNode(GuiContent content, GuiTreeOptions options = 0, Texture icon = null, Action onSelect = null)
+        public static bool BeginTreeNode(GuiContent content, GuiTreeOptions options = 0, Action onSelect = null)
         {
             ImGuiTreeNodeFlags flags = (ImGuiTreeNodeFlags)options | ImGuiTreeNodeFlags.SpanFullWidth;
 
@@ -361,10 +361,10 @@ namespace KoraEditor.UI
                 onSelect();
 
             // Image
-            if(icon != null)
+            if(content.Icon != null)
             {
                 ImGui.SameLine();
-                ImGui.Image(icon.WeakPtr, new Vector2(32, 32));
+                ImGui.Image(content.IconPtr, new Vector2(32, 32));
             }
 
             // Label

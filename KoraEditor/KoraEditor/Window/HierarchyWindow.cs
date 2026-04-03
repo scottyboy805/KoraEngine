@@ -59,7 +59,7 @@ namespace KoraEditor
                 options |= GuiTreeOptions.NoArrow;
 
             // Display the node
-            if (Gui.BeginTreeNode(obj.Name, options, null, () =>
+            if (Gui.BeginTreeNode(obj.Name, options, () =>
             {
                 // Select the object
                 Selection.Select(obj);

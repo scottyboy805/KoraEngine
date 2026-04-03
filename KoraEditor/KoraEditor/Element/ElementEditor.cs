@@ -37,15 +37,15 @@ namespace KoraEditor
         public IEnumerable<PropertyEditor> GetPropertyEditors(bool visible)
         {
             // Select elements
-            IEnumerable<EditorSerializedElement> elements = visible == true
-                ? layout.VisibleElements
-                : layout.Elements;
+            IEnumerable<EditorSerializedProperty> elements = visible == true
+                ? layout.VisibleProperties
+                : layout.Properties;
 
             // Create editor for element
             return GetPropertyEditors(elements);
         }
 
-        public IEnumerable<PropertyEditor> GetPropertyEditors(IEnumerable<EditorSerializedElement> elements)
+        public IEnumerable<PropertyEditor> GetPropertyEditors(IEnumerable<EditorSerializedProperty> elements)
         {
             // Create editor for element
             return elements

@@ -8,11 +8,14 @@ namespace KoraEditor.Element
         // Private
         private PropertyEditor[] propertyEditors = null;
 
+        // Properties
+        protected virtual IEnumerable<EditorSerializedProperty> DisplayProperties => Layout.VisibleProperties;
+
         // Methods
         protected override void OnCreate()
         {
             // Create drawers
-            propertyEditors = GetPropertyEditors(true).ToArray();
+            propertyEditors = GetPropertyEditors(DisplayProperties).ToArray();
         }
 
         protected override void OnGui()

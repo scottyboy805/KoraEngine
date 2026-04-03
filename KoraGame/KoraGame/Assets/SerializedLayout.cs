@@ -8,22 +8,22 @@ namespace KoraGame
     {
         // Public
         public readonly object Instance;
-        public readonly SerializedElement Element;
+        public readonly SerializedProperty Property;
         public readonly BindElement Parent;
 
         // Constructor
-        public BindElement(object instance, SerializedElement element, BindElement parent = null)
+        public BindElement(object instance, SerializedProperty property, BindElement parent = null)
         {
             this.Instance = instance;
-            this.Element = element;
+            this.Property = property;
             this.Parent = parent;
         }
 
         // Methods
         public void Bind(object value)
         {
-            // Set the value for this element
-            Element.SetValue(Instance, value);
+            // Set the value for this property
+            Property.SetValue(Instance, value);
 
             // If we have a parent, trigger parent rebuild to propagate struct changes
             if (Parent != null && Instance is ValueType)
@@ -40,16 +40,16 @@ namespace KoraGame
         private static readonly Dictionary<Type, SerializedLayout> serializedTypeLayouts = new();
 
         public readonly Type SerializeType;
-        public readonly List<SerializedElement> SerializeElements = new();
+        public readonly List<SerializedProperty> SerializeProperties = new();
 
         // Properties
-        public SerializedElement this[string name] => SerializeElements.FirstOrDefault(e => e.ElementName == name);
+        public SerializedProperty this[string name] => SerializeProperties.FirstOrDefault(e => e.PropertyName == name);
 
         // Constructor
-        private SerializedLayout(Type fromType, IEnumerable<SerializedElement> serializedElements)
+        private SerializedLayout(Type fromType, IEnumerable<SerializedProperty> serializedElements)
         {
             this.SerializeType = fromType;
-            this.SerializeElements.AddRange(serializedElements);
+            this.SerializeProperties.AddRange(serializedElements);
         }
 
         // Methods
@@ -108,13 +108,13 @@ namespace KoraGame
                 && property.IsDefined(typeof(DataMemberAttribute), false) == true;
         }
 
-        private static IEnumerable<SerializedElement> GetSerializableElements(Type type)
+        private static IEnumerable<SerializedProperty> GetSerializableElements(Type type)
         {
             // Search the base type first
             if(type.BaseType != null && type.BaseType != typeof(object) && type.BaseType != typeof(ValueType))
             {
                 // Get base elements first
-                foreach(SerializedElement element in GetSerializableElements(type.BaseType))
+                foreach(SerializedProperty element in GetSerializableElements(type.BaseType))
                     yield return element;
             }
 
@@ -126,7 +126,7 @@ namespace KoraGame
                     continue;
 
                 // Create field element
-                yield return new SerializedElement.SerializedField(field);
+                yield return new SerializedProperty.SerializedFieldMember(field);
             }
 
             // Check properties
@@ -137,21 +137,21 @@ namespace KoraGame
                     continue;
 
                 // Create property element
-                yield return new SerializedElement.SerializedProperty(property);
+                yield return new SerializedProperty.SerializedPropertyMember(property);
             }
         }
     }
 
-    internal abstract class SerializedElement
+    internal abstract class SerializedProperty
     {
         // Type
-        internal sealed class SerializedField : SerializedElement
+        internal sealed class SerializedFieldMember : SerializedProperty
         {
             // Private
             private readonly FieldInfo serializeField;
 
             // Constructor
-            public SerializedField(FieldInfo serializeField)
+            public SerializedFieldMember(FieldInfo serializeField)
                 : base(GetSerializeMemberName(serializeField), serializeField.FieldType)
             {
                 this.serializeField = serializeField;
@@ -173,13 +173,13 @@ namespace KoraGame
                 return serializeField.GetCustomAttribute<T>();
             }
         }
-        internal sealed class SerializedProperty : SerializedElement
+        internal sealed class SerializedPropertyMember : SerializedProperty
         {
             // Private
             private readonly PropertyInfo serializeProperty;
 
             // Constructor
-            public SerializedProperty(PropertyInfo serializeProperty)
+            public SerializedPropertyMember(PropertyInfo serializeProperty)
                 : base(GetSerializeMemberName(serializeProperty), serializeProperty.PropertyType)
             {
                 this.serializeProperty = serializeProperty;
@@ -201,7 +201,7 @@ namespace KoraGame
                 return serializeProperty.GetCustomAttribute<T>();
             }
         }
-        internal sealed class SerializedArrayElement : SerializedElement
+        internal sealed class SerializedArrayElement : SerializedProperty
         {
             // Private
             private readonly int index;
@@ -236,18 +236,18 @@ namespace KoraGame
         }
 
         // Public
-        public readonly string ElementName;
-        public readonly Type ElementType;
+        public readonly string PropertyName;
+        public readonly Type PropertyType;
 
         // Properties
-        public bool IsArray => ElementType.IsArray == true || typeof(IList).IsAssignableFrom(ElementType) == true;
-        public bool IsObject => ElementType.IsPrimitive == false && ElementType.IsEnum == false && ElementType != typeof(string);
+        public bool IsArray => PropertyType.IsArray == true || typeof(IList).IsAssignableFrom(PropertyType) == true;
+        public bool IsObject => PropertyType.IsPrimitive == false && PropertyType.IsEnum == false && PropertyType != typeof(string);
 
         // Constructor
-        protected SerializedElement(string name, Type type)
+        protected SerializedProperty(string name, Type type)
         {
-            this.ElementName = name;
-            this.ElementType = type;
+            this.PropertyName = name;
+            this.PropertyType = type;
         }
 
         // Methods

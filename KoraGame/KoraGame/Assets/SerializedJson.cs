@@ -283,7 +283,7 @@ namespace KoraGame
                 string propertyName = reader.GetString();
 
                 // Get the layout element
-                SerializedElement element = layout?[propertyName];
+                SerializedProperty element = layout?[propertyName];
 
                 // Check for found
                 if (element != null)
@@ -293,7 +293,7 @@ namespace KoraGame
 
                     // Check for reference element
                     // If true, the elements will be added to the lookup tables and data will be bound later
-                    SerializeRefType refType = ReadReferenceInfo(ref reader, element.ElementType, out string refId);
+                    SerializeRefType refType = ReadReferenceInfo(ref reader, element.PropertyType, out string refId);
 
                     // Check for local reference
                     if (refType == SerializeRefType.LocalRef)
@@ -305,13 +305,13 @@ namespace KoraGame
                     else if (refType == SerializeRefType.ExternRef)
                     {
                         // Add reference to external object
-                        context?.AddExternalReference(refId, bind, element.ElementType);
+                        context?.AddExternalReference(refId, bind, element.PropertyType);
                     }
                     // Just deserialize normally
                     else
                     {
                         // Try to read any
-                        bool didRead = ReadAny(context, ref reader, element.ElementType, null, bind, out object value);
+                        bool didRead = ReadAny(context, ref reader, element.PropertyType, null, bind, out object value);
 
                         // Check for any value
                         if (didRead == true && value != null)

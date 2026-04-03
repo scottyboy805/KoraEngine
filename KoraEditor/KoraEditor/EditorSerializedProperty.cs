@@ -1,16 +1,15 @@
 ﻿using KoraGame;
 using System.Collections;
-using System.Runtime.InteropServices.Marshalling;
 using System.Text.RegularExpressions;
 
 namespace KoraEditor
 {
-    public sealed class EditorSerializedElement
+    public sealed class EditorSerializedProperty
     {
         // Private
-        private SerializedElement element;
+        private SerializedProperty property;
         private EditorSerializedLayout root;
-        private List<EditorSerializedElement> childElements;
+        private List<EditorSerializedProperty> childProperties;
         private object[] instances;
 
         // Properties
@@ -20,11 +19,11 @@ namespace KoraEditor
             get
             {
                 // Get the name attribute
-                if (element.HasAttribute<EditorNameAttribute>() == true)
-                    return element.GetAttribute<EditorNameAttribute>().DisplayName;
+                if (property.HasAttribute<EditorNameAttribute>() == true)
+                    return property.GetAttribute<EditorNameAttribute>().DisplayName;
 
                 // Add space before capital letters (except the first one)
-                var result = Regex.Replace(element.ElementName, "(\\B[A-Z])", " $1");
+                var result = Regex.Replace(property.PropertyName, "(\\B[A-Z])", " $1");
 
                 // Capitalize first letter
                 return char.ToUpper(result[0]) + result.Substring(1);
@@ -35,35 +34,35 @@ namespace KoraEditor
             get
             {
                 // Get the tooltip value
-                if (element.HasAttribute<EditorTooltipAttribute>() == true)
-                    return element.GetAttribute<EditorTooltipAttribute>().Tooltip;
+                if (property.HasAttribute<EditorTooltipAttribute>() == true)
+                    return property.GetAttribute<EditorTooltipAttribute>().Tooltip;
 
                 return null;
             }
         }
-        public string ElementName => element.ElementName;
-        public Type ElementType => element.ElementType;
-        public bool IsVisible => element.HasAttribute<EditorHiddenAttribute>() == false;
-        public bool IsReadOnly => element.HasAttribute<EditorReadOnlyAttribute>() == true;
+        public string PropertyName => property.PropertyName;
+        public Type PropertyType => property.PropertyType;
+        public bool IsVisible => property.HasAttribute<EditorHiddenAttribute>() == false;
+        public bool IsReadOnly => property.HasAttribute<EditorReadOnlyAttribute>() == true;
         public bool IsEditingMultiple => instances.Length > 1;
-        public bool IsArray => element.IsArray;
-        public bool IsObject => element.IsObject;
-        public IEnumerable<EditorSerializedElement> ChildElements => childElements != null ? childElements : Array.Empty<EditorSerializedElement>();
-        public IEnumerable<EditorSerializedElement> VisibleChildElements => ChildElements.Where(e => e.IsVisible);
+        public bool IsArray => property.IsArray;
+        public bool IsObject => property.IsObject;
+        public IEnumerable<EditorSerializedProperty> ChildProperties => childProperties != null ? childProperties : Array.Empty<EditorSerializedProperty>();
+        public IEnumerable<EditorSerializedProperty> VisibleChildProperties => ChildProperties.Where(e => e.IsVisible);
 
         // Constructor
-        internal EditorSerializedElement(SerializedElement element, EditorSerializedLayout root, object[] instances)
+        internal EditorSerializedProperty(SerializedProperty property, EditorSerializedLayout root, object[] instances)
         {
-            this.element = element;
+            this.property = property;
             this.root = root;
             this.instances = instances;
 
             // Create child elements
-            if(element.IsArray == true)
+            if(property.IsArray == true)
             {
                 // Get the element
                 IList[] arrayInstances = instances
-                    .Select(e => element.GetValue(e) as IList)
+                    .Select(e => property.GetValue(e) as IList)
                     .ToArray();
 
                 // Get max length
@@ -73,10 +72,10 @@ namespace KoraEditor
                 if (length > 0)
                 {
                     // Create child elements
-                    this.childElements = new List<EditorSerializedElement>(length);
+                    this.childProperties = new List<EditorSerializedProperty>(length);
 
                     // Get element type
-                    Type arrayElementType = SerializedElement.GetArrayElementType(arrayInstances.First());
+                    Type arrayElementType = SerializedProperty.GetArrayElementType(arrayInstances.First());
 
                     // Create all elements
                     for (int i = 0; i < length; i++)
@@ -95,10 +94,10 @@ namespace KoraEditor
                             arrayElementType = firstExplicitArrayElementType;
 
                         // Create the array element item
-                        SerializedElement.SerializedArrayElement arrayElement = new SerializedElement.SerializedArrayElement(arrayElementType, i);
+                        SerializedProperty.SerializedArrayElement arrayElement = new SerializedProperty.SerializedArrayElement(arrayElementType, i);
 
                         // Create all elements
-                        childElements.Add(new EditorSerializedElement(arrayElement, root, arrayElementInstances));
+                        childProperties.Add(new EditorSerializedProperty(arrayElement, root, arrayElementInstances));
                     }
                 }
             }
@@ -117,12 +116,12 @@ namespace KoraEditor
         // Methods
         public override string ToString()
         {
-            return string.Format("Serialize Property ({0}): {1}", ElementName, ElementType);
+            return string.Format("Serialize Property ({0}): {1}", PropertyName, PropertyType);
         }
 
         public ElementEditor CreateEditor()
         {
-            return ElementEditor.ForElements(ElementType, instances);
+            return ElementEditor.ForElements(PropertyType, instances);
         }
 
         public void SetValue<T>(in T value)
@@ -132,13 +131,13 @@ namespace KoraEditor
                 throw new InvalidOperationException("Property is readonly and cannot be modified");
 
             // Check for type
-            if (element.ElementType != typeof(T) && (value != null && element.ElementType != value.GetType()))
-                throw new InvalidOperationException("Cannot set property value as type: " + typeof(T) + ", property is of type: " + element.ElementType);
+            if (property.PropertyType != typeof(T) && (value != null && property.PropertyType != value.GetType()))
+                throw new InvalidOperationException("Cannot set property value as type: " + typeof(T) + ", property is of type: " + property.PropertyType);
 
             // Update all instances
             for (int i = 0; i < instances.Length; i++)
             {
-                element.SetValue(instances[i], value);
+                property.SetValue(instances[i], value);
             }
 
             // Mark as modified
@@ -153,12 +152,12 @@ namespace KoraEditor
         public T GetValue<T>(out bool isMixed)
         {
             // Check for type
-            if (element.ElementType != typeof(T) && typeof(T).IsAssignableFrom(element.ElementType) == false)
-                throw new InvalidOperationException("Cannot get property value as type: " + typeof(T) + ", property is of type: " + element.ElementType);
+            if (property.PropertyType != typeof(T) && typeof(T).IsAssignableFrom(property.PropertyType) == false)
+                throw new InvalidOperationException("Cannot get property value as type: " + typeof(T) + ", property is of type: " + property.PropertyType);
 
             // Store values
             T firstValue = instances[0] != null
-                    ? (T)element.GetValue(instances[0])
+                    ? (T)property.GetValue(instances[0])
                     : default;
             isMixed = false;
 
@@ -171,7 +170,7 @@ namespace KoraEditor
             {
                 // Get value
                 T otherValue = instances[i] != null
-                    ? (T)element.GetValue(instances[i])
+                    ? (T)property.GetValue(instances[i])
                     : default;
 
                 // Check for mixed
@@ -193,7 +192,7 @@ namespace KoraEditor
 
             // Store values
             object firstValue = instances[0] != null
-                    ? element.GetValue(instances[0])
+                    ? property.GetValue(instances[0])
                     : default;
 
             // Check all
@@ -201,7 +200,7 @@ namespace KoraEditor
             {
                 // Get value
                 object otherValue = instances[i] != null
-                    ? element.GetValue(instances[i])
+                    ? property.GetValue(instances[i])
                     : default;
 
                 // Check for mixed
@@ -215,9 +214,9 @@ namespace KoraEditor
             return false;
         }
 
-        public EditorSerializedElement FindChildElement(string name, bool includeHidden = false)
+        public EditorSerializedProperty FindChildProperty(string name, bool includeHidden = false)
         {
-            return childElements.FirstOrDefault(e => e.ElementName == name && e.IsVisible == true || includeHidden == true);
+            return childProperties.FirstOrDefault(e => e.PropertyName == name && e.IsVisible == true || includeHidden == true);
         }
     }
 }

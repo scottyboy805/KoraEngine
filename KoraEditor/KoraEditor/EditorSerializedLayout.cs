@@ -1,4 +1,5 @@
 ﻿using KoraGame;
+using System.Text.RegularExpressions;
 
 namespace KoraEditor
 {
@@ -6,28 +7,39 @@ namespace KoraEditor
     {
         // Private
         private SerializedLayout layout;
-        private List<EditorSerializedElement> elements;
+        private List<EditorSerializedProperty> properties;
         private object[] instances;
-        
+
         // Properties
+        public string DisplayName
+        {
+            get
+            {
+                // Add space before capital letters (except the first one)
+                var result = Regex.Replace(layout.SerializeType.Name, "(\\B[A-Z])", " $1");
+
+                // Capitalize first letter
+                return char.ToUpper(result[0]) + result.Substring(1);
+            }
+        }
         public Type SerializeType => layout.SerializeType;
         public bool IsEditingMultiple => instances.Length > 1;
         public IReadOnlyList<object> EditingInstances => instances;
-        public IEnumerable<EditorSerializedElement> Elements => elements;
-        public IEnumerable<EditorSerializedElement> VisibleElements => elements.Where(e => e.IsVisible);
+        public IEnumerable<EditorSerializedProperty> Properties => properties;
+        public IEnumerable<EditorSerializedProperty> VisibleProperties => properties.Where(e => e.IsVisible);
 
         // Constructor
         public EditorSerializedLayout(Type editInstanceType, object[] instances)
         {
             this.instances = instances;
             this.layout = SerializedLayout.GetSerializeLayout(editInstanceType);
-            this.elements = layout.SerializeElements.Select(e => new EditorSerializedElement(e, this, instances)).ToList();
+            this.properties = layout.SerializeProperties.Select(e => new EditorSerializedProperty(e, this, instances)).ToList();
         }
 
         // Methods
-        public EditorSerializedElement FindElement(string name, bool includeHidden = false)
+        public EditorSerializedProperty FindProperty(string name, bool includeHidden = false)
         {
-            return elements.FirstOrDefault(e => e.ElementName == name && (e.IsVisible == true || includeHidden == true));
+            return properties.FirstOrDefault(e => e.PropertyName == name && (e.IsVisible == true || includeHidden == true));
         }
 
         /// <summary>

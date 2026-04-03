@@ -140,7 +140,7 @@ namespace KoraEditor
                 options |= GuiTreeOptions.NoArrow;
 
             // Display the node
-            if (Gui.BeginTreeNode(node.Name, options, icon) == true)
+            if (Gui.BeginTreeNode(new GuiContent(node.Name, null, icon), options) == true)
             {
                 // Display children
                 foreach(var child in node.Children)

@@ -1,4 +1,5 @@
-﻿using KoraEditor.Element;
+﻿using ImGuiNET;
+using KoraEditor.Element;
 using KoraEditor.UI;
 using KoraGame;
 
@@ -17,10 +18,10 @@ namespace KoraEditor
             base.OnCreate();
 
             // Find components
-            EditorSerializedElement componentsElement = Layout.FindElement("Components", true);
+            EditorSerializedProperty componentsElement = Layout.FindProperty("Components", true);
 
             // Get all children
-            componentElementEditors = componentsElement.ChildElements
+            componentElementEditors = componentsElement.ChildProperties
                 .Select(e => e.CreateEditor())
                 .ToArray();
         }
@@ -36,7 +37,13 @@ namespace KoraEditor
                 foreach(ElementEditor editor in componentElementEditors)
                 {
                     // Draw foldout
-                    bool expanded = Gui.BeginTreeNode(editor.Layout.SerializeType.ToString(), GuiTreeOptions.Framed);
+                    bool expanded = Gui.BeginTreeNode(editor.Layout.DisplayName, GuiTreeOptions.Framed);
+
+                    //Gui.BeginLayout(GuiLayout.Horizontal);
+                    //{
+                    //    Gui.Label("Testing");
+                    //}
+                    //Gui.EndLayout();
 
                     if (expanded == true)
                     {

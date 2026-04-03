@@ -10,12 +10,12 @@ namespace KoraEditor
         private static readonly Dictionary<Type, Type> specificPropertyEditors = new ();  // Edit Type, PropertyEditor Type
         private static readonly List<(Type, Type)> derivedPropertyEditors = new ();       // Edit Type, PropertyEditor Type
 
-        private EditorSerializedElement element;
+        private EditorSerializedProperty element;
         private bool isModified = false;
         private float[] columnSizes = new float[1];
 
         // Properties
-        public EditorSerializedElement Element => element;
+        public EditorSerializedProperty Element => element;
         public float PropertyLabelWidth => Gui.PropertyLableWidth;
         public float PropertyValueWidth => Gui.PropertyValueWidth;
 
@@ -66,14 +66,14 @@ namespace KoraEditor
             this.element?.Layout.SetModified();
         }
 
-        public static PropertyEditor ForElement(EditorSerializedElement element)
+        public static PropertyEditor ForElement(EditorSerializedProperty element)
         {
             // Check for null
             if (element == null)
                 return null;
 
             // Lookup type
-            Type propertyEditorType = GetPropertyEditorType(element.ElementType);
+            Type propertyEditorType = GetPropertyEditorType(element.PropertyType);
 
             // Check for no editor
             if (propertyEditorType == null)

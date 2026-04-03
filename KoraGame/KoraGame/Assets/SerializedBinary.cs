@@ -163,13 +163,13 @@ namespace KoraGame
                 WriteType(context, writer, type);            
 
             // Process all serialize fields
-            foreach(SerializedElement element in layout.SerializeElements)
+            foreach(SerializedProperty element in layout.SerializeProperties)
             {
                 // Get the value
                 object value = element.GetValue(instance);
 
                 // Write value
-                WriteAny(context, writer, element.ElementType, value);
+                WriteAny(context, writer, element.PropertyType, value);
             }
         }
 
@@ -345,13 +345,13 @@ namespace KoraGame
                         SerializedLayout layout = SerializedLayout.GetSerializeLayout(objectType);
 
                         // Process all serialize fields
-                        foreach (SerializedElement element in layout.SerializeElements)
+                        foreach (SerializedProperty element in layout.SerializeProperties)
                         {
                             // Create bind
                             BindElement bind = new(instance, element, parent);
 
                             // Read the object
-                            object value = ReadAny(context, reader, element.ElementType, bind);
+                            object value = ReadAny(context, reader, element.PropertyType, bind);
 
                             // Set the value
                             element.SetValue(instance, value);
