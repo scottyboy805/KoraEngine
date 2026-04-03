@@ -13,7 +13,9 @@ namespace KoraEditor
         // Private
         private string title = "";
         private Vector2F position;
-        private Vector2F size;        
+        private Vector2F size;
+
+        private Vector2F lastSize;
 
         // Properties
         public string Title
@@ -55,7 +57,14 @@ namespace KoraEditor
             {
                 // Update state
                 position = (Vector2F)ImGui.GetWindowPos();
-                size = (Vector2F)ImGui.GetWindowSize();
+                size = (Vector2F)ImGui.GetContentRegionAvail();//.GetWindowSize();
+
+                // Check for changed
+                if(size != lastSize)
+                {
+                    lastSize = size;
+                    OnResize();
+                }
 
                 OnGui();
             }
@@ -87,6 +96,7 @@ namespace KoraEditor
 
         protected virtual void OnOpen() { }
         protected virtual void OnClose() { }
+        protected virtual void OnResize() { }
 
         protected virtual void OnGui()
         {

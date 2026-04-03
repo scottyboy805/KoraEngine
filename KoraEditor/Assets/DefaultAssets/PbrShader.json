@@ -1,0 +1,52 @@
+{
+	"Name": "Pbr",
+	"Format": 2,
+	"CullMode": 2,
+	"Vertex": 
+	{
+		"Source": { "$ref": "pbr.vert.spv" },
+		"EntryPoint": "main",
+		"UniformCount": 2,
+		"SamplerCount": 0
+	},
+	"Fragment":
+	{
+		"Source": { "$ref": "pbr.frag.spv" },
+		"EntryPoint": "main",
+		"UniformCount": 0,
+		"SamplerCount": 5
+	},
+	"Properties":
+	[
+		{
+			"Name": "Texture",
+			"Location": 0,
+			"Stage": 0,
+			"Type": 2
+		},
+		{
+			"Name": "Normal",
+			"Location": 1,
+			"Stage": 0,
+			"Type": 2
+		},
+		{
+			"Name": "Metallic",
+			"Location": 2,
+			"Stage": 0,
+			"Type": 2
+		},
+		{
+			"Name": "Roughness",
+			"Location": 3,
+			"Stage": 0,
+			"Type": 2
+		},
+		{
+			"Name": "Occlusion",
+			"Location": 4,
+			"Stage": 0,
+			"Type": 2
+		}
+	]
+}

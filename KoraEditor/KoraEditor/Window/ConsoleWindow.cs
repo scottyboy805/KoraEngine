@@ -60,7 +60,7 @@ namespace KoraEditor
 
         private void OnTopBarGui()
         {
-            Gui.BeginLayout(GuiLayout.Horizontal);
+            Gui.BeginLayout(GuiLayoutOptions.Horizontal);
             {
                 // Clear button
                 Gui.Button(new GuiContent("Clear", "Clear all console messages"), Clear);

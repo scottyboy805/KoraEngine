@@ -1,9 +1,6 @@
 ﻿using KoraEditor.UI;
 using KoraGame;
 using KoraGame.Graphics;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace KoraEditor
 {
@@ -32,7 +29,7 @@ namespace KoraEditor
             Texture icon = folderNormalIcon;
 
             // Display folder path
-            Gui.BeginLayout(GuiLayout.Horizontal);
+            Gui.BeginLayout(GuiLayoutOptions.Horizontal);
             {
                 // Icon
                 Gui.Image(icon, new Vector2F(32, 32));

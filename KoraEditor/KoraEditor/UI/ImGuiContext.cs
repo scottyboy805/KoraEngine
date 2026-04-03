@@ -21,7 +21,7 @@ namespace KoraEditor.UI
         private float fontSize = 18;
 
         // Public
-        public const float DefaultUIScale = 1.75f;                              // Global scale of UI elements
+        public const float DefaultUIScale = 1.5f;                              // Global scale of UI elements
         public const float UISharpen = 3f;                                      // Render oversize and then reduce to create crisper image
 
         public const uint DefaultVertexBufferSize = sizeof(float) * 4098;
@@ -182,6 +182,9 @@ namespace KoraEditor.UI
 
         public void EndFrame()
         {
+            // End the frame
+            Gui.EndFrame();
+
             ImGui.Render();
             ImDrawDataPtr drawPtr = ImGui.GetDrawData();
 

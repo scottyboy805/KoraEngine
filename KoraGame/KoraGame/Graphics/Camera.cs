@@ -1,12 +1,18 @@
 ﻿
+using System.Runtime.Serialization;
+
 namespace KoraGame.Graphics
 {
     public sealed class Camera : Component
     {
         // Private
+        [DataMember(Name = "Clear Color")]
         private Color clearColor = Color.CornflowerBlue;
+        [DataMember(Name = "Field Of View")]
         private float fieldOfView = 60f;
+        [DataMember(Name = "Near Plane")]
         private float nearPlane = 0.01f;
+        [DataMember(Name = "Far Plane")]
         private float farPlane = 1000f;
 
         private readonly GraphicsBatch renderBatch = new(256);

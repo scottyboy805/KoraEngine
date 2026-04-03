@@ -12,18 +12,34 @@ namespace KoraGame
 
     public unsafe readonly struct DisplayMode
     {
-        // Internal
-        internal readonly SDL_DisplayMode* sdlMode;
-
         // Properties
-        public uint Width => (uint)sdlMode->w;
-        public uint Height => (uint)sdlMode->h;
-        public float RefreshRate => sdlMode->refresh_rate;
+        public readonly uint Width;
+        public readonly uint Height;
+        public readonly float RefreshRate;
 
         // Constructor
+        public DisplayMode(uint width, uint height, float refreshRate = 0f)
+        {
+            this.Width = width;
+            this.Height = height;
+            this.RefreshRate = refreshRate;
+        }
+
         internal DisplayMode(SDL_DisplayMode* sdlMode)
         {
-            this.sdlMode = sdlMode;
+            //this.sdlMode = sdlMode;
+            this.Width = (uint)sdlMode->w;
+            this.Height = (uint)sdlMode->h;
+            this.RefreshRate = sdlMode->refresh_rate;
+        }
+
+        // Methods
+        public override string ToString()
+        {
+            if(RefreshRate > 0)
+                return $"{Width} X {Height} @ {RefreshRate}hz";
+
+            return $"{Width} X {Height}";
         }
     }
 
@@ -117,9 +133,13 @@ namespace KoraGame
 
         public void Resize(DisplayMode mode)
         {
+            // Get display mod
+            SDL_DisplayMode sdlDisplayMode = default;
+            SDL3.SDL_GetClosestFullscreenDisplayMode(0, (int)mode.Width, (int)mode.Height, mode.RefreshRate, false, &sdlDisplayMode);
+
             // Make full screen
             SDL3.SDL_SetWindowFullscreen(sdlWindow, true);
-            SDL3.SDL_SetWindowFullscreenMode(sdlWindow, mode.sdlMode);
+            SDL3.SDL_SetWindowFullscreenMode(sdlWindow, &sdlDisplayMode);
 
             Debug.Log($"Resize full screen: '{mode.Width}, {mode.Height}, {mode.RefreshRate}'", LogFilter.Graphics);
         }

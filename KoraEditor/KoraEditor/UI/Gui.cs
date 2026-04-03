@@ -1,16 +1,24 @@
 ﻿using ImGuiNET;
 using KoraGame;
-using KoraGame.Graphics;
 using System.Numerics;
 
 namespace KoraEditor.UI
 {
-    public enum GuiLayout
+    [Flags]
+    public enum GuiLayoutOptions
     {
-        Vertical,
-        Horizontal,
+        None = 0,
+        Border = 1,
+        AutoSizeX = 0x10,
+        AutoSizeY = 0x20,
+        Frame = 0x80,
+        Vertical = 0x200,
+        Horizontal = 0x400,
+        Continue = 0x800,
+        Empty = 0x1600,
     }
 
+    [Flags]
     public enum GuiTreeOptions
     {
         None = 0,
@@ -23,6 +31,15 @@ namespace KoraEditor.UI
     public static class Gui
     {
         // Type
+        [Flags]
+        private enum GuiLayoutKind
+        {
+            Vertical = 1,
+            Horizontal = 2,
+
+            Child = 1 << 24,
+        }
+
         private struct GuiStyle
         {
             // Public
@@ -33,10 +50,15 @@ namespace KoraEditor.UI
 
         // Private
         private static int idCounter = 1;
-        private static Stack<GuiLayout> layouts = new();
+        private static Stack<GuiLayoutKind> layouts = new();
         private static Stack<GuiStyle> styles = new();
 
         // Properties
+        public static Vector2F Position
+        {
+            get => (Vector2F)ImGui.GetCursorPos();
+            set => ImGui.SetCursorPos((Vector2)value);
+        }
         public static Vector2F AvailableSize => (Vector2F)ImGui.GetContentRegionAvail();
         public static float PropertyLableWidth => AvailableSize.X * 0.4f;
         public static float PropertyValueWidth => AvailableSize.X * 0.6f;
@@ -45,6 +67,12 @@ namespace KoraEditor.UI
         internal static void NewFrame()
         {
             idCounter = 1;
+        }
+
+        internal static void EndFrame()
+        {
+            if (layouts.Count > 0)
+                throw new InvalidOperationException("Expected closing Gui layout: " + layouts.Peek());
         }
 
         public static void ItemWidth(float width)
@@ -65,6 +93,20 @@ namespace KoraEditor.UI
                 ActiveColor = active
             });
         }
+
+        #region PrimitiveShapes
+        public static void DrawRectangle(Vector2F position, Vector2F size, Color color)
+        {
+            // Get the draw list
+            ImDrawListPtr drawList = ImGui.GetWindowDrawList();
+
+            // Get the window pos
+            position += (Vector2F)ImGui.GetCursorPos();
+
+            // Add rect
+            drawList.AddRectFilled(((Vector2)position), (Vector2)(position + size), ((Color32)color).RGBA);
+        }
+        #endregion
 
         public static void Label(GuiContent content)
         {
@@ -252,17 +294,35 @@ namespace KoraEditor.UI
             EndControl(default);
         }
 
-        public static void BeginLayout(GuiLayout layout = GuiLayout.Vertical, Vector2F size = default, string id = null)
+        public static void BeginLayout(GuiLayoutOptions options = 0, Vector2F size = default, string id = null)
         {
+            GuiLayoutKind kind = (options & GuiLayoutOptions.Horizontal) != 0
+                ? GuiLayoutKind.Horizontal : GuiLayoutKind.Vertical;
+
+            // Check for child
+            if ((options & GuiLayoutOptions.Empty) == 0)
+                kind |= GuiLayoutKind.Child;
+
+            // Check for continue
+            if ((options & GuiLayoutOptions.Continue) != 0)
+                ImGui.SameLine();
+
             // Push layout
-            layouts.Push(layout);
+            layouts.Push(kind);
+
+            // Don't pass extra flags to imgui
+            options &= ~(GuiLayoutOptions.Vertical | GuiLayoutOptions.Horizontal | GuiLayoutOptions.Continue | GuiLayoutOptions.Empty);
 
             // Get layout flags
-            ImGuiChildFlags flags = /*ImGuiChildFlags.AutoResizeX | */ImGuiChildFlags.AutoResizeY | ImGuiChildFlags.NavFlattened;
+            ImGuiChildFlags flags = (ImGuiChildFlags)options | ImGuiChildFlags.AutoResizeY | ImGuiChildFlags.NavFlattened;
 
-            ImGui.BeginChild(string.IsNullOrEmpty(id) == true
-                ? (idCounter++).ToString()
-                : id, (Vector2)size, flags);
+            // Start a child?
+            if ((kind & GuiLayoutKind.Child) != 0)
+            {
+                ImGui.BeginChild(string.IsNullOrEmpty(id) == true
+                    ? (idCounter++).ToString()
+                    : id, (Vector2)size, flags);
+            }
         }
 
         public static void EndLayout()
@@ -271,8 +331,11 @@ namespace KoraEditor.UI
             if (layouts.Count == 0)
                 throw new InvalidOperationException("Attempted to end too many layouts");
 
-            ImGui.EndChild();
-            layouts.Pop();
+            GuiLayoutKind kind = layouts.Pop();
+
+            // End child if it was started
+            if((kind & GuiLayoutKind.Child) != 0)
+                ImGui.EndChild();            
         }
 
         public static void BeginTableLayout(int columns, IList<float> columnWidths = null, string id = null)
@@ -382,7 +445,7 @@ namespace KoraEditor.UI
         private static void BeginControl(in GuiContent content, ImGuiCol? normal, ImGuiCol? hover, ImGuiCol? active)
         {
             // Check layout
-            if(layouts.Count > 0 && layouts.Peek() == GuiLayout.Horizontal)
+            if(layouts.Count > 0 && (layouts.Peek() & GuiLayoutKind.Horizontal) != 0)
                 ImGui.SameLine();
 
             // Get id

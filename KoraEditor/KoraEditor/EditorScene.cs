@@ -1,5 +1,6 @@
 ﻿using KoraGame;
 using KoraGame.Graphics;
+using KoraGame.Physics;
 
 namespace KoraEditor
 {
@@ -11,6 +12,7 @@ namespace KoraEditor
         public event Action<GameObject> OnGameObjectDestroyed;
 
         // Properties
+        public static Editor EditorInstance => Editor.EditorInstance;
         public static EditorScene EditorSceneInstance => Editor.EditorInstance?.EditorScene;
 
         // Constructor
@@ -20,6 +22,26 @@ namespace KoraEditor
         }
 
         // Methods
+        public async void CreateDefault()
+        {
+            // Load assets
+            Material mat = await EditorInstance.EditorAssets.LoadAsync<Material>("DefaultAssets/PbrMaterial.json");
+            GameObject cube = await EditorInstance.EditorAssets.LoadAsync<GameObject>("DefaultAssets/Cube.fbx");
+
+            // Setup cube
+            cube.GetComponent<MeshRenderer>(true).SetMaterial(mat, 0);
+            cube.AddComponent<BoxCollider>();
+            cube.LocalPosition = new Vector3F(0f, 5f, -10f);
+
+            // Create the camera
+            GameObject cam = CreateCameraObject();            
+            cam.Scene = this;
+            cam.SetActive(true);
+
+            cube.Scene = this;
+            cube.SetActive(true);
+        }
+
         public GameObject CreateEmptyObject(string name = null)
         {
             // Generate name
@@ -28,10 +50,9 @@ namespace KoraEditor
 
             // Create object
             GameObject go = new GameObject(name, false);
-            go.AddComponent<MeshRenderer>();
 
             // Add to scene
-            gameObjects.Add(go);
+            go.Scene = this;
 
             // Select the new object
             Editor.EditorInstance?.Selection.Select(go);
@@ -44,6 +65,19 @@ namespace KoraEditor
             Editor.DoEvent(OnGameObjectCreated, go);
 
             return go;
+        }
+
+        public GameObject CreateCameraObject(string name = "Camera")
+        {
+            // Create object
+            GameObject cam = CreateEmptyObject(name);
+
+            // Add component
+            cam.AddComponent<Camera>();
+
+            // Do event
+            Editor.DoEvent(OnGameObjectModified, cam);
+            return cam;
         }
 
         public void SetDirty()

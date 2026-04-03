@@ -22,24 +22,32 @@ namespace KoraEditor
 
         // Private
         private Project project = null;
-        private Selection selection = new();
+        private Selection selection = new();        
         private AssetDatabase assetDatabase = null;
+        private Screen editorScreen = null;
+        private GraphicsDevice editorGraphics = null;
         private EditorScene editorScene = null;
 
         private AssetProvider editorAssets = null;
         private ImGuiContext gui = null;
         private Menu menuBar = new();
+        private bool isPlaying = false;
 
         // Properties
         public Project Project => project;
         public Selection Selection => selection;
         public AssetDatabase AssetDatabase => assetDatabase;
+        public Screen EditorScreen => editorScreen;
+        public GraphicsDevice GraphicsDevice => editorGraphics;
         public EditorScene EditorScene => editorScene;
         public AssetProvider EditorAssets => editorAssets;
         internal ImGuiContext Gui => gui;
 
         // Properties
         internal static Editor EditorInstance => Instance as Editor;
+
+        public override bool IsEditor => true;
+        public override bool IsPlaying => isPlaying;
 
         public string EditorBasePath
         {
@@ -70,38 +78,40 @@ namespace KoraEditor
         {
             base.DoInitialize();
 
-
-
             // Create scripting
             Debug.Log("Initialize scripting", LogFilter.Script);
             this.scriptable = new ScriptableProvider();
 
             // Create the screen
             Debug.Log("Initialize graphics", LogFilter.Graphics);
-            this.screen = new Screen("KoraEditor", 1920, 1080, false);
+            this.editorScreen = new Screen("KoraEditor", 1920, 1080, false);
 
-            Debug.Log($"Use screen resolution: '{screen.Width} x {screen.Height}', FullScreen = '{screen.Fullscreen}'", LogFilter.Graphics);
+            Debug.Log($"Use screen resolution: '{editorScreen.Width} x {editorScreen.Height}', FullScreen = '{editorScreen.Fullscreen}'", LogFilter.Graphics);
 
             // Create graphics            
-            this.graphics = new GraphicsDevice(this.screen);
+            this.editorGraphics = new GraphicsDevice(this.editorScreen);
 
-            Debug.Log($"Use graphics API: '{graphics.GetDeviceDriverName()}'", LogFilter.Graphics);
+            Debug.Log($"Use graphics API: '{editorGraphics.GetDeviceDriverName()}'", LogFilter.Graphics);
 
             // Create assets
             Debug.Log($"Initialize assets", LogFilter.Assets);
-            this.editorAssets = new AssetProvider(scriptable, graphics, EditorAssetsPath, false);
+            this.editorAssets = new AssetProvider(scriptable, editorGraphics, EditorAssetsPath, false);
 
             Debug.Log($"Use assets directory: '{editorAssets.AssetDirectory}'", LogFilter.Assets);
 
             // Ensure SDL text input is enabled so we receive SDL_TEXTINPUT events
             unsafe
             {
-                SDL3.SDL_StartTextInput(screen.sdlWindow);
+                SDL3.SDL_StartTextInput(editorScreen.sdlWindow);
             }
+
+            // Initialize the game layer
+            this.assets = assetDatabase;
+            this.graphics = editorGraphics;
 
             // Init gui
             gui = new ImGuiContext();
-            gui.Initialize(graphics, editorAssets);
+            gui.Initialize(editorGraphics, editorAssets);
 
 
             // Init menu
@@ -120,7 +130,7 @@ namespace KoraEditor
             AssetsWindow.Open();
             HierarchyWindow.Open();
             PropertiesWindow.Open();
-
+            GameWindow.Open();
 
             
 
@@ -389,7 +399,7 @@ namespace KoraEditor
                 NewScene();
 
             // Update title
-            Screen.Title = $"KoraEditor ({project.Name})";
+            EditorScreen.Title = $"KoraEditor ({project.Name})";
             
             // Do events
             DoEvent(OnProjectChanged);
@@ -409,7 +419,7 @@ namespace KoraEditor
                 assetDatabase = null;
 
                 // Update title
-                Screen.Title = "Kora Editor";
+                EditorScreen.Title = "Kora Editor";
 
                 // Do events
                 DoEvent(OnProjectChanged);
@@ -421,6 +431,9 @@ namespace KoraEditor
         {
             CloseScene();
             editorScene = new EditorScene("New Scene");
+
+            editorScene.CreateDefault();
+            editorScene.Activate();
 
             // Do events
             DoEvent(OnScenesChanged);

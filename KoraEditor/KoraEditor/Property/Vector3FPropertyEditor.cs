@@ -35,7 +35,7 @@ namespace KoraEditor.Property
 
             Gui.BeginTableLayout(3, columnSizes);
             {
-                Gui.BeginLayout(GuiLayout.Horizontal);
+                Gui.BeginLayout(GuiLayoutOptions.Horizontal);
                 {
                     // X value
                     Gui.NextItemColor(xNormal, xHover, xNormal);
@@ -53,7 +53,7 @@ namespace KoraEditor.Property
 
                 Gui.ColumnSeparator();
 
-                Gui.BeginLayout(GuiLayout.Horizontal);
+                Gui.BeginLayout(GuiLayoutOptions.Horizontal);
                 {
                     // Y value
                     Gui.NextItemColor(yNormal, yHover, yNormal);
@@ -71,7 +71,7 @@ namespace KoraEditor.Property
 
                 Gui.ColumnSeparator();
 
-                Gui.BeginLayout(GuiLayout.Horizontal);
+                Gui.BeginLayout(GuiLayoutOptions.Horizontal);
                 {
                     // Z value
                     Gui.NextItemColor(zNormal, zHover, zNormal);

@@ -1,0 +1,4 @@
+{
+	"Name": "Default Material",
+	"Shader": { "$ref": "StandardShader.json" }
+}

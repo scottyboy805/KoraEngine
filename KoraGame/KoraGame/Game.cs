@@ -44,7 +44,9 @@ namespace KoraGame
         public PhysicsSimulation Physics => physics;
         public ScriptableProvider Scriptable => scriptable;
         public Scene Scene => scene;
-        
+
+        public virtual bool IsEditor => false;
+        public virtual bool IsPlaying => true;        
 
         // Constructor
         internal Game()

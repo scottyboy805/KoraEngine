@@ -1,5 +1,6 @@
 ﻿
 using KoraGame;
+using KoraGame.Graphics;
 using KoraPipeline;
 
 namespace KoraEditor
@@ -15,6 +16,8 @@ namespace KoraEditor
         public Selection Selection => editor?.Selection;
         public AssetDatabase AssetDatabase => editor?.AssetDatabase;
         public Scene EditorScene => editor?.EditorScene;
+        public Screen EditorScreen => editor?.EditorScreen;
+        public GraphicsDevice EditorGraphics => editor?.Graphics;
         public AssetProvider EditorAssets => editor?.EditorAssets;
 
         // Constructor

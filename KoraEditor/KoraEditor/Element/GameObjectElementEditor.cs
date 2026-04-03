@@ -39,15 +39,15 @@ namespace KoraEditor
                     // Draw foldout
                     bool expanded = Gui.BeginTreeNode(editor.Layout.DisplayName, GuiTreeOptions.Framed);
 
-                    //Gui.BeginLayout(GuiLayout.Horizontal);
-                    //{
-                    //    Gui.Label("Testing");
-                    //}
-                    //Gui.EndLayout();
+                    Gui.BeginLayout(GuiLayoutOptions.Horizontal | GuiLayoutOptions.Continue | GuiLayoutOptions.Empty);
+                    {
+                        Gui.Label("Testing");
+                    }
+                    Gui.EndLayout();
 
                     if (expanded == true)
                     {
-                        Gui.Label("Componeont: " + editor.Layout.SerializeType);
+                        // Draw the gui
                         editor.DrawEditorGui();
 
                         Gui.EndTreeNode();

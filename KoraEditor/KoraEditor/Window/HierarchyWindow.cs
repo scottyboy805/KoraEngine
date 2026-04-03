@@ -38,7 +38,7 @@ namespace KoraEditor
 
         private void OnHierarchyHeaderGui()
         {
-            Gui.BeginLayout(GuiLayout.Horizontal);
+            Gui.BeginLayout(GuiLayoutOptions.Horizontal);
             {
                 // New scene button
                 Gui.ImageButton(plusIcon, new Vector2F(32, 32), OnNewScene);

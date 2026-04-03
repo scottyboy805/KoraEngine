@@ -66,7 +66,7 @@ namespace KoraEditor
                     .ToArray();
 
                 // Get max length
-                int length = arrayInstances.Max(e => e.Count);
+                int length = arrayInstances.Max(e => e != null ? e.Count : 0);
 
                 // Check for any
                 if (length > 0)

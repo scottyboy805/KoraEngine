@@ -91,7 +91,7 @@ namespace KoraEditor
 
         private void OnProjectViewHeaderGui()
         {
-            Gui.BeginLayout(GuiLayout.Horizontal);
+            Gui.BeginLayout(GuiLayoutOptions.Horizontal);
             {
                 Gui.Button("Path A", () => { });
                 Gui.Button("Path B", () => { });
