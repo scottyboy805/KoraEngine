@@ -12,7 +12,7 @@ namespace KoraEditor
         protected override void OnCreate()
         {
             // Get initial value
-            intValue = Element.GetValue<int>();
+            intValue = Property.GetValue<int>();
         }
 
         protected override void OnValueGui()
@@ -20,7 +20,7 @@ namespace KoraEditor
             if(Gui.InputNumber(ref intValue) == true)
             {
                 // Update value
-                Element.SetValue(intValue);
+                Property.SetValue(intValue);
 
                 // Mark modified
                 SetModified();

@@ -453,7 +453,7 @@ namespace KoraEditor.UI
                 onSelect();
 
             // Image
-            if(content.Icon != null)
+            if (content.Icon != null)
             {
                 float iconSize = (options & GuiTreeOptions.Framed) != 0
                     ? 32f : 24f;
@@ -467,6 +467,7 @@ namespace KoraEditor.UI
             ImGui.SameLine();
             Label(content);
             EndControl(content);
+
             return expanded;
         }
 

@@ -12,7 +12,7 @@ namespace KoraEditor
         protected override void OnCreate()
         {
             // Try to get bool value
-            boolValue = Element.GetValue<bool>();
+            boolValue = Property.GetValue<bool>();
         }
 
         protected override void OnValueGui()
@@ -20,7 +20,7 @@ namespace KoraEditor
             if (Gui.Toggle(ref boolValue) == true)
             {
                 // Set value
-                Element.SetValue(boolValue);
+                Property.SetValue(boolValue);
 
                 // Set modified
                 SetModified();

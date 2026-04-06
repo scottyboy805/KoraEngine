@@ -7,23 +7,49 @@ namespace KoraEditor
     {
         // Private
         private float floatValue;
+        private bool useSlider;
 
         // Methods
         protected override void OnCreate()
         {
             // Get initial value
-            floatValue = Element.GetValue<float>();
+            floatValue = Property.GetValue<float>();
+
+            // Check for slider
+            useSlider = Property.RangeValue != null;
         }
 
         protected override void OnValueGui()
         {
-            if (Gui.InputNumber(ref floatValue) == true)
+            if (useSlider == true)
             {
-                // Update value
-                Element.SetValue(floatValue);
+                if (Gui.Slider(ref floatValue, Property.RangeValue.Value.Item1, Property.RangeValue.Value.Item2) == true)
+                {
+                    // Update value
+                    Property.SetValue(floatValue);
 
-                // Mark modified
-                SetModified();
+                    // Mark modified
+                    SetModified();
+                }
+            }
+            else
+            {
+                if (Gui.InputNumber(ref floatValue) == true)
+                {
+                    // Validate min
+                    if (Property.MinValue != null && floatValue < Property.MinValue.Value)
+                        floatValue = Property.MinValue.Value;
+
+                    // Validate max
+                    if (Property.MaxValue != null && floatValue > Property.MaxValue.Value)
+                        floatValue = Property.MaxValue.Value;
+
+                    // Update value
+                    Property.SetValue(floatValue);
+
+                    // Mark modified
+                    SetModified();
+                }
             }
         }
     }

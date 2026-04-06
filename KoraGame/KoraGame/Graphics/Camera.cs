@@ -10,8 +10,10 @@ namespace KoraGame.Graphics
         [DataMember(Name = "Clear Color")]
         private Color clearColor = Color.CornflowerBlue;
         [DataMember(Name = "Field Of View")]
+        [EditorRange(1f, 180f)]
         private float fieldOfView = 60f;
         [DataMember(Name = "Near Plane")]
+        [EditorMin(0.01f)]
         private float nearPlane = 0.01f;
         [DataMember(Name = "Far Plane")]
         private float farPlane = 1000f;

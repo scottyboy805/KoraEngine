@@ -12,12 +12,15 @@ namespace KoraEditor
         private Texture folderEmptyIcon;
 
         private EditorSerializedProperty pathElement;
+        private string folderPath = "";
+        private int subfolderCount = 0;
 
         // Methods
         protected async override void OnCreate()
         {
             // Get the folder
             pathElement = Layout.FindProperty(nameof(EditorFolder.FolderPath));
+            folderPath = pathElement.GetValue<string>();
 
             // Load icons
             folderNormalIcon = await EditorAssets.LoadAsync<Texture>("Icon/FolderNormal.png");
@@ -36,7 +39,7 @@ namespace KoraEditor
                 Gui.Image(icon, new Vector2F(32, 32));
 
                 // Folder name
-                Gui.Label(pathElement.GetValue<string>());
+                Gui.Label(folderPath);
             }
             Gui.EndLayout();
         }

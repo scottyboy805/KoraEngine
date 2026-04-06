@@ -47,6 +47,9 @@ namespace KoraEditor
         public bool IsEditingMultiple => instances.Length > 1;
         public bool IsArray => property.IsArray;
         public bool IsObject => property.IsObject;
+        public float? MinValue => property.HasAttribute<EditorMinAttribute>() == true ? property.GetAttribute<EditorMinAttribute>().Min : null;
+        public float? MaxValue => property.HasAttribute<EditorMaxAttribute>() == true ? property.GetAttribute<EditorMaxAttribute>().Max : null;
+        public (float, float)? RangeValue => property.HasAttribute<EditorRangeAttribute>() == true ? property.GetAttribute<EditorRangeAttribute>().Range : null;
         public IEnumerable<EditorSerializedProperty> ChildProperties => childProperties != null ? childProperties : Array.Empty<EditorSerializedProperty>();
         public IEnumerable<EditorSerializedProperty> VisibleChildProperties => ChildProperties.Where(e => e.IsVisible);
 

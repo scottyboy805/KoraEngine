@@ -63,7 +63,6 @@ namespace KoraEditor
 
         protected override void OnGui()
         {
-            //OnProjectViewHeaderGui();
             // Display preview area
             Gui.BeginTableLayout(1);
             {
@@ -156,15 +155,19 @@ namespace KoraEditor
 
             GuiTreeOptions options = 0;
 
-            if (isFolder == false)
+            // Check for children
+            if (node.Children.Count == 0)
                 options |= GuiTreeOptions.NoArrow;
+
+            // Check for selected
+            if (Selection.GetSelected<EditorFolder>().Any(f => f.FolderPath == node.Path) == true)
+                options |= GuiTreeOptions.Selected;
 
             // Display the node
             if (Gui.BeginTreeNode(new GuiContent(node.Name, null, icon), options, () =>
             {
                 // Select the folder
                 Selection.Select(new EditorFolder(node.Path));
-                Debug.Log("Path = " + node.Path);
             }) == true)
             {
                 // Display children
@@ -182,7 +185,6 @@ namespace KoraEditor
             RebuildAssetTree();
         }
 
-
         private void RebuildAssetTree()
         {
             // Clear sub nodes
@@ -193,73 +195,10 @@ namespace KoraEditor
                 return;
 
             // Find all folders
-            //foreach (string folder in AssetDatabase.SearchFolders())
-            //{
-            //    RebuildAssetTreeNode(folder, rootAssetNode);
-            //}
             RebuildAssetTreeNode("", rootAssetNode);
-            return;
 
-            // Search in folder
-            IEnumerable<string> assetGuids = AssetDatabase.SearchAssets(null, null, SearchOption.AllDirectories);
-
-            // Process all assets
-            foreach (string assetGuid in assetGuids)
-            {
-                // Get the asset path
-                string assetPath = AssetDatabase.GetAssetPath(assetGuid);
-
-                // Skip invalid
-                if (string.IsNullOrEmpty(assetPath))
-                    continue;
-
-                // Split into parts
-                string[] parts = assetPath.Split(new[] { '/' }, StringSplitOptions.RemoveEmptyEntries);
-
-                AssetNode parent = rootAssetNode;
-
-                for (int i = 0; i < parts.Length; i++)
-                {
-                    string part = parts[i];
-                    // Intermediate parts are folders. The last part is a folder only if AssetDatabase reports it as such.
-                    bool isFolder = (i < parts.Length - 1);
-
-                    // Try to find existing child
-                    AssetNode child = parent.Children.FirstOrDefault(c => string.Equals(c.Name, part, StringComparison.OrdinalIgnoreCase)
-                        && c.IsFolder == isFolder);
-
-                    // Create if missing
-                    if (child == null)
-                    {
-                        string path = "";
-                        for(int j = 0; j < i; j++)
-                        {
-                            path += parts[j];
-                            if(j < i - 1) path += "/";
-                        }    
-
-                        child = new AssetNode { Name = part, Path = path, IsFolder = isFolder };
-                        parent.Children.Add(child);
-                    }
-
-                    parent = child;
-                }
-            }
-
-            // Sort children so folders come first, then files, both alphabetically
-            void SortNodes(AssetNode node)
-            {
-                node.Children.Sort((a, b) =>
-                {
-                    if (a.IsFolder != b.IsFolder) return a.IsFolder ? -1 : 1;
-                    return string.Compare(a.Name, b.Name, StringComparison.OrdinalIgnoreCase);
-                });
-
-                foreach (var c in node.Children)
-                    SortNodes(c);
-            }
-
-            SortNodes(rootAssetNode);
+            // Sort the node
+            SortAssetTreeNodes(rootAssetNode);
         }
 
         private void RebuildAssetTreeNode(string searchPath, AssetNode parent)
@@ -305,6 +244,18 @@ namespace KoraEditor
                 // Add the node
                 parent.Children.Add(leaf);
             }
+        }
+
+        private void SortAssetTreeNodes(AssetNode node)
+        {
+            node.Children.Sort((a, b) =>
+            {
+                if (a.IsFolder != b.IsFolder) return a.IsFolder ? -1 : 1;
+                return string.Compare(a.Name, b.Name, StringComparison.OrdinalIgnoreCase);
+            });
+
+            foreach (var c in node.Children)
+                SortAssetTreeNodes(c);
         }
 
         [Menu("Window/Assets")]

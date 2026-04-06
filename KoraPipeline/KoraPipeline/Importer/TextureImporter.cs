@@ -3,6 +3,7 @@ using BCnEncoder.Shared;
 using KoraGame.Assets;
 using KoraGame.Graphics;
 using StbImageSharp;
+using System.Runtime.Serialization;
 
 namespace KoraPipeline.Importer
 {
@@ -13,8 +14,11 @@ namespace KoraPipeline.Importer
         private ImageResult image;
 
         // Public
+        [DataMember]
         public bool GenerateMipMaps = true;
+        [DataMember]
         public int MipMapLevels = -1;
+        [DataMember]
         public CompressionQuality Quality = CompressionQuality.Balanced;
 
         // Methods

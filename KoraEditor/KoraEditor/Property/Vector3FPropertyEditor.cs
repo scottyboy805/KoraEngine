@@ -25,7 +25,7 @@ namespace KoraEditor.Property
         protected override void OnCreate()
         {
             // Try to get vector value
-            vectorValue = Element.GetValue<Vector3F>();
+            vectorValue = Property.GetValue<Vector3F>();
         }
 
         protected override void OnValueGui()
@@ -43,7 +43,7 @@ namespace KoraEditor.Property
                     if (Gui.InputNumber(ref vectorValue.X) == true)
                     {
                         // Set value
-                        Element.SetValue(vectorValue);
+                        Property.SetValue(vectorValue);
 
                         // Set modified
                         SetModified();
@@ -61,7 +61,7 @@ namespace KoraEditor.Property
                     if (Gui.InputNumber(ref vectorValue.Y) == true)
                     {
                         // Set value
-                        Element.SetValue(vectorValue);
+                        Property.SetValue(vectorValue);
 
                         // Set modified
                         SetModified();
@@ -79,7 +79,7 @@ namespace KoraEditor.Property
                     if (Gui.InputNumber(ref vectorValue.Z) == true)
                     {
                         // Set value
-                        Element.SetValue(vectorValue);
+                        Property.SetValue(vectorValue);
 
                         // Set modified
                         SetModified();
@@ -94,7 +94,7 @@ namespace KoraEditor.Property
         {
             // Apply modify
             vectorValue.X = defaultValue.X;
-            Element.SetValue(vectorValue);
+            Property.SetValue(vectorValue);
 
             // Set dirty
             SetModified();
@@ -104,7 +104,7 @@ namespace KoraEditor.Property
         {
             // Apply modify
             vectorValue.Y = defaultValue.Y;
-            Element.SetValue(vectorValue);
+            Property.SetValue(vectorValue);
 
             // Set dirty
             SetModified();
@@ -114,7 +114,7 @@ namespace KoraEditor.Property
         {
             // Apply modify
             vectorValue.Z = defaultValue.Z;
-            Element.SetValue(vectorValue);
+            Property.SetValue(vectorValue);
 
             // Set dirty
             SetModified();

@@ -12,7 +12,7 @@ namespace KoraEditor
         protected override void OnCreate()
         {
             // Try to get string
-            stringValue = Element.GetValue<string>(out bool isMixed);
+            stringValue = Property.GetValue<string>(out bool isMixed);
 
             // Check for mixed
             if (isMixed == true)
@@ -24,7 +24,7 @@ namespace KoraEditor
             if (Gui.Input(ref stringValue) == true)
             {
                 // Set value
-                Element.SetValue(stringValue);
+                Property.SetValue(stringValue);
 
                 // Set modified
                 SetModified();

@@ -74,6 +74,9 @@ namespace KoraGame
         public readonly float Min;
         public readonly float Max;
 
+        // Properties
+        public (float, float) Range => (Min, Max);
+
         // Constructor
         public EditorRangeAttribute(float min, float max)
         {
@@ -84,6 +87,30 @@ namespace KoraGame
         public EditorRangeAttribute(int min, int max)
         {
             this.Min = min;
+            this.Max = max;
+        }
+    }
+
+    public sealed class EditorMinAttribute : Attribute
+    {
+        // Public
+        public readonly float Min;
+
+        // Constructor
+        public EditorMinAttribute(float min)
+        {
+            this.Min = min;
+        }
+    }
+
+    public sealed class EditorMaxAttribute : Attribute
+    {
+        // Public
+        public readonly float Max;
+
+        // Construtor
+        public EditorMaxAttribute(float max)
+        {
             this.Max = max;
         }
     }

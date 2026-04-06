@@ -13,7 +13,7 @@ namespace KoraEditor
         protected override void OnCreate()
         {
             // Get the value
-            value = Element.GetValue<Enum>(out isMixed);
+            value = Property.GetValue<Enum>(out isMixed);
         }
 
         protected override void OnValueGui()
@@ -21,7 +21,7 @@ namespace KoraEditor
             if (Gui.EnumPopup(ref value) == true)
             {
                 // Set value
-                Element.SetValue(value);
+                Property.SetValue(value);
 
                 // Set modified
                 SetModified();
