@@ -22,14 +22,9 @@ namespace KoraGame
 
         private Scene scene = null;
         private GameObject parent = null;
+        private Transform localTransform = Transform.Identity;
+        private Transform? worldTransform = null;
 
-        private Vector3F localPosition = Vector3F.Zero;
-        private QuaternionF localRotation = QuaternionF.Identity;
-        private Vector3F localScale = Vector3F.One;
-        private Matrix4F? localToWorldMatrix = null;
-        private Matrix4F? worldToLocalMatrix = null;
-        [DataMember]
-        public TypeCode t;
         // Properties
         public bool Active => active;
         public bool ActiveInScene
@@ -77,25 +72,82 @@ namespace KoraGame
         public bool HasChildren => children != null;
         public bool HasComponents => components != null;
 
+        #region Transform
+        public Transform LocalTransform         
+        {
+            get => localTransform;
+            set
+            {
+                localTransform = value;
+                InvalidateTransform();
+            }
+        }
+
+        public Transform WorldTransform
+        {
+            get
+            {
+                if (worldTransform == null)
+                {
+                    if (parent != null)
+                    {
+                        worldTransform = new Transform(
+                            parent.WorldTransform.TransformMatrix,
+                            localTransform.Position,
+                            localTransform.Rotation,
+                            localTransform.Scale);
+                    }
+                    else
+                        worldTransform = localTransform;
+                }
+                return worldTransform.Value;
+            }
+            set
+            {
+                Matrix4F worldToLocal = parent != null
+                    ? parent.WorldTransform.InverseTransformMatrix
+                    : Matrix4F.Identity;
+
+                Vector4F p = worldToLocal * new Vector4F(value.Position.X, value.Position.Y, value.Position.Z, 1f);
+
+                QuaternionF parentRot = parent != null
+                    ? parent.WorldTransform.Rotation
+                    : QuaternionF.Identity;
+
+                QuaternionF localRot = QuaternionF.Inverse(parentRot) * value.Rotation;
+
+                // NOTE: scale conversion assumes no shear / non-uniform complexity case
+                Vector3F localScale = value.Scale;
+
+                localTransform = new Transform(
+                    new Vector3F(p.X, p.Y, p.Z),
+                    localRot,
+                    localScale
+                );
+
+                InvalidateTransform();
+            }
+        }
+
         [DataMember]
         [EditorName("Position")]
         [EditorTooltip("Position in local space")]
         public Vector3F LocalPosition
         {
-            get => localPosition;
+            get => localTransform.Position;
             set
             {
-                localPosition = value;
+                localTransform = new Transform(value, localTransform.Rotation, localTransform.Scale);
                 InvalidateTransform();
             }
         }
 
         public QuaternionF LocalRotation
         {
-            get => localRotation;
+            get => localTransform.Rotation;
             set
             {
-                localRotation = value;
+                localTransform = new Transform(localTransform.Position, value, localTransform.Scale);
                 InvalidateTransform();
             }
         }
@@ -103,96 +155,95 @@ namespace KoraGame
         [DataMember]
         [EditorName("Rotation")]
         [EditorTooltip("Rotation in local space")]
-        public Vector3F LocalEuler
+        public Vector3F LocalEulerRotation
         {
-            set { }
+            get => localTransform.EulerRotation;
+            set
+            {
+                localTransform = new Transform(localTransform.Position, QuaternionF.Euler(value), localTransform.Scale);
+                InvalidateTransform();
+            }
         }
 
         [DataMember]
         [EditorName("Scale")]
         public Vector3F LocalScale
         {
-            get => localScale;
+            get => localTransform.Scale;
             set
             {
-                localScale = value;
+                localTransform = new Transform(localTransform.Position, localTransform.Rotation, value);
                 InvalidateTransform();
             }
         }
 
         public Vector3F WorldPosition
         {
-            get
-            {
-                return parent != null
-                    ? parent.TransformPoint(localPosition)
-                    : localPosition;
-            }
+            get => WorldTransform.Position;
             set
             {
-                localPosition = parent != null
-                    ? parent.InverseTransformPoint(value)
-                    : value;
+                Vector4F local = WorldToLocalMatrix * (Vector4F)value;
+
+                localTransform = new Transform(
+                    local.XYZ,
+                    localTransform.Rotation,
+                    localTransform.Scale
+                );
+
                 InvalidateTransform();
             }
         }
 
         public QuaternionF WorldRotation
         {
-            get
-            {
-                QuaternionF rot = localRotation;
-                GameObject current = parent;
-
-                while(current != null)
-                {
-                    rot = current.localRotation * rot;
-                    current = current.parent;
-                }
-                return rot;
-            }
+            get => WorldTransform.Rotation;
             set
             {
-                localRotation = parent != null
-                    ? QuaternionF.Inverse(parent.WorldRotation) * value 
-                    : value;
+                QuaternionF parentRot = parent != null
+                    ? parent.WorldTransform.Rotation
+                    : QuaternionF.Identity;
+
+                QuaternionF local = QuaternionF.Inverse(parentRot) * value;
+
+                localTransform = new Transform(
+                    localTransform.Position,
+                    local,
+                    localTransform.Scale
+                );
                 InvalidateTransform();
             }
         }
 
-        public Matrix4F LocalToWorldMatrix
+        public Vector3F WorldEulerRotation
         {
-            get
+            get => WorldTransform.EulerRotation;
+            set
             {
-                // Check for rebuild
-                if (localToWorldMatrix == null)
-                {
-                    // Create our matrix
-                    Matrix4F mat = Matrix4F.TRS(localPosition, localRotation, localScale);
+                QuaternionF worldRot = QuaternionF.Euler(value);
 
-                    // Check for parent
-                    if (parent != null)
-                        mat = parent.LocalToWorldMatrix * mat;
+                QuaternionF parentRot = parent != null
+                    ? parent.WorldTransform.Rotation
+                    : QuaternionF.Identity;
 
-                    // Update the matrix
-                    localToWorldMatrix = mat;
-                }
-                return localToWorldMatrix.Value;
+                QuaternionF localRot = QuaternionF.Inverse(parentRot) * worldRot;
+
+                localTransform = new Transform(
+                    localTransform.Position,
+                    localRot,
+                    localTransform.Scale
+                );
+
+                InvalidateTransform();
             }
         }
-        public Matrix4F WorldToLocalMatrix
-        {
-            get
-            {
-                // Check for rebuild
-                if (worldToLocalMatrix == null)
-                {
-                    // Update the matrix
-                    worldToLocalMatrix = Matrix4F.Inverse(LocalToWorldMatrix);
-                }
-                return worldToLocalMatrix.Value;
-            }
-        }
+
+        public Vector3F Forward => WorldTransform.Forward;
+        public Vector3F Up => WorldTransform.Up;
+        public Vector3F Right => WorldTransform.Right;
+
+        public Matrix4F LocalToWorldMatrix => WorldTransform.TransformMatrix;
+        public Matrix4F WorldToLocalMatrix => WorldTransform.InverseTransformMatrix;
+        #endregion
 
         // Constructor
         private GameObject() { }
@@ -524,32 +575,10 @@ namespace KoraGame
             }
         }
 
-        #region Transform
-        public Vector3F TransformPoint(in Vector3F point)
-        {
-            Vector4F v = (Vector4F)point;
-
-            // Multiply by matrix
-            v = LocalToWorldMatrix * v;
-
-            return v.XYZ;
-        }
-
-        public Vector3F InverseTransformPoint(in Vector3F point)
-        {
-            Vector4F v = (Vector4F)point;
-
-            // Multiply by matrix
-            v = WorldToLocalMatrix * v;
-
-            return v.XYZ;
-        }
-        #endregion
-
         private void InvalidateTransform()
         {
-            // Clear matrix
-            localToWorldMatrix = null;
+            // Clear world transform
+            worldTransform = null;
 
             // Invalidate children also if our transform was changed
             if (children != null)

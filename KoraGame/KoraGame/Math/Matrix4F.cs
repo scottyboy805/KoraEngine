@@ -18,6 +18,54 @@ namespace KoraGame
             new Vector4F(0f, 0f, 0f, 1f)
         );
 
+        // Properties
+        public Vector3F Position => new Vector3F(C3.X, C3.Y, C3.Z);
+
+        public QuaternionF Rotation
+        {
+            get
+            {
+                float m00 = C0.X;
+                float m01 = C1.X;
+                float m02 = C2.X;
+
+                float m10 = C0.Y;
+                float m11 = C1.Y;
+                float m12 = C2.Y;
+
+                float m20 = C0.Z;
+                float m21 = C1.Z;
+                float m22 = C2.Z;
+
+                float trace = m00 + m11 + m22;
+
+                QuaternionF q;
+
+                if (trace > 0f)
+                {
+                    float s = MathF.Sqrt(trace + 1f) * 2f;
+                    q = new QuaternionF((m21 - m12) / s, (m02 - m20) / s, (m10 - m01) / s, 0.25f * s);
+                }
+                else if (m00 > m11 && m00 > m22)
+                {
+                    float s = MathF.Sqrt(1f + m00 - m11 - m22) * 2f;
+                    q = new QuaternionF(0.25f * s, (m01 + m10) / s, (m02 + m20) / s, (m21 - m12) / s);
+                }
+                else if (m11 > m22)
+                {
+                    float s = MathF.Sqrt(1f + m11 - m00 - m22) * 2f;
+                    q = new QuaternionF((m01 + m10) / s, 0.25f * s, (m12 + m21) / s, (m02 - m20) / s);
+                }
+                else
+                {
+                    float s = MathF.Sqrt(1f + m22 - m00 - m11) * 2f;
+                    q = new QuaternionF((m02 + m20) / s, (m12 + m21) / s, 0.25f * s, (m10 - m01) / s);
+                }
+
+                return q.Normalized;
+            }
+        }
+
         // Constructors
         public Matrix4F(Vector4F c0, Vector4F c1, Vector4F c2, Vector4F c3)
         {
@@ -107,6 +155,35 @@ namespace KoraGame
                 new Vector4F(cos, sin, 0f, 0f),
                 new Vector4F(-sin, cos, 0f, 0f),
                 new Vector4F(0f, 0f, 1f, 0f),
+                new Vector4F(0f, 0f, 0f, 1f)
+            );
+        }
+
+        public static Matrix4F Rotate(QuaternionF rotation)
+        {
+            rotation = rotation.Normalized;
+
+            float x = rotation.X;
+            float y = rotation.Y;
+            float z = rotation.Z;
+            float w = rotation.W;
+
+            float xx = x * x;
+            float yy = y * y;
+            float zz = z * z;
+
+            float xy = x * y;
+            float xz = x * z;
+            float yz = y * z;
+
+            float wx = w * x;
+            float wy = w * y;
+            float wz = w * z;
+
+            return new Matrix4F(
+                new Vector4F(1f - 2f * (yy + zz), 2f * (xy + wz), 2f * (xz - wy), 0f),
+                new Vector4F(2f * (xy - wz), 1f - 2f * (xx + zz), 2f * (yz + wx), 0f),
+                new Vector4F(2f * (xz + wy), 2f * (yz - wx), 1f - 2f * (xx + yy), 0f),
                 new Vector4F(0f, 0f, 0f, 1f)
             );
         }
@@ -237,6 +314,17 @@ namespace KoraGame
             );
 
             return new Matrix4F(c0, c1, c2, c3);
+        }
+
+        public static Vector3F operator *(Matrix4F lhs, Vector3F rhs)
+        {
+            Vector4F v = (Vector4F)rhs;
+
+            return new Vector3F(
+                lhs.C0.X * v.X + lhs.C1.X * v.Y + lhs.C2.X * v.Z + lhs.C3.X * v.W,
+                lhs.C0.Y * v.X + lhs.C1.Y * v.Y + lhs.C2.Y * v.Z + lhs.C3.Y * v.W,
+                lhs.C0.Z * v.X + lhs.C1.Z * v.Y + lhs.C2.Z * v.Z + lhs.C3.Z * v.W
+            );
         }
 
         public static Vector4F operator *(Matrix4F lhs, Vector4F rhs)
