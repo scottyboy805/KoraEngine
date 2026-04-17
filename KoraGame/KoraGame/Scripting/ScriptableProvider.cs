@@ -14,9 +14,18 @@ namespace KoraGame
             return Activator.CreateInstance(type, true);
         }
 
-        public T CreateInstance<T>()
+        public T CreateInstance<T>(Type instanceType = null)
         {
-            return Activator.CreateInstance<T>();
+            // Check type
+            if(instanceType == null)
+                instanceType = typeof(T);
+
+            // Check derived
+            if (typeof(GameElement).IsAssignableFrom(instanceType) == false)
+                throw new ArgumentException("Type must be GameElement");
+
+            // Create the instance
+            return (T)Activator.CreateInstance(instanceType, true);
         }
 
         public T CreateInstanceAs<T>(Type type)

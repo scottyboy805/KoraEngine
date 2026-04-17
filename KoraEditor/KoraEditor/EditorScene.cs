@@ -33,6 +33,13 @@ namespace KoraEditor
             cube.AddComponent<BoxCollider>();
             cube.LocalPosition = new Vector3F(0f, 5f, -10f);
 
+
+            GameObject cube2 = await EditorInstance.EditorAssets.LoadAsync<GameObject>("DefaultAssets/Cube.fbx");
+            cube2 = GameObject.Instantiate(cube2);
+            cube2.GetComponent<MeshRenderer>(true).SetMaterial(mat, 0);
+            cube2.Parent = cube;
+            cube2.LocalPosition = new Vector3F(5f, -5f, 0f);
+
             // Create the camera
             GameObject cam = CreateCameraObject();            
             cam.Scene = this;
@@ -40,6 +47,8 @@ namespace KoraEditor
 
             cube.Scene = this;
             cube.SetActive(true);
+            cube2.Scene = this;
+            cube2.SetActive(true);
         }
 
         public GameObject CreateEmptyObject(string name = null)

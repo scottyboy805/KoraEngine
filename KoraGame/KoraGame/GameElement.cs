@@ -108,10 +108,10 @@ namespace KoraGame
             element.game = game;
         }
 
-        internal virtual T OnInstantiate<T>() where T : GameElement, new()
+        internal virtual T OnInstantiate<T>() where T : GameElement
         {
             // Create copy
-            T clone = new T();
+            T clone = game.Scriptable.CreateInstance<T>(elementType);
 
             // Perform clone
             CloneInstantiate(clone);
@@ -119,7 +119,7 @@ namespace KoraGame
         }
         protected virtual void OnDestroy() { }
 
-        public static T Instantiate<T>(T element) where T : GameElement, new()
+        public static T Instantiate<T>(T element) where T : GameElement
         {
             // Check for null
             if (element == null)

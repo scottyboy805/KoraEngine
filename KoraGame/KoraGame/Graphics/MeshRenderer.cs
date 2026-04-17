@@ -103,5 +103,15 @@ namespace KoraGame.Graphics
                 }
             }
         }
+
+        internal override void CloneInstantiate(GameElement element)
+        {
+            base.CloneInstantiate(element);
+
+            MeshRenderer renderer = (MeshRenderer) element;
+
+            renderer.mesh = Mesh.Instantiate(mesh);
+            renderer.materials = materials != null ? materials.Select(m => Material.Instantiate(m)).ToList() : null;
+        }
     }
 }

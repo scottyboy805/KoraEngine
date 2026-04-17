@@ -8,8 +8,7 @@ namespace KoraGame
     [EditorIcon("Icon/Object.png")]
     public sealed class GameObject : GameElement
     {
-        // Private
-        [DataMember(Name = "Active")]
+        // Private        
         private bool active = false;
 
         [EditorHidden]
@@ -26,7 +25,12 @@ namespace KoraGame
         private Transform? worldTransform = null;
 
         // Properties
-        public bool Active => active;
+        [DataMember(Name = "Active")]
+        public bool Active
+        {
+            get => active;
+            internal set => SetActive(value);
+        }
         public bool ActiveInScene
         {
             get
@@ -67,7 +71,19 @@ namespace KoraGame
                     value.gameObjects.Add(this);
             }
         }
-        public GameObject Parent => parent;
+        public GameObject Parent
+        {
+            get => parent;
+            set
+            {
+                // Check for self
+                if(parent == this)
+                    throw new InvalidOperationException("Cannot set parent to self");
+
+                parent = value;
+                InvalidateTransform();
+            }
+        }
         public IReadOnlyList<GameObject> Children => children != null ? children : Array.Empty<GameObject>();
         public bool HasChildren => children != null;
         public bool HasComponents => components != null;
@@ -537,6 +553,21 @@ namespace KoraGame
             return count;
         }
         #endregion
+
+        internal override void CloneInstantiate(GameElement element)
+        {
+            base.CloneInstantiate(element);
+
+            GameObject go = (GameObject)element;
+
+            go.active = active;
+            go.children = children != null ? children.Select(c => GameObject.Instantiate(c)).ToList() : null;
+            go.components = components != null ? components.Select(c => Component.Instantiate(c)).ToList() : null;
+            go.scene = scene;
+            go.parent = parent;
+            go.localTransform = localTransform;
+            go.worldTransform = worldTransform;
+        }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static bool CheckComponent(Component component, bool includeInactive)
