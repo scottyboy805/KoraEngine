@@ -127,7 +127,7 @@ namespace KoraGame.Graphics
         private Shader()
         {
             // Get device
-            this.device = Game.Instance?.Graphics;
+            this.device = Game.Instance?.GraphicsDevice;
         }
 
         public Shader(GraphicsDevice device, byte[] vertexSource, byte[] fragmentSource, ShaderFormat format, string entryPoint = "main")

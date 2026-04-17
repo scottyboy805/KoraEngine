@@ -29,13 +29,13 @@ namespace KoraGame
             Debug.Log($"Use screen resolution: '{screen.Width} x {screen.Height}', FullScreen = '{screen.Fullscreen}'", LogFilter.Graphics);
 
             // Create graphics            
-            this.graphics = new GraphicsDevice(this.screen);
+            this.graphicsDevice = new GraphicsDevice(this.screen);
 
-            Debug.Log($"Use graphics API: '{graphics.GetDeviceDriverName()}'", LogFilter.Graphics);
+            Debug.Log($"Use graphics API: '{graphicsDevice.GetDeviceDriverName()}'", LogFilter.Graphics);
 
             // Create assets
             Debug.Log($"Initialize assets", LogFilter.Assets);
-            this.assets = new AssetProvider(scriptable, graphics, Environment.CurrentDirectory, false);
+            this.assets = new AssetProvider(scriptable, graphicsDevice, Environment.CurrentDirectory, false);
 
             Debug.Log($"Use assets directory: '{assets.AssetDirectory}'", LogFilter.Assets);
 

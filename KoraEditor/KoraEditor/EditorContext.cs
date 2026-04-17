@@ -17,7 +17,7 @@ namespace KoraEditor
         public AssetDatabase AssetDatabase => editor?.AssetDatabase;
         public Scene EditorScene => editor?.EditorScene;
         public Screen EditorScreen => editor?.EditorScreen;
-        public GraphicsDevice EditorGraphics => editor?.Graphics;
+        public GraphicsDevice EditorGraphics => editor?.GraphicsDevice;
         public AssetProvider EditorAssets => editor?.EditorAssets;
 
         // Constructor

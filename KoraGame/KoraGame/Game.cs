@@ -20,7 +20,7 @@ namespace KoraGame
         protected bool quit = false;
         protected GameSettings settings = new();
         protected Screen screen = null;
-        protected GraphicsDevice graphics = null;
+        protected GraphicsDevice graphicsDevice = null;
         protected AssetProvider assets = null;
         protected AudioDevice audio = null;
         protected InputProvider input = null;
@@ -37,7 +37,7 @@ namespace KoraGame
         public bool Quit => quit;
         public GameSettings Settings => settings;
         public Screen Screen => screen;
-        public GraphicsDevice Graphics => graphics;
+        public GraphicsDevice GraphicsDevice => graphicsDevice;
         public AssetProvider Assets => assets;
         public AudioDevice Audio => audio;
         public InputProvider Input => input;

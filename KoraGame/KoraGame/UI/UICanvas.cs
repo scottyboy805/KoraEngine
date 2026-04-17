@@ -93,10 +93,10 @@ namespace KoraGame.UI
             input.OnMouseUp.RemoveListener(OnMouseUpEvent);
         }
 
-        public override void Draw(GraphicsBatch renderBatch)
+        public override void Draw(GraphicsBatch graphics)
         {
             foreach(UIComponent component in activeUIComponents)
-                component.Draw(renderBatch);
+                component.Draw(graphics);
         }
 
         public void DoPointerMoveEvent(Vector2F pointerPosition)

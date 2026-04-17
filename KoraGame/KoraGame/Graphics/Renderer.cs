@@ -4,7 +4,7 @@ namespace KoraGame.Graphics
     public abstract class Renderer : Component
     {
         // Properties
-        public GraphicsDevice Graphics => Game?.Graphics;
+        public GraphicsDevice GraphicsDevice => Game?.GraphicsDevice;
 
         // Methods
         internal override void RegisterSubSystems()
@@ -19,6 +19,6 @@ namespace KoraGame.Graphics
             Scene?.activeRenderers.Remove(this);
         }
 
-        public abstract void Draw(GraphicsBatch renderBatch);
+        public abstract void Draw(GraphicsBatch graphics);
     }
 }

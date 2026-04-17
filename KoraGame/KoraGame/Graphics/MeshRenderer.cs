@@ -58,7 +58,7 @@ namespace KoraGame.Graphics
             return null;
         }
 
-        public override void Draw(GraphicsBatch renderBatch)
+        public override void Draw(GraphicsBatch graphics)
         {
             // Check for any mesh
             if (mesh == null || mesh.HasVertices == false)
@@ -77,30 +77,8 @@ namespace KoraGame.Graphics
                 if (material == null)
                     continue;
 
-                // Get elements
-                mesh.GetElements(out uint indexOffset, out uint vertexOffset, out uint elementCount, subMesh);
-
-                // Get the mesh vertex elements
-                MeshVertexElements vertexElements = mesh.GetVertexElements(subMesh);
-
-
-                // Check for indexed
-                if(mesh.HasIndices == true)
-                {
-                    // Get index format
-                    IndexBufferFormat indexFormat = mesh.GetIndexFormat(subMesh);
-
-                    // Draw indexed
-                    renderBatch.SubmitIndexedDrawCall(modelMatrix, material, 
-                        mesh.VertexBuffer, vertexElements, mesh.IndexBuffer, 
-                        indexFormat, indexOffset, vertexOffset, elementCount);
-                }
-                else
-                {
-                    // Draw vertices
-                    renderBatch.SubmitDrawCall(modelMatrix, material, 
-                        mesh.VertexBuffer, vertexElements, vertexOffset, elementCount);
-                }
+                // Draw mesh
+                graphics.Draw(modelMatrix, material, mesh, subMesh, 1);
             }
         }
 

@@ -18,10 +18,10 @@ namespace KoraGame.Graphics
         [DataMember(Name = "Far Plane")]
         private float farPlane = 1000f;
 
-        private readonly GraphicsBatch renderBatch = new(256);
+        private readonly GraphicsBatch graphics = new(256);
 
         // Properties
-        public GraphicsDevice Graphics => Game?.Graphics;
+        public GraphicsDevice GraphicsDevice => Game?.GraphicsDevice;
 
         public Color ClearColor
         {
@@ -79,7 +79,7 @@ namespace KoraGame.Graphics
         public void Render(Texture renderTexture = null, Matrix4F? viewMatrix = null, Matrix4F? projectionMatrix = null)
         {
             // Get command buffer
-            GraphicsCommand cmd = Graphics.AcquireCommandBuffer();
+            GraphicsCommand cmd = GraphicsDevice.AcquireCommandBuffer();
 
             // Begin rendering
             cmd.BeginRenderPass(clearColor, renderTexture);
@@ -111,12 +111,12 @@ namespace KoraGame.Graphics
                 : projectionMatrix.Value;
 
             // Begin batch
-            renderBatch.Begin(renderPass, view, projection);
+            graphics.Begin(renderPass, view, projection);
             {
                 // Render the scene
-                Scene?.Draw(renderBatch);
+                Scene?.Draw(graphics);
             }
-            renderBatch.End();
+            graphics.End();
         }
     }
 }

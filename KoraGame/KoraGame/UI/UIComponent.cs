@@ -33,7 +33,7 @@ namespace KoraGame.UI
         private UICanvas canvas = null;
 
         // Properties
-        public GraphicsDevice Graphics => Game?.Graphics;
+        public GraphicsDevice Graphics => Game?.GraphicsDevice;
         public InputProvider Input => Game?.Input;
 
         public bool PointerTarget
@@ -101,7 +101,7 @@ namespace KoraGame.UI
         protected virtual void OnPointerDown() { }
         protected virtual void OnPointerUp() { }
 
-        public virtual void Draw(GraphicsBatch renderBatch) { }
+        public virtual void Draw(GraphicsBatch graphics) { }
 
         internal override void RegisterSubSystems()
         {

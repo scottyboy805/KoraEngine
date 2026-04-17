@@ -37,7 +37,7 @@ namespace KoraGame.UI
             mesh = Mesh.PrimitiveQuad(Graphics, Vector2F.One);
         }
 
-        public override void Draw(GraphicsBatch renderBatch)
+        public override void Draw(GraphicsBatch graphics)
         {
             
         }

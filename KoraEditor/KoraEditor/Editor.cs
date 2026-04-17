@@ -108,7 +108,7 @@ namespace KoraEditor
 
             // Initialize the game layer
             this.assets = assetDatabase;
-            this.graphics = editorGraphics;
+            this.graphicsDevice = editorGraphics;
 
             // Init gui
             gui = new ImGuiContext();
@@ -423,7 +423,7 @@ namespace KoraEditor
             project.Load();
 
             // Init assets
-            assets = assetDatabase = new AssetDatabase(scriptable, graphics, project.AssetsFolder, false);
+            assets = assetDatabase = new AssetDatabase(scriptable, graphicsDevice, project.AssetsFolder, false);
 
             // Refresh assets
             assetDatabase.Refresh();

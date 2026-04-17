@@ -64,7 +64,7 @@ namespace KoraGame
             }
         }
 
-        internal void Draw(GraphicsBatch renderBatch)
+        internal void Draw(Graphics.GraphicsBatch renderBatch)
         {
             // Process all renderers
             foreach(Renderer renderer in activeRenderers)

@@ -23,7 +23,7 @@ namespace KoraGame.Graphics
         public const string MainTextureName = "Texture";        
 
         // Properties
-        public GraphicsDevice Graphics => Game?.Graphics;
+        public GraphicsDevice Graphics => Game?.GraphicsDevice;
 
         public Shader Shader
         {

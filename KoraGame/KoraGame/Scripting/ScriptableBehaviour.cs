@@ -37,7 +37,7 @@ namespace KoraGame
         }
 
         public Screen Screen => Game?.Screen;
-        public GraphicsDevice Graphics => Game?.Graphics;
+        public GraphicsDevice Graphics => Game?.GraphicsDevice;
         public InputProvider Input => Game?.Input;
         public PhysicsSimulation Physics => Game?.Physics;
 

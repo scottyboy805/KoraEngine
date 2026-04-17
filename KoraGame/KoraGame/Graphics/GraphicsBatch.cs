@@ -1,11 +1,11 @@
-﻿
-using System.Runtime.InteropServices;
+﻿using System.Runtime.InteropServices;
 
 namespace KoraGame.Graphics
 {
     public sealed class GraphicsBatch
     {
         // Type
+        #region Type
         private sealed class DrawCommandComparer : IComparer<DrawCommand>
         {
             public int Compare(DrawCommand x, DrawCommand y)
@@ -74,6 +74,7 @@ namespace KoraGame.Graphics
             public Matrix4F ProjectionMatrix;
             public Matrix4F ModelMatrix;
         }
+        #endregion
 
         // Private
         private static readonly DrawCommandComparer keyComparer = new();
@@ -108,7 +109,47 @@ namespace KoraGame.Graphics
             batchDraw.Clear();
         }
 
-        public void SubmitDrawCall(Matrix4F matrix, Material material, GraphicsBuffer vertexBuffer, MeshVertexElements elements, uint offset, uint size)
+        public void Draw(Matrix4F matrix, Material material, Mesh mesh, uint subMeshOffset = 0, uint subMeshCount = 1)
+        {
+            // Check null
+            if (material == null)
+                throw new ArgumentNullException(nameof(material));
+
+            if(mesh == null)
+                throw new ArgumentNullException(nameof(mesh));
+
+            // Get submeshes
+            uint start = subMeshCount >= mesh.SubMeshCount ? 0 : subMeshOffset;
+            uint count = subMeshOffset + subMeshCount > mesh.SubMeshCount ? mesh.SubMeshCount : subMeshCount;
+            uint end = start + count;
+
+            // Draw submesh
+            for (uint i = start; i < end; i++)
+            {
+                // Get mesh elements
+                mesh.GetElements(out uint indexOffset, out uint vertexOffset, out uint elementCount, i);
+
+                // Get the mesh vertex elements
+                MeshVertexElements vertexElements = mesh.GetVertexElements(i);
+
+                // Check for indexed
+                if(mesh.HasIndices == true)
+                {
+                    // Get the index format
+                    IndexBufferFormat indexFormat = mesh.GetIndexFormat(i);
+
+                    // Draw indexed
+                    DrawIndexed(matrix, material, mesh.VertexBuffer, vertexElements, mesh.IndexBuffer, indexFormat, indexOffset, vertexOffset, elementCount);
+                }
+                else
+                {
+                    // Draw vertices
+                    Draw(matrix, material, mesh.VertexBuffer, vertexElements, vertexOffset, elementCount);
+                }
+            }
+        }
+
+        public void Draw(Matrix4F matrix, Material material, GraphicsBuffer vertexBuffer, MeshVertexElements elements, uint offset, uint size)
         {
             // Check null
             if (material == null)
@@ -136,7 +177,7 @@ namespace KoraGame.Graphics
                 Execute();
         }
 
-        public void SubmitIndexedDrawCall(Matrix4F matrix, Material material, GraphicsBuffer vertexBuffer, MeshVertexElements elements, GraphicsBuffer indexBuffer, IndexBufferFormat indexFormat, uint indexOffset, uint vertexOffset, uint size)
+        public void DrawIndexed(Matrix4F matrix, Material material, GraphicsBuffer vertexBuffer, MeshVertexElements elements, GraphicsBuffer indexBuffer, IndexBufferFormat indexFormat, uint indexOffset, uint vertexOffset, uint size)
         {
             // Check null
             if (material == null)

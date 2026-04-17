@@ -53,7 +53,7 @@ namespace KoraGame.UI
             }
         }
 
-        public override void Draw(GraphicsBatch renderBatch)
+        public override void Draw(GraphicsBatch graphics)
         {
             TTF_GPUAtlasDrawSequence* s;
             //SDL3_ttf.cre

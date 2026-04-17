@@ -48,7 +48,7 @@ namespace KoraGame.Graphics
         // Constructor
         private Mesh()
         {
-            device = Game.Instance?.Graphics;
+            device = Game.Instance?.GraphicsDevice;
         }
 
         public Mesh(GraphicsDevice device, uint subMeshCount = 1)
