@@ -88,8 +88,8 @@ namespace KoraGame.Graphics
 
             MeshRenderer renderer = (MeshRenderer) element;
 
-            renderer.mesh = Mesh.Instantiate(mesh);
-            renderer.materials = materials != null ? materials.Select(m => Material.Instantiate(m)).ToList() : null;
+            renderer.mesh = mesh;
+            renderer.materials = materials != null ? materials.ToList() : null;
         }
     }
 }

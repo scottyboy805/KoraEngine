@@ -38,7 +38,7 @@ namespace KoraEditor
             cube2 = GameObject.Instantiate(cube2);
             cube2.Name = "Child Cube";
             cube2.GetComponent<MeshRenderer>(true).SetMaterial(mat, 0);
-            //cube2.Parent = cube;
+            cube2.Parent = cube;
             cube2.LocalPosition = new Vector3F(2f, -5f, -10f);
 
             // Create the camera
@@ -46,7 +46,7 @@ namespace KoraEditor
             //cam.Scene = this;
 
             cube.Scene = this;
-            cube2.Scene = this;
+            //cube2.Scene = this;
             
         }
 
