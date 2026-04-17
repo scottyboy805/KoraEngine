@@ -119,7 +119,7 @@ namespace KoraGame
             }
 
             // Check fields
-            foreach(FieldInfo field in type.GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic))
+            foreach(FieldInfo field in type.GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly))
             {
                 // Check for serializable
                 if (IsFieldSerializable(field) == false)
@@ -130,7 +130,7 @@ namespace KoraGame
             }
 
             // Check properties
-            foreach(PropertyInfo property in type.GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic))
+            foreach(PropertyInfo property in type.GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly))
             {
                 // Check for serializable
                 if(IsPropertySerializable(property) == false)

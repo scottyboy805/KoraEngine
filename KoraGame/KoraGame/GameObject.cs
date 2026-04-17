@@ -6,10 +6,10 @@ namespace KoraGame
 {
     [DataContract]
     [EditorIcon("Icon/Object.png")]
-    public sealed class GameObject : GameElement
+    public sealed class GameObject : GameElement, IAssetSerialize
     {
         // Private        
-        private bool active = false;
+        private bool active = true;
 
         [EditorHidden]
         //[DataMember(Name = "Children")]
@@ -66,9 +66,20 @@ namespace KoraGame
                 // Change scene
                 this.scene = value;
 
+                // Update children
+                if (children != null)
+                {
+                    foreach (GameObject child in children)
+                        child.scene = value;
+                }
+
                 // Add to new scene
                 if (value != null)
                     value.gameObjects.Add(this);
+
+                // Check for active now
+                if(wasActive != ActiveInScene)
+                    DoGameObjectEnabledEvent(this, ActiveInScene);
             }
         }
         public GameObject Parent
@@ -80,7 +91,29 @@ namespace KoraGame
                 if(parent == this)
                     throw new InvalidOperationException("Cannot set parent to self");
 
+                // Check for was active
+                bool wasActive = ActiveInScene;
+
+                // Remove from current
+                if (parent != null && parent.children != null)
+                    parent.children.Remove(this);
+
+                scene = null;
                 parent = value;
+
+                // Add to new parent
+                if(parent != null)
+                {
+                    if (parent.children == null) parent.children = new();
+                    parent.children.Add(this);
+
+                    scene = parent.scene;
+                }
+
+                // Check for now active
+                if (ActiveInScene != wasActive)
+                    DoGameObjectEnabledEvent(this, ActiveInScene);
+
                 InvalidateTransform();
             }
         }
@@ -308,7 +341,7 @@ namespace KoraGame
 
             // Set active
             if(ActiveInScene == true)
-                component.SetActive(true);
+                Component.DoComponentEnabledEvent(component, component.Active);
         }
         #endregion
 
@@ -562,7 +595,14 @@ namespace KoraGame
 
             go.active = active;
             go.children = children != null ? children.Select(c => GameObject.Instantiate(c)).ToList() : null;
-            go.components = components != null ? components.Select(c => Component.Instantiate(c)).ToList() : null;
+
+            if(components != null)
+            {
+                go.components = new();
+                foreach (Component component in components)
+                    go.AddComponent(Component.Instantiate(component));
+            }
+
             go.scene = scene;
             go.parent = parent;
             go.localTransform = localTransform;
@@ -589,21 +629,14 @@ namespace KoraGame
             if (active == on)
                 return;
 
+            // Check was active
+            bool wasActive = ActiveInScene;
+
             this.active = on;
 
-            // Update children
-            if (children != null)
-            {
-			    foreach(GameObject child in children)
-                    child.SetActive(on);
-            }
-
-            // Update components
-            if (components != null)
-            {
-			    foreach(Component component in components)
-                    component.SetActive(on);
-            }
+            // Check for now active
+            if(ActiveInScene != wasActive)
+                DoGameObjectEnabledEvent(this, on);
         }
 
         private void InvalidateTransform()
@@ -616,6 +649,23 @@ namespace KoraGame
             {
 			    foreach(GameObject go in children)
                     go.InvalidateTransform();
+            }
+        }
+
+        internal static void DoGameObjectEnabledEvent(GameObject go, bool on)
+        {
+            // Update children
+            if (go.children != null)
+            {
+                foreach (GameObject child in go.children)
+                    DoGameObjectEnabledEvent(child, on);
+            }
+
+            // Update components
+            if (go.components != null)
+            {
+                foreach (Component component in go.components)
+                    Component.DoComponentEnabledEvent(component, on);
             }
         }
 
@@ -657,6 +707,15 @@ namespace KoraGame
                 segments != null ? segments.Value : 12);
 
             return go;
+        }
+
+        void IAssetSerialize.OnSerialize()
+        {
+        }
+
+        void IAssetSerialize.OnDeserialize()
+        {
+            throw new NotImplementedException();
         }
     }
 }

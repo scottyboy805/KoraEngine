@@ -178,7 +178,7 @@ namespace KoraGame.Assets
             if(objectNode.HasMeshes == true)
             {
                 // Add mesh renderer
-                MeshRenderer meshRenderer = new();
+                MeshRenderer meshRenderer = go.AddComponent<MeshRenderer>();
 
                 // Read the mesh
                 meshRenderer.Mesh = ReadAsMesh(context, scene, objectNode);
@@ -191,8 +191,8 @@ namespace KoraGame.Assets
                     materialSlot++;
                 }
                 
-                // Add component
-                go.AddComponent(meshRenderer);
+                //// Add component
+                //go.AddComponent(meshRenderer);
             }
 
             // Check for children

@@ -4,15 +4,19 @@ namespace KoraGame
 {
     public abstract class Component : GameElement
     {
-        // Private
-        [DataMember(Name = "Active")]
-        private bool active = false;
+        // Private        
+        private bool active = true;
 
         // Internal
         internal GameObject gameObject = null;
 
         // Properties
-        public bool Active => active;
+        [DataMember(Name = "Active")]
+        public bool Active
+        {
+            get => active;
+            set => SetActive(value);
+        }
         public bool ActiveInScene => active == true && gameObject != null && gameObject.ActiveInScene == true;
 
         public Scene Scene => gameObject?.Scene;
@@ -45,18 +49,24 @@ namespace KoraGame
 
             this.active = on;
 
+            // Do event
+            DoComponentEnabledEvent(this, on);
+        }
+
+        internal static void DoComponentEnabledEvent(Component component, bool on)
+        {
             // Trigger event
             if (on == true)
             {
                 // Register the component with the scene
-                RegisterSubSystems();
+                component.RegisterSubSystems();
 
                 try
                 {
                     // Trigger enable
-                    OnEnable();
+                    component.OnEnable();
                 }
-                catch(Exception e)
+                catch (Exception e)
                 {
                     Debug.LogException(e);
                 }
@@ -66,15 +76,15 @@ namespace KoraGame
                 try
                 {
                     // Trigger disable
-                    OnDisable();
+                    component.OnDisable();
                 }
-                catch(Exception e)
+                catch (Exception e)
                 {
                     Debug.LogException(e);
                 }
 
                 // Unregister the component
-                UnregisterSubSystems();
+                component.UnregisterSubSystems();
             }
         }
     }

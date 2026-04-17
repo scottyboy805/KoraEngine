@@ -36,19 +36,18 @@ namespace KoraEditor
 
             GameObject cube2 = await EditorInstance.EditorAssets.LoadAsync<GameObject>("DefaultAssets/Cube.fbx");
             cube2 = GameObject.Instantiate(cube2);
+            cube2.Name = "Child Cube";
             cube2.GetComponent<MeshRenderer>(true).SetMaterial(mat, 0);
             cube2.Parent = cube;
             cube2.LocalPosition = new Vector3F(5f, -5f, 0f);
 
             // Create the camera
-            GameObject cam = CreateCameraObject();            
-            cam.Scene = this;
-            cam.SetActive(true);
+            /*GameObject cam = */CreateCameraObject();            
+            //cam.Scene = this;
 
             cube.Scene = this;
-            cube.SetActive(true);
-            cube2.Scene = this;
-            cube2.SetActive(true);
+            //cube2.Scene = this;
+            
         }
 
         public GameObject CreateEmptyObject(string name = null)

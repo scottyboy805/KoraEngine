@@ -70,8 +70,7 @@ namespace KoraGame
             foreach(Renderer renderer in activeRenderers)
             {
                 // Render the object
-                if(renderer.Active == true)
-                    renderer.Draw(renderBatch);
+                renderer.Draw(renderBatch);
             }
         }
 
