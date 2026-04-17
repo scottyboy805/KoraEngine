@@ -34,8 +34,8 @@ namespace KoraEditor
             cube.LocalPosition = new Vector3F(0f, 5f, -10f);
 
 
-            GameObject cube2 = await EditorInstance.EditorAssets.LoadAsync<GameObject>("DefaultAssets/Cube.fbx");
-            cube2 = GameObject.Instantiate(cube2);
+            GameObject cube2 = GameObject.Instantiate(cube); //await EditorInstance.EditorAssets.LoadAsync<GameObject>("DefaultAssets/Cube.fbx");
+            //cube2 = GameObject.Instantiate(cube2);
             cube2.Name = "Child Cube";
             cube2.GetComponent<MeshRenderer>(true).SetMaterial(mat, 0);
             cube2.Parent = cube;

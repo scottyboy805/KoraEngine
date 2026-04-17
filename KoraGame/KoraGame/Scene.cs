@@ -14,11 +14,26 @@ namespace KoraGame
 
         internal readonly List<Camera> activeCameras = new();
         internal readonly List<Renderer> activeRenderers = new();
+        internal readonly List<Light> activeLights = new();
         internal readonly List<ScriptableBehaviour> activeBehaviours = new();
+
+        internal GraphicsBuffer lightBuffer;
 
         // Properties
         public bool Active => active;
         public IReadOnlyList<GameObject> GameObjects => gameObjects;
+
+        internal GraphicsBuffer LightBuffer
+        {
+            get
+            {
+                // Lazy rebuild light buffer if needed
+                if (lightBuffer == null)
+                    lightBuffer = Light.RebuildLightBuffer(this);
+
+                return lightBuffer;
+            }
+        }
 
         // Constructor
         private Scene() { }

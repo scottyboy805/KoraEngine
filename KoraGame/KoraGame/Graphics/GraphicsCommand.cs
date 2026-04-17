@@ -341,6 +341,34 @@ namespace KoraGame.Graphics
             SDL3.SDL_BindGPUVertexBuffers(gpuRenderPass, 0, &bindingInfo, 1);
         }
 
+        public unsafe void BindStorageBuffer(GraphicsBuffer buffer, ShaderStage stage)
+        {
+            // Check for null
+            if (buffer == null)
+                throw new ArgumentNullException(nameof(buffer));
+
+            // Check for render pass begin
+            RequireActiveRenderPass();
+
+            // Check for storage buffer
+            if ((buffer.Usage & GraphicsBufferUsage.GraphicsRead) == 0)
+                throw new InvalidOperationException("The specified buffer does not support storage buffer usage");
+
+            // Create the buffer array with single element
+            SDL_GPUBuffer** buffers = stackalloc SDL_GPUBuffer*[1];
+            buffers[0] = buffer.gpuBuffer;
+
+            // Check stage
+            if (stage == ShaderStage.Vertex)
+            {
+                SDL3.SDL_BindGPUVertexStorageBuffers(gpuRenderPass, 0, buffers, 1);
+            }
+            else
+            {
+                SDL3.SDL_BindGPUFragmentStorageBuffers(gpuRenderPass, 0, buffers, 1);
+            }
+        }
+
         public unsafe void BindShader(Shader shader, MeshVertexElements elements)
         {
             // Check for null
