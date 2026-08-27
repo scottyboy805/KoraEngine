@@ -1,0 +1,12 @@
+FileVersion = 1
+
+[Workspace]
+StartupProject = "KoraPlayer"
+
+[Projects]
+KoraPlayer = {Path = "KoraPlayer"}
+KoraPlayer-Desktop = {Path = "KoraPlayer-Desktop"}
+SDL3 = {Path = "vendor/SDL3"}
+
+[WorkspaceFolders]
+vendor = ["SDL3"]

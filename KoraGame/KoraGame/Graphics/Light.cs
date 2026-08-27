@@ -26,6 +26,18 @@ namespace KoraGame.Graphics
         [DataMember]
         public float Intensity { get; set; } = 1f;
 
+        // Properties
+        internal Vector3F PositionOrDirection
+        {
+            get
+            {
+                // Use foward vector for directional light, world position for point light
+                return Kind != LightKind.Directional
+                    ? GameObject.WorldPosition
+                    : GameObject.Forward;
+            }
+        }
+
         // Methods
         internal override void RegisterSubSystems()
         {
@@ -63,7 +75,7 @@ namespace KoraGame.Graphics
                     Light light = activeLights[i];
 
                     // Get light position
-                    Vector4F lightPosition = (Vector4F)light.GameObject.WorldPosition;
+                    Vector4F lightPosition = (Vector4F)light.PositionOrDirection;
                     lightPosition.W = light.Kind == LightKind.Directional ? 0f : 1f; // Set W to indicate light type
 
                     // Get light color

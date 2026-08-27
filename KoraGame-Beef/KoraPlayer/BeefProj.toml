@@ -1,0 +1,17 @@
+FileVersion = 1
+
+[Project]
+Name = "KoraPlayer"
+StartupObject = "KoraPlayer_Console.Program"
+
+[Dependencies]
+corlib = "*"
+SDL3 = "*"
+
+[Configs.Debug.Win64]
+LibPaths = ["$(WorkspaceDir)/vendor/SDL3/dist/SDL3-3.4.0/lib/x64/SDL3.lib"]
+EnvironmentVars = ["DOTNET_ROOT=C:\\\\Program Files\\\\dotnet"]
+
+[Configs.Release.Win64]
+BuildKind = "DynamicLib"
+LibPaths = ["$(WorkspaceDir)/vendor/SDL3/dist/SDL3-3.4.0/lib/x64/SDL3.lib"]

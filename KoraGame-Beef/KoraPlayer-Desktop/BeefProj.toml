@@ -1,0 +1,18 @@
+FileVersion = 1
+Dependencies = {corlib = "*", SDL3 = "*"}
+
+[Project]
+Name = "KoraPlayer-Desktop"
+StartupObject = "KoraPlayer_Desktop.Program"
+
+[Configs.Debug.Win64]
+LibPaths = [
+	"$(WorkspaceDir)/vendor/SDL3/dist/SDL3-3.4.0/lib/x64/SDL3.lib",
+	"$(WorkspaceDir)/build/Debug_Win64/KoraPlayer/KoraPlayer.lib"
+]
+
+[Configs.Release.Win64]
+LibPaths = [
+	"$(WorkspaceDir)/vendor/SDL3/dist/SDL3-3.4.0/lib/x64/SDL3.lib",
+	"$(WorkspaceDir)/build/Release_Win64/KoraPlayer/KoraPlayer.lib"
+]

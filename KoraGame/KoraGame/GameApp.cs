@@ -12,7 +12,7 @@ namespace KoraGame
         // Methods
         internal override void DoInitialize()
         {
-            base.DoInitialize();
+            base.DoInitialize(); 
 
             // Read configuration
             if (File.Exists("Settings.json") == true)
