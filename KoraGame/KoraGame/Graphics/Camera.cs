@@ -1,5 +1,4 @@
-﻿
-using System.Runtime.Serialization;
+﻿using System.Runtime.Serialization;
 
 namespace KoraGame.Graphics
 {
@@ -18,10 +17,10 @@ namespace KoraGame.Graphics
         [DataMember(Name = "Far Plane")]
         private float farPlane = 1000f;
 
-        private readonly GraphicsBatch graphics = new(256);
+        private readonly GraphicsBatch graphicsBatch = new(256);
 
         // Properties
-        public GraphicsDevice GraphicsDevice => Game?.GraphicsDevice;
+        public GraphicsProvider Graphics => Game?.Graphics;
 
         public Color ClearColor
         {
@@ -60,12 +59,12 @@ namespace KoraGame.Graphics
         }
 
         // Methods
-        internal override void RegisterSubSystems()
+        protected override void OnEnable()
         {
             Scene?.activeCameras.Add(this);
         }
 
-        internal override void UnregisterSubSystems()
+        protected override void OnDisable()
         {
             Scene?.activeCameras.Remove(this);
         }
@@ -78,26 +77,26 @@ namespace KoraGame.Graphics
 
         public void Render(Texture renderTexture = null, Matrix4F? viewMatrix = null, Matrix4F? projectionMatrix = null)
         {
-            // Get command buffer
-            GraphicsCommand cmd = GraphicsDevice.AcquireCommandBuffer();
+            // Get graphics
+            GraphicsProvider graphics = Graphics;
 
             // Begin rendering
-            cmd.BeginRenderPass(clearColor, renderTexture);
+            graphics.BeginRenderPass(clearColor, renderTexture);
             {
                 // Render the camera perspective
-                Render(cmd, viewMatrix, projectionMatrix);
+                Render(graphics, viewMatrix, projectionMatrix);
             }
             // End rendering
-            cmd.EndRenderPass();
+            graphics.EndRenderPass();
 
             // Submit the command buffer
-            cmd.Submit();
+            graphics.Submit();
         }
 
-        public void Render(GraphicsCommand renderPass, Matrix4F? viewMatrix = null, Matrix4F? projectionMatrix = null)
+        public void Render(GraphicsProvider graphics, Matrix4F? viewMatrix = null, Matrix4F? projectionMatrix = null)
         {
             // Get the aspect
-            float aspect = renderPass.RenderWidth / (float)renderPass.RenderHeight;
+            float aspect = graphics.RenderWidth / (float)graphics.RenderHeight;
 
             // Create view matrix
             // IMPORTANT - Use WorldToLocal as the inverse for camera
@@ -111,12 +110,12 @@ namespace KoraGame.Graphics
                 : projectionMatrix.Value;
 
             // Begin batch
-            graphics.Begin(renderPass, view, projection);
+            graphicsBatch.Begin(graphics, view, projection);
             {
                 // Render the scene
-                Scene?.Draw(graphics);
+                Scene?.Draw(graphicsBatch);
             }
-            graphics.End();
+            graphicsBatch.End();
         }
     }
 }

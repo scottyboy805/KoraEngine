@@ -1,10 +1,10 @@
 FileVersion = 1
 LastConfig = "Debug"
 LastPlatform = "Win64"
-RecentFilesList = ["KoraPlayer\\src\\Graphics\\Mesh.bf", "KoraPlayer\\src\\Graphics\\Shader.bf", "c:\\Program Files\\BeefLang\\BeefLibs\\corlib\\src\\Span.bf", "KoraPlayer\\src\\GameObject.bf", "KoraPlayer\\src\\Game.bf", "KoraPlayer\\src\\Graphics\\Camera.bf", "KoraPlayer\\src\\Graphics\\GraphicsBatch.bf", "KoraPlayer\\src\\Graphics\\MeshRenderer.bf", "KoraPlayer\\src\\Scene.bf", "KoraPlayer\\src\\Graphics\\Renderer.bf", "KoraPlayer\\src\\Graphics\\GraphicsBuffer.bf", "KoraPlayer\\src\\Math\\Color32.bf", "KoraPlayer\\src\\Math\\Color.bf", "KoraPlayer\\src\\Graphics\\GraphicsCommand.bf", "KoraPlayer\\src\\Graphics\\Material.bf", "KoraPlayer\\src\\Assets\\AssetProvider.bf", "KoraPlayer\\src\\Component.bf", "KoraPlayer\\src\\Graphics\\Texture.bf", "KoraPlayer\\src\\RawAsset.bf", "KoraPlayer\\src\\Assets\\AssetImporter.bf"]
+RecentFilesList = ["KoraPlayer\\src\\Graphics\\Texture.bf", "KoraPlayer\\src\\Graphics\\Mesh.bf", "KoraPlayer\\src\\Graphics\\MeshRenderer.bf", "KoraPlayer\\src\\Graphics\\GraphicsBatch.bf", "KoraPlayer\\src\\Graphics\\Shader.bf", "c:\\Program Files\\BeefLang\\BeefLibs\\corlib\\src\\Span.bf", "KoraPlayer\\src\\GameObject.bf", "KoraPlayer\\src\\Game.bf", "KoraPlayer\\src\\Graphics\\Camera.bf", "KoraPlayer\\src\\Scene.bf", "KoraPlayer\\src\\Graphics\\Renderer.bf", "KoraPlayer\\src\\Graphics\\GraphicsBuffer.bf", "KoraPlayer\\src\\Math\\Color32.bf", "KoraPlayer\\src\\Math\\Color.bf", "KoraPlayer\\src\\Graphics\\GraphicsCommand.bf", "KoraPlayer\\src\\Graphics\\Material.bf", "KoraPlayer\\src\\Assets\\AssetProvider.bf", "KoraPlayer\\src\\Component.bf", "KoraPlayer\\src\\RawAsset.bf"]
 
 [MainWindow]
-X = 2295
+X = 6135
 Y = 77
 Width = 1169
 Height = 877
@@ -86,14 +86,12 @@ CursorPos = 2274
 ProjectName = "KoraPlayer"
 
 [[MainDockingFrame.DockedWidgets.DockedWidgets.DockedWidgets.Tabs]]
-Active = true
 TabLabel = "Mesh.bf"
 TabWidth = 75.73174
 TabIsPinned = false
 Type = "SourceViewPanel"
 FilePath = "KoraPlayer\\src\\Graphics\\Mesh.bf"
-CursorPos = 7631
-VertPos = 7425.0
+CursorPos = 320
 ProjectName = "KoraPlayer"
 
 [[MainDockingFrame.DockedWidgets.DockedWidgets.DockedWidgets.Tabs]]
@@ -102,7 +100,8 @@ TabWidth = 125.122
 TabIsPinned = false
 Type = "SourceViewPanel"
 FilePath = "KoraPlayer\\src\\Graphics\\GraphicsBatch.bf"
-CursorPos = 5309
+CursorPos = 2973
+VertPos = 1775.0
 ProjectName = "KoraPlayer"
 
 [[MainDockingFrame.DockedWidgets.DockedWidgets.DockedWidgets.Tabs]]
@@ -124,12 +123,13 @@ CursorPos = 1516
 ProjectName = "KoraPlayer"
 
 [[MainDockingFrame.DockedWidgets.DockedWidgets.DockedWidgets.Tabs]]
+Active = true
 TabLabel = "Texture.bf"
 TabWidth = 85.48784
 TabIsPinned = false
 Type = "SourceViewPanel"
 FilePath = "KoraPlayer\\src\\Graphics\\Texture.bf"
-CursorPos = 3501
+CursorPos = 121
 ProjectName = "KoraPlayer"
 
 [[MainDockingFrame.DockedWidgets.DockedWidgets.DockedWidgets.Tabs]]
@@ -183,7 +183,7 @@ TabWidth = 126.3415
 TabIsPinned = false
 Type = "SourceViewPanel"
 FilePath = "KoraPlayer\\src\\Graphics\\MeshRenderer.bf"
-CursorPos = 1253
+CursorPos = 355
 ProjectName = "KoraPlayer"
 
 [[MainDockingFrame.DockedWidgets.DockedWidgets.DockedWidgets.Tabs]]

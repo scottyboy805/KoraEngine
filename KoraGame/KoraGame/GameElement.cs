@@ -62,13 +62,13 @@ namespace KoraGame
         // Constructor
         protected GameElement()
         {
-            this.game = Game.Instance;
+            this.game = GameHost.Game;
             this.elementType = GetType();
         }
 
         protected GameElement(string name)
         {
-            this.game = Game.Instance;
+            this.game = GameHost.Game;
             this.elementType = GetType();
 
             this.name = name;

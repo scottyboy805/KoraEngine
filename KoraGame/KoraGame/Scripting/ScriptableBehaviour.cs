@@ -1,6 +1,4 @@
 ﻿using KoraGame.Graphics;
-using KoraGame.Input;
-using KoraGame.Physics;
 using System.Runtime.Serialization;
 
 namespace KoraGame
@@ -37,9 +35,7 @@ namespace KoraGame
         }
 
         public Screen Screen => Game?.Screen;
-        public GraphicsDevice Graphics => Game?.GraphicsDevice;
-        public InputProvider Input => Game?.Input;
-        public PhysicsSimulation Physics => Game?.Physics;
+        public GraphicsProvider Graphics => Game?.Graphics;
 
         // Methods
         protected virtual void OnStart() { }
@@ -64,13 +60,13 @@ namespace KoraGame
         public int GetComponentsInParent<T>(IList<T> results, bool includeInactive = false, string tag = null) where T : class => GameObject?.GetComponentsInParent<T>(results, includeInactive, tag) ?? 0;
         #endregion
 
-        internal override void RegisterSubSystems()
+        protected override void OnEnable()
         {
             Scene?.activeBehaviours.Add(this);
             Scene?.activeBehaviours.Sort(behaviourComparer);
         }
 
-        internal override void UnregisterSubSystems()
+        protected override void OnDisable()
         {
             Scene?.activeBehaviours.Remove(this);
         }

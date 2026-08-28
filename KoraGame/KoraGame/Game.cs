@@ -1,8 +1,5 @@
 ﻿using SDL;
-using KoraGame.Audio;
 using KoraGame.Graphics;
-using KoraGame.Input;
-using KoraGame.Physics;
 using System.Runtime.CompilerServices;
 
 [assembly: InternalsVisibleTo("KoraGame-Desktop")]
@@ -11,73 +8,69 @@ using System.Runtime.CompilerServices;
 
 namespace KoraGame
 {
-    public abstract class Game
+    public sealed class Game
     {
         // Private
-        private static Game instance;
-        protected readonly Queue<GameElement> destroyElements = new();
+        private readonly Queue<GameElement> destroyElements = new();
 
-        protected bool quit = false;
-        protected GameSettings settings = new();
-        protected Screen screen = null;
-        protected GraphicsDevice graphicsDevice = null;
-        protected AssetProvider assets = null;
-        protected AudioDevice audio = null;
-        protected InputProvider input = null;
-        protected PhysicsSimulation physics = null;
-        protected ScriptableProvider scriptable = null;
-        protected Scene scene = null;
+        private bool quit = false;
+        private GameSettings settings = null;
+        private Screen screen = null;
+        private GraphicsProvider graphics = null;
+        private AssetProvider assets = null;
+        private ScriptableProvider scriptable = null;
+        private Scene scene = null;
+        private bool isEditor = false;
+        private bool isPlaying = false;
 
         private ulong lastFrameTime = 0;
         private ulong performanceFrequency = 0;        
 
-        // Properties
-        internal static Game Instance => instance;        
-
+        // Properties    
         public bool Quit => quit;
         public GameSettings Settings => settings;
         public Screen Screen => screen;
-        public GraphicsDevice GraphicsDevice => graphicsDevice;
+        public GraphicsProvider Graphics => graphics;
         public AssetProvider Assets => assets;
-        public AudioDevice Audio => audio;
-        public InputProvider Input => input;
-        public PhysicsSimulation Physics => physics;
         public ScriptableProvider Scriptable => scriptable;
         public Scene Scene => scene;
 
-        public virtual bool IsEditor => false;
-        public virtual bool IsPlaying => true;        
+        public bool IsEditor => isEditor;
+        public bool IsPlaying => isPlaying;        
 
         // Constructor
-        internal Game()
+        internal Game(GameSettings settings, Screen screen, GraphicsProvider graphics, AssetProvider assets, ScriptableProvider scriptable, bool isEditor, bool isPlaying)
         {
-            instance = this;
-        }
-
-        ~Game()
-        {
-            if (instance == this)
-                instance = null;
+            this.settings = settings;
+            this.screen = screen;
+            this.graphics = graphics;
+            this.assets = assets;
+            this.scriptable = scriptable;
+            this.isEditor = isEditor;
+            this.isPlaying = isPlaying;
         }
 
         // Methods
-        public virtual void ChangeScene(Scene scene)
+        public void ChangeScene(Scene scene)
         {
+            if(this.scene == scene)
+                Debug.LogWarning("Scene is already active");
+
             // Deactivate current scene
             if (this.scene != null)
-                this.scene.Deactivate();
+                this.scene.SetActive(false);
             
             // Switch scene
             this.scene = scene;
 
             // Activate
             if (scene != null)
-                scene.Activate();
+                scene.SetActive(true);
 
             Debug.Log($"Change current scene: '{(scene != null ? scene.Name : null)}'", LogFilter.Game);
         }
 
-        internal virtual void DoInitialize()
+        internal void Initialize()
         {
             // Init SDL
             Debug.Log("Initialize SDL", LogFilter.Game);
@@ -102,9 +95,23 @@ namespace KoraGame
             // Initialize timing
             performanceFrequency = SDL3.SDL_GetPerformanceFrequency();
             lastFrameTime = SDL3.SDL_GetPerformanceCounter();
+                        
+
+            Scene scene = new Scene("MyScene");
+
+            GameObject cam = new GameObject("Camera");
+            cam.AddComponent<Camera>();
+            cam.Scene = scene;
+
+            GameObject cube = assets.LoadAsync<GameObject>("DefaultAssets/Cube.fbx").Result;
+            cube.Scene = scene;
+            cube.WorldPosition = new Vector3F(0, 0, -5);
+            cube.WorldRotation = QuaternionF.Euler(0, 45, 0);
+
+            ChangeScene(scene);
         }
 
-        internal virtual void DoUpdate()
+        internal void Update()
         {
             // Calculate frame time
             ulong currentTime = SDL3.SDL_GetPerformanceCounter();
@@ -113,9 +120,33 @@ namespace KoraGame
 
             // Update time system
             Time.UpdateTime(deltaTime);
+
+            // Render current scene
+            if (scene != null)
+            {
+                // Update all objects
+                scene.Update();
+
+                // Render all cameras
+                foreach (Camera camera in scene.activeCameras)
+                {
+                    // Render the camera
+                    camera.Render();
+                }
+            }
+
+            // Update input
+            //input.UpdateInputStates();
+
+            // Update title
+            screen.Title = "Fps = " + Time.FPS.ToString("F2");
+
+            // Destroy elements at the end of the frame
+            while (destroyElements.Count > 0)
+                GameElement.DestroyImmediate(destroyElements.Dequeue());
         }
 
-        internal virtual void DoShutdown()
+        internal void Shutdown()
         {
             // Unload assets
             assets?.UnloadAll();
@@ -133,7 +164,7 @@ namespace KoraGame
             SDL3.SDL_Quit();
         }
 
-        internal virtual void DoEvent(in SDL_Event evt)
+        internal void HandleEvent(in SDL_Event evt)
         {
             switch(evt.Type)
             {
@@ -146,7 +177,7 @@ namespace KoraGame
                 // Input
                 case SDL_EventType.SDL_EVENT_MOUSE_MOTION:
                     {
-                        input?.DoMouseMove(evt.motion.x, evt.motion.y);
+                        //input?.DoMouseMove(evt.motion.x, evt.motion.y);
                         break;
                     }
                 case SDL_EventType.SDL_EVENT_MOUSE_WHEEL:
@@ -156,26 +187,26 @@ namespace KoraGame
                 case SDL_EventType.SDL_EVENT_MOUSE_BUTTON_UP:
                 case SDL_EventType.SDL_EVENT_MOUSE_BUTTON_DOWN:
                     {
-                        input?.DoMouseButtonEvent((MouseButton)evt.button.Button, evt.button.down);
+                        //input?.DoMouseButtonEvent((MouseButton)evt.button.Button, evt.button.down);
                         break;
                     }
                 case SDL_EventType.SDL_EVENT_KEY_UP:
                 case SDL_EventType.SDL_EVENT_KEY_DOWN:
                     {
-                        input?.DoKeyboardButtonEvent((Key)evt.key.key, evt.key.down);
+                        //input?.DoKeyboardButtonEvent((Key)evt.key.key, evt.key.down);
                         break;
                     }
 
                 case SDL_EventType.SDL_EVENT_GAMEPAD_ADDED:
                 case SDL_EventType.SDL_EVENT_GAMEPAD_REMOVED:
                     {
-                        input?.DoControllerAvailabilityEvent((int)evt.gdevice.which, evt.Type == SDL_EventType.SDL_EVENT_GAMEPAD_ADDED);
+                        //input?.DoControllerAvailabilityEvent((int)evt.gdevice.which, evt.Type == SDL_EventType.SDL_EVENT_GAMEPAD_ADDED);
                         break;
                     }
                 case SDL_EventType.SDL_EVENT_GAMEPAD_BUTTON_UP:
                 case SDL_EventType.SDL_EVENT_GAMEPAD_BUTTON_DOWN:
                     {
-                        input?.DoControllerButtonEvent((int)evt.gbutton.which, (ControllerButton)evt.gbutton.button, evt.gbutton.down);
+                        //input?.DoControllerButtonEvent((int)evt.gbutton.which, (ControllerButton)evt.gbutton.button, evt.gbutton.down);
                         break;
                     }
                 case SDL_EventType.SDL_EVENT_GAMEPAD_AXIS_MOTION:
@@ -184,16 +215,16 @@ namespace KoraGame
                         int axisValue = evt.gaxis.value;
 
                         // Remap to float
-                        float remappedAxisValue = -1f + (axisValue - -InputProvider.ControllerAxisRange) * (1f - -1f) / (InputProvider.ControllerAxisRange - -InputProvider.ControllerAxisRange);
+                        //float remappedAxisValue = -1f + (axisValue - -InputProvider.ControllerAxisRange) * (1f - -1f) / (InputProvider.ControllerAxisRange - -InputProvider.ControllerAxisRange);
 
-                        input?.DoControllerAxisEvent((int)evt.gaxis.which, (ControllerAxis)evt.gaxis.axis, remappedAxisValue);
+                        //input?.DoControllerAxisEvent((int)evt.gaxis.which, (ControllerAxis)evt.gaxis.axis, remappedAxisValue);
                         break;
                     }
                 
             }
         }
 
-        internal virtual void DestroyDelayed(GameElement element)
+        internal void DestroyDelayed(GameElement element)
         {
             // Will be destroyed at the end of the frame
             destroyElements.Enqueue(element);

@@ -37,14 +37,11 @@ internal unsafe static class Program
     internal static SDL_AppResult AppInit(IntPtr* appState, int argc, byte** argv)
     {
         // Create the game
-        Game game = new GameApp();
+        GameHost host = new GameHost();
 
         // Initialize the game
-        game.DoInitialize();
-
-        // Pin the game
-        GCHandle gameHandle = GCHandle.Alloc(game, GCHandleType.Normal);
-        *appState = (IntPtr)gameHandle;
+        host.DoInitialize();
+        *appState = host.Handle;
 
         // Continue the game
         return SDL_AppResult.SDL_APP_CONTINUE;
@@ -53,15 +50,14 @@ internal unsafe static class Program
     [UnmanagedCallersOnly(CallConvs = new[] { typeof(CallConvCdecl) })]
     internal static SDL_AppResult AppEvent(IntPtr appState, SDL_Event* eventPtr)
     {
-        // Get the handle
-        GCHandle gameHandle = (GCHandle)appState;
-        Game game = (Game)gameHandle.Target;
+        // Get the game host
+        GameHost host = GameHost.Get(appState);
 
         // Handle the event
-        game.DoEvent(*eventPtr);
+        host.DoEvent(*eventPtr);
 
         // Check for quit
-        if (game.Quit == true)
+        if (host.Quit == true)
             return SDL_AppResult.SDL_APP_SUCCESS;
 
         // Continue the game
@@ -71,12 +67,11 @@ internal unsafe static class Program
     [UnmanagedCallersOnly(CallConvs = new[] { typeof(CallConvCdecl) })]
     internal static SDL_AppResult AppIterate(IntPtr appState)
     {
-        // Get the handle
-        GCHandle gameHandle = (GCHandle)appState;
-        Game game = (Game)gameHandle.Target;
+        // Get the game host
+        GameHost host = GameHost.Get(appState);
 
         // Update the game
-        game.DoUpdate();
+        host.DoUpdate();
 
         // Continue the game
         return SDL_AppResult.SDL_APP_CONTINUE;
@@ -85,14 +80,10 @@ internal unsafe static class Program
     [UnmanagedCallersOnly(CallConvs = new[] { typeof(CallConvCdecl) })]
     internal static void AppQuit(IntPtr appState, SDL_AppResult result)
     {
-        // Get the handle
-        GCHandle gameHandle = (GCHandle)appState;
-        Game game = (Game)gameHandle.Target;
+        // Get the game host
+        GameHost host = GameHost.Get(appState);
 
         // Shutdown the game
-        game.DoShutdown();
-
-        // Free the handle
-        gameHandle.Free();
+        host.DoShutdown();
     }
 }

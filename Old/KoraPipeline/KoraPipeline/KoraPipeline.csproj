@@ -1,0 +1,18 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>disable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\KoraGame\KoraGame\KoraGame.csproj" />
+  </ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="BCnEncoder.Net" Version="2.2.1" />
+		<PackageReference Include="StbImageSharp" Version="2.30.15" />
+	</ItemGroup>
+
+</Project>

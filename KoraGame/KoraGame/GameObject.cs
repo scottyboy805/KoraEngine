@@ -104,9 +104,10 @@ namespace KoraGame
                 // Add to new parent
                 if(parent != null)
                 {
-                    if (parent.children == null) parent.children = new();
-                    parent.children.Add(this);
+                    if (parent.children == null) 
+                        parent.children = new();
 
+                    parent.children.Add(this);
                     scene = parent.scene;
                 }
 
@@ -340,8 +341,8 @@ namespace KoraGame
             component.gameObject = this;
 
             // Set active
-            if(ActiveInScene == true)
-                Component.DoComponentEnabledEvent(component, component.Active);
+            if(ActiveInScene == true && component.Active == true)
+                Component.DoComponentEnabledEvent(component, true);
         }
         #endregion
 
@@ -631,7 +632,6 @@ namespace KoraGame
 
             // Check was active
             bool wasActive = ActiveInScene;
-
             this.active = on;
 
             // Check for now active
@@ -654,22 +654,22 @@ namespace KoraGame
 
         internal static void DoGameObjectEnabledEvent(GameObject go, bool on)
         {
-            // Update children
-            if (go.children != null)
-            {
-                foreach (GameObject child in go.children)
-                    DoGameObjectEnabledEvent(child, on);
-            }
-
             // Update components
             if (go.components != null)
             {
                 foreach (Component component in go.components)
                     Component.DoComponentEnabledEvent(component, on);
             }
+
+            // Update children
+            if (go.children != null)
+            {
+                foreach (GameObject child in go.children)
+                    DoGameObjectEnabledEvent(child, on);
+            }
         }
 
-        public static GameObject PrimitiveQuad(GraphicsDevice graphics, Vector2F? extents = null)
+        public static GameObject PrimitiveQuad(GraphicsProvider graphics, Vector2F? extents = null)
         {
             // Create the object
             GameObject go = new GameObject("Quad");
@@ -682,7 +682,7 @@ namespace KoraGame
             return go;
         }
 
-        public static GameObject PrimitiveCube(GraphicsDevice graphics, Vector3F? extents = null)
+        public static GameObject PrimitiveCube(GraphicsProvider graphics, Vector3F? extents = null)
         {
             // Create the object
             GameObject go = new GameObject("Cube");
@@ -695,7 +695,7 @@ namespace KoraGame
             return go;
         }
 
-        public static GameObject PrimitiveSphere(GraphicsDevice graphics, float? radius = null, float? segments = null)
+        public static GameObject PrimitiveSphere(GraphicsProvider graphics, float? radius = null, float? segments = null)
         {
             // Create the object
             GameObject go = new GameObject("Sphere");

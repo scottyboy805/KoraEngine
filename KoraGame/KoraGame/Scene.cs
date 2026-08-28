@@ -1,4 +1,5 @@
 ﻿using KoraGame.Graphics;
+using System.Runtime;
 using System.Runtime.Serialization;
 
 namespace KoraGame
@@ -17,23 +18,9 @@ namespace KoraGame
         internal readonly List<Light> activeLights = new();
         internal readonly List<ScriptableBehaviour> activeBehaviours = new();
 
-        internal GraphicsBuffer lightBuffer;
-
         // Properties
         public bool Active => active;
         public IReadOnlyList<GameObject> GameObjects => gameObjects;
-
-        internal GraphicsBuffer LightBuffer
-        {
-            get
-            {
-                // Lazy rebuild light buffer if needed
-                if (lightBuffer == null)
-                    lightBuffer = Light.RebuildLightBuffer(this);
-
-                return lightBuffer;
-            }
-        }
 
         // Constructor
         private Scene() { }
@@ -44,22 +31,13 @@ namespace KoraGame
         }
 
         // Methods
-        internal void Activate()
+        internal void SetActive(bool on)
         {
-            active = true;
+            active = on;
 
             // Update all objects
             foreach (GameObject go in gameObjects)
-                go.SetActive(true);
-        }
-
-        internal void Deactivate()
-        {
-            active = false;
-
-            // Update all objects
-            foreach (GameObject go in gameObjects)
-                go.SetActive(false);
+                GameObject.DoGameObjectEnabledEvent(go, on);
         }
 
         internal void Update()

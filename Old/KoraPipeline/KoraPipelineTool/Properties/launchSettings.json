@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "KoraPipelineTool": {
+      "commandName": "Project",
+      "commandLineArgs": "D:\\VisualStudio\\KoraEngine\\KoraEditor\\Content\\Shader\\imgui.shader.json D:\\VisualStudio\\KoraEngine\\KoraEditor\\Content\\Shader"
+    }
+  }
+}

@@ -1,0 +1,17 @@
+FileVersion = 1
+
+[Project]
+Name = "SDL3"
+TargetType = "BeefLib"
+StartupObject = "SDL3.Program"
+
+[Configs.Debug.Win64]
+PostBuildCmds = [
+	"CopyToDependents(\"$(ProjectDir)/dist/SDL3-3.4.0/lib/x64/*.dll\")", 
+	"CopyToDependents(\"$(ProjectDir)/dist/SDL3-3.4.0/lib/x64/*.pdb\")"
+]
+	
+[Configs.Release.Win64]
+PostBuildCmds = [
+	"CopyToDependents(\"$(ProjectDir)/dist/SDL3-3.4.0/lib/x64/*.dll\")"
+	]

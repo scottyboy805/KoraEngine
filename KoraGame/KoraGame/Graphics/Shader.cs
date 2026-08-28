@@ -108,7 +108,7 @@ namespace KoraGame.Graphics
         private List<ShaderProperty> properties = new();
 #pragma warning restore 0649
 
-        private GraphicsDevice device;        
+        private GraphicsProvider graphics;        
         private Dictionary<ShaderPipelineKey, IntPtr> pipelines = new();
 
         // Public
@@ -127,16 +127,16 @@ namespace KoraGame.Graphics
         private Shader()
         {
             // Get device
-            this.device = Game.Instance?.GraphicsDevice;
+            this.graphics = Game.Graphics;
         }
 
-        public Shader(GraphicsDevice device, byte[] vertexSource, byte[] fragmentSource, ShaderFormat format, string entryPoint = "main")
+        public Shader(GraphicsProvider graphics, byte[] vertexSource, byte[] fragmentSource, ShaderFormat format, string entryPoint = "main")
         {
             // Check for null
-            if(device == null)
-                throw new ArgumentNullException(nameof(device));
+            if(graphics == null)
+                throw new ArgumentNullException(nameof(graphics));
 
-            this.device = device;
+            this.graphics = graphics;
             this.format = format;
 
             // Initialize shaders
@@ -152,17 +152,17 @@ namespace KoraGame.Graphics
         // Methods
         protected override void OnDestroy()
         {
-            if(device != null)
+            if(graphics != null)
             {
                 // Destroy pipelines
                 foreach (IntPtr pipeline in pipelines.Values)
-                    SDL3.SDL_ReleaseGPUGraphicsPipeline(device.gpuDevice, (SDL_GPUGraphicsPipeline*)pipeline);
+                    SDL3.SDL_ReleaseGPUGraphicsPipeline(graphics.gpuDevice, (SDL_GPUGraphicsPipeline*)pipeline);
 
                 // Destroy shaders
-                SDL3.SDL_ReleaseGPUShader(device.gpuDevice, gpuVertexShader);
-                SDL3.SDL_ReleaseGPUShader(device.gpuDevice, gpuFragmentShader);
+                SDL3.SDL_ReleaseGPUShader(graphics.gpuDevice, gpuVertexShader);
+                SDL3.SDL_ReleaseGPUShader(graphics.gpuDevice, gpuFragmentShader);
 
-                device = null;
+                graphics = null;
                 gpuVertexShader = null;
                 gpuFragmentShader = null;
 
@@ -226,7 +226,7 @@ namespace KoraGame.Graphics
                     };
 
                     // Create the shader
-                    SDL_GPUShader* shader = SDL3.SDL_CreateGPUShader(device.gpuDevice, &vertexInfo);
+                    SDL_GPUShader* shader = SDL3.SDL_CreateGPUShader(graphics.gpuDevice, &vertexInfo);
 
                     // Check for error
                     if (shader == null)
@@ -240,7 +240,7 @@ namespace KoraGame.Graphics
         private SDL_GPUShader* InitializeShader(ShaderSource shaderSource, ShaderStage stage)
         {
             // Check for device
-            if (device == null)
+            if (graphics == null)
                 return null;
 
             // Get entry point
@@ -269,7 +269,7 @@ namespace KoraGame.Graphics
                     };
 
                     // Create the shader
-                    SDL_GPUShader* shader = SDL3.SDL_CreateGPUShader(device.gpuDevice, &vertexInfo);
+                    SDL_GPUShader* shader = SDL3.SDL_CreateGPUShader(graphics.gpuDevice, &vertexInfo);
 
                     // Check for error
                     if (shader == null)
@@ -363,7 +363,7 @@ namespace KoraGame.Graphics
                 };
 
                 // Create the pipeline
-                SDL_GPUGraphicsPipeline* pipeline = SDL3.SDL_CreateGPUGraphicsPipeline(device.gpuDevice, &pipelineInfo);
+                SDL_GPUGraphicsPipeline* pipeline = SDL3.SDL_CreateGPUGraphicsPipeline(graphics.gpuDevice, &pipelineInfo);
 
                 // Check for error
                 if(pipeline == null)

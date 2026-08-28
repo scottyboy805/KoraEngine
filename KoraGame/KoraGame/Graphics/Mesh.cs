@@ -32,7 +32,7 @@ namespace KoraGame.Graphics
         }
 
         // Private
-        private GraphicsDevice device;
+        private GraphicsProvider graphics;
         private GraphicsBuffer indexBuffer;
         private GraphicsBuffer vertexBuffer;
         private SubMesh[] subMeshes;
@@ -48,20 +48,20 @@ namespace KoraGame.Graphics
         // Constructor
         private Mesh()
         {
-            device = Game.Instance?.GraphicsDevice;
+            graphics = Game.Graphics;
         }
 
-        public Mesh(GraphicsDevice device, uint subMeshCount = 1)
+        public Mesh(GraphicsProvider graphics, uint subMeshCount = 1)
         {
             // Check for null
-            if (device == null)
-                throw new ArgumentNullException(nameof(device));
+            if (graphics == null)
+                throw new ArgumentNullException(nameof(graphics));
 
             // Require 1 sub mesh minimum
             if (subMeshCount < 1)
                 subMeshCount = 1;
 
-            this.device = device;
+            this.graphics = graphics;
 
             // Create sub meshes
             this.subMeshes = new SubMesh[subMeshCount];
@@ -70,9 +70,9 @@ namespace KoraGame.Graphics
         // Methods
         protected override void OnDestroy()
         {
-            if(device != null)
+            if(graphics != null)
             {
-                device = null;
+                graphics = null;
 
                 // GC will run the finalizer to cleanup these
                 indexBuffer = null;
@@ -182,7 +182,7 @@ namespace KoraGame.Graphics
             }
 
             // Create new buffer
-            GraphicsBuffer newBuffer = new GraphicsBuffer(device, GraphicsBufferUsage.Index, totalSize);
+            GraphicsBuffer newBuffer = new GraphicsBuffer(graphics, GraphicsBufferUsage.Index, totalSize);
 
             // Copy existing data and write new data
             newBuffer.MapMemory(newBufferPtr =>
@@ -324,7 +324,7 @@ namespace KoraGame.Graphics
             }
 
             // Create new buffer
-            GraphicsBuffer newBuffer = new GraphicsBuffer(device, GraphicsBufferUsage.Vertex, totalSize);
+            GraphicsBuffer newBuffer = new GraphicsBuffer(graphics, GraphicsBufferUsage.Vertex, totalSize);
 
             // Copy existing data and write new data
             newBuffer.MapMemory(newBufferPtr =>
@@ -474,14 +474,14 @@ namespace KoraGame.Graphics
         }
 
         #region Primitives
-        public static Mesh PrimitiveQuad(GraphicsDevice device, Vector2F bounds)
+        public static Mesh PrimitiveQuad(GraphicsProvider graphics, Vector2F bounds)
         {
             // Check for null device
-            if (device == null)
-                throw new ArgumentNullException(nameof(device));
+            if (graphics == null)
+                throw new ArgumentNullException(nameof(graphics));
 
             // Create the mesh
-            Mesh mesh = new Mesh(device);
+            Mesh mesh = new Mesh(graphics);
 
             // Calculate half extents to center the quad
             Vector2F halfExtents = bounds * 0.5f;
@@ -536,14 +536,14 @@ namespace KoraGame.Graphics
             return mesh;
         }
         
-        public static Mesh PrimitiveCube(GraphicsDevice device, Vector3F extents)
+        public static Mesh PrimitiveCube(GraphicsProvider graphics, Vector3F extents)
         {
             // Check for null device
-            if (device == null)
-                throw new ArgumentNullException(nameof(device));
+            if (graphics == null)
+                throw new ArgumentNullException(nameof(graphics));
 
             // Create the mesh
-            Mesh mesh = new Mesh(device);
+            Mesh mesh = new Mesh(graphics);
 
             // Calculate half extents to center the cube
             Vector3F halfExtents = extents * 0.5f;
@@ -653,18 +653,18 @@ namespace KoraGame.Graphics
             return mesh;
         }
 
-        public static Mesh PrimitiveSphere(GraphicsDevice device, float radius, float segments)
+        public static Mesh PrimitiveSphere(GraphicsProvider graphics, float radius, float segments)
         {
             // Check for null device
-            if (device == null)
-                throw new ArgumentNullException(nameof(device));
+            if (graphics == null)
+                throw new ArgumentNullException(nameof(graphics));
 
             // Ensure minimum segments
             if (segments < 3)
                 segments = 3;
 
             // Create the mesh
-            Mesh mesh = new Mesh(device);
+            Mesh mesh = new Mesh(graphics);
 
             // Calculate vertex and index counts
             int latitudeSegments = (int)segments;

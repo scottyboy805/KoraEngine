@@ -39,21 +39,21 @@ namespace KoraGame.Graphics
         }
 
         // Methods
-        internal override void RegisterSubSystems()
+        protected override void OnEnable()
         {
             if (Scene != null)
             {
                 Scene.activeLights.Add(this);
-                Scene.lightBuffer = null;
+                //Scene.lightBuffer = null;
             }
         }
 
-        internal override void UnregisterSubSystems()
+        protected override void OnDisable()
         {
             if (Scene != null)
             {
                 Scene.activeLights.Remove(this);
-                Scene.lightBuffer = null;
+                //Scene.lightBuffer = null;
             }
         }
 
@@ -64,7 +64,7 @@ namespace KoraGame.Graphics
             uint lightCount = (uint)activeLights.Count;
 
             // Recreate buffer
-            GraphicsBuffer lightBuffer = new GraphicsBuffer(scene.Game.GraphicsDevice, GraphicsBufferUsage.GraphicsRead, (uint)sizeof(LightData) * lightCount);
+            GraphicsBuffer lightBuffer = new GraphicsBuffer(scene.Game.Graphics, GraphicsBufferUsage.GraphicsRead, (uint)sizeof(LightData) * lightCount);
 
             // Fill light data
             lightBuffer.MapMemory((bufferPtr) =>

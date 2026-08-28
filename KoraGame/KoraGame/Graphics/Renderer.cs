@@ -4,16 +4,16 @@ namespace KoraGame.Graphics
     public abstract class Renderer : Component
     {
         // Properties
-        public GraphicsDevice GraphicsDevice => Game?.GraphicsDevice;
+        public GraphicsProvider Graphics => Game?.Graphics;
 
         // Methods
-        internal override void RegisterSubSystems()
+        protected override void OnEnable()
         {
             Debug.Log("Register: " + gameObject.Name);
             Scene?.activeRenderers.Add(this);
         }
 
-        internal override void UnregisterSubSystems()
+        protected override void OnDisable()
         {
             Debug.Log("Unregister: " + gameObject.Name);
             Scene?.activeRenderers.Remove(this);

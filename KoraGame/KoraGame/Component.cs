@@ -26,9 +26,6 @@ namespace KoraGame
         protected virtual void OnEnable() { }
         protected virtual void OnDisable() { }
 
-        internal virtual void RegisterSubSystems() { }
-        internal virtual void UnregisterSubSystems() { }
-
         internal override void CloneInstantiate(GameElement element)
         {
             // Clone base
@@ -58,9 +55,6 @@ namespace KoraGame
             // Trigger event
             if (on == true)
             {
-                // Register the component with the scene
-                component.RegisterSubSystems();
-
                 try
                 {
                     // Trigger enable
@@ -82,9 +76,6 @@ namespace KoraGame
                 {
                     Debug.LogException(e);
                 }
-
-                // Unregister the component
-                component.UnregisterSubSystems();
             }
         }
     }
