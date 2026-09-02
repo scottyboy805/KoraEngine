@@ -1,106 +1,134 @@
-﻿//using SDL;
+﻿using SDL;
 
-//namespace KoraGame.Graphics
-//{
-//    public unsafe sealed class GraphicsDevice
-//    {
-//        // Private
-//        private readonly Screen defaultRenderTarget;
-//        private readonly Texture defaultDepthTarget;
-//        private readonly TextureFormat preferredFormat = TextureFormat.B8G8R8A8Unorm;
+namespace KoraGame.Graphics
+{
+    public sealed class GraphicsDevice
+    {
+        // Private
+        private readonly Screen screenRenderTarget;
+        private readonly Texture depthRenderTarget;        
+        private readonly TextureFormat preferredFormat = TextureFormat.B8G8R8A8Unorm;
+        private readonly ThreadLocal<GraphicsCommand> graphicsCommands;
+        
+        private Texture whiteTexture = null;
+        private Material errorMaterial = null;
 
-//        private Texture whiteTexture = null;
-//        private Shader defaultShader = null;
+        // Internal
+        internal unsafe readonly SDL_GPUDevice* gpuDevice;
+        internal unsafe readonly TTF_TextEngine* ttfTextEngine;
 
-//        // Internal
-//        internal readonly SDL_GPUDevice* gpuDevice;
-//        internal readonly TTF_TextEngine* ttfTextEngine;
+        // Properties
+        public uint RenderWidth => screenRenderTarget != null ? (uint)screenRenderTarget.Width : 0;
+        public uint RenderHeght => screenRenderTarget != null ? (uint)screenRenderTarget.Height : 0;
+        public TextureFormat PreferredFormat => preferredFormat;
+        public Texture WhiteTexture => whiteTexture;
+        public Material ErrorMaterial => errorMaterial;
 
-//        // Properties
-//        internal Screen DefaultRenderTarget => defaultRenderTarget;
-//        internal Texture DefaultDepthTarget => defaultDepthTarget;
-//        public TextureFormat PreferredFormat => preferredFormat;
+        internal Screen DefaultRenderTarget => screenRenderTarget;
+        internal Texture DefaultDepthTarget => depthRenderTarget;
 
-//        public Texture WhiteTexture => whiteTexture;
-//        public Shader DefaultShader => defaultShader;
+        // Constructor
+        public unsafe GraphicsDevice(Screen screenRenderTarget = null)
+        {
+            this.screenRenderTarget = screenRenderTarget;
 
-//        // Constructor
-//        public GraphicsDevice(Screen defaultRenderTarget = null)
-//        {
-//            this.defaultRenderTarget = defaultRenderTarget;
+            // Create the device
+            this.gpuDevice = SDL3.SDL_CreateGPUDevice(SDL_GPUShaderFormat.SDL_GPU_SHADERFORMAT_SPIRV | SDL_GPUShaderFormat.SDL_GPU_SHADERFORMAT_MSL, true, (byte*)null);
+            string err = SDL3.SDL_GetError();
 
-//            // Create the device
-//            this.gpuDevice = SDL3.SDL_CreateGPUDevice(SDL_GPUShaderFormat.SDL_GPU_SHADERFORMAT_SPIRV | SDL_GPUShaderFormat.SDL_GPU_SHADERFORMAT_MSL, true, (byte*)null);
-//            string err = SDL3.SDL_GetError();
+            // Create the text engine
+            this.ttfTextEngine = SDL3_ttf.TTF_CreateGPUTextEngine(gpuDevice);
 
-//            // Create the text engine
-//            this.ttfTextEngine = SDL3_ttf.TTF_CreateGPUTextEngine(gpuDevice);
+            if (screenRenderTarget != null)
+            {
+                // Claim the window
+                SDL3.SDL_ClaimWindowForGPUDevice(gpuDevice, screenRenderTarget.sdlWindow);
 
-//            // Attach the device
-//            if(defaultRenderTarget != null)
-//            {
-//                // Claim the window
-//                SDL3.SDL_ClaimWindowForGPUDevice(gpuDevice, defaultRenderTarget.sdlWindow);
+                // Get the preferred format
+                this.preferredFormat = (TextureFormat)SDL3.SDL_GetGPUSwapchainTextureFormat(gpuDevice, screenRenderTarget.sdlWindow);
 
-//                // Get the preferred format
-//                this.preferredFormat = (TextureFormat)SDL3.SDL_GetGPUSwapchainTextureFormat(gpuDevice, defaultRenderTarget.sdlWindow);
+                // Create depth texture
+                this.depthRenderTarget = new Texture(this, (uint)screenRenderTarget.Width, (uint)screenRenderTarget.Height, TextureFormat.D32Float, 1, TextureUsage.DepthStencilTarget);
+            }
 
-//                // Create depth texture
-//                this.defaultDepthTarget = new Texture(this, (uint)defaultRenderTarget.Width, (uint)defaultRenderTarget.Height, TextureFormat.D32Float, 1, TextureUsage.DepthStencilTarget);
-//            }
+            // Init commands
+            this.graphicsCommands = new(CreateCommand);
+        }
 
-//            // Create default assets
-//            InitializeDefaultAssets();
-//        }
+        unsafe ~GraphicsDevice()
+        {
+            // Shutdown graphics
+            SDL3_ttf.TTF_DestroyGPUTextEngine(ttfTextEngine);
+            SDL3.SDL_DestroyGPUDevice(gpuDevice);
+        }
 
-//        ~GraphicsDevice()
-//        {
-//            SDL3_ttf.TTF_DestroyGPUTextEngine(ttfTextEngine);
-//            SDL3.SDL_DestroyGPUDevice(gpuDevice);
-//        }
+        // Methods
+        public unsafe string GetDeviceDriverName()
+        {
+            return SDL3.SDL_GetGPUDeviceDriver(gpuDevice);
+        }
 
-//        // Methods
-//        public GraphicsCommand AcquireCommandBuffer()
-//        {
-//            // Try to get command buffer
-//            SDL_GPUCommandBuffer* gpuCommandBuffer = SDL3.SDL_AcquireGPUCommandBuffer(gpuDevice);
+        public unsafe GraphicsCommand Acquire()
+        {
+            // Try to get command buffer
+            SDL_GPUCommandBuffer* gpuCommandBuffer = SDL3.SDL_AcquireGPUCommandBuffer(gpuDevice);
 
-//            // Create new
-//            return new GraphicsCommand(this, gpuCommandBuffer);
-//        }
+            if (gpuCommandBuffer == null)
+            {
+                Debug.LogError("Unable to acquire command buffer");
+                return default;
+            }
 
-//        public string GetDeviceDriverName()
-//        {
-//            return SDL3.SDL_GetGPUDeviceDriver(gpuDevice);
-//        }
+            // Get command for current thread
+            GraphicsCommand command = graphicsCommands.Value;
 
-//        private unsafe void InitializeDefaultAssets()
-//        {
-//            try
-//            {
-//                // Create white texture
-//                this.whiteTexture = new Texture(this, 1, 1);
-//                Color32 white = Color32.White;
-//                whiteTexture.Write(new Color32[,] { { white } });
+            // Begin the command
+            command.Begin(gpuCommandBuffer);
+            return command;
+        }
 
-//                // Create default shader
-//                byte[] vertexSource = File.ReadAllBytes("vertex.spv");
-//                byte[] fragmentSource = File.ReadAllBytes("fragment.spv");
-//                defaultShader = new Shader(this, vertexSource, fragmentSource, ShaderFormat.Spirv);
+        private GraphicsCommand CreateCommand()
+        {
+            return new GraphicsCommand(Thread.CurrentThread, this);
+        }
 
-//                // Upload the assets
-//                GraphicsCommand cmd = this.AcquireCommandBuffer();
-//                cmd.BeginCopyPass();
-//                {
-//                    cmd.UploadTexture(whiteTexture);
-//                }
-//                cmd.EndCopyPass();
-//                cmd.Submit();
-//            }
-//            catch(Exception e)
-//            {
-//                Debug.LogException(e);
-//            }
-//        }
-//    }
-//}
+        internal async Task InitializeDefaultAssetsAsync(AssetProvider assets)
+        {
+            try
+            {
+                // Create white texture
+                this.whiteTexture = new Texture(this, 1, 1);
+                Color32 white = Color32.White;
+                whiteTexture.Write(new Color32[,] { { white } });
+
+                // Load error shader parts
+                RawAsset vertexSource = await assets.LoadAsync<RawAsset>("DefaultAssets/Error.vert.spv");
+                RawAsset fragmentSource = await assets.LoadAsync<RawAsset>("DefaultAssets/Error.frag.spv");
+
+                // Create error shader
+                Shader errorShader = new Shader(this, vertexSource.GetBytes(), fragmentSource.GetBytes(), ShaderFormat.Spirv);
+
+                // Create error material
+                errorMaterial = new Material
+                {
+                    Name = "Error Material",
+                    Shader = errorShader,
+                    MainTexture = whiteTexture,
+                };
+
+                // Upload the assets
+                GraphicsCommand graphics = Acquire();
+                graphics.BeginCopyPass();
+                {
+                    graphics.UploadTexture(whiteTexture);
+                }
+                graphics.EndCopyPass();
+                graphics.Submit();
+            }
+            catch (Exception e)
+            {
+                Debug.LogException(e);
+            }
+        }
+    }
+}

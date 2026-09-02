@@ -1,0 +1,4 @@
+{
+	"Name": "Error Material",
+	"Shader": { "$ref": "ErrorShader.json" }
+}

@@ -35,7 +35,7 @@ namespace KoraGame
         }
 
         public Screen Screen => Game?.Screen;
-        public GraphicsProvider Graphics => Game?.Graphics;
+        public GraphicsDevice Graphics => Game?.GraphicsDevice;
 
         // Methods
         protected virtual void OnStart() { }

@@ -64,10 +64,10 @@ namespace KoraGame.Graphics
             uint lightCount = (uint)activeLights.Count;
 
             // Recreate buffer
-            GraphicsBuffer lightBuffer = new GraphicsBuffer(scene.Game.Graphics, GraphicsBufferUsage.GraphicsRead, (uint)sizeof(LightData) * lightCount);
+            GraphicsBuffer lightBuffer = new GraphicsBuffer(scene.Game.GraphicsDevice, (uint)sizeof(LightData) * lightCount, GraphicsBufferUsage.GraphicsRead);
 
             // Fill light data
-            lightBuffer.MapMemory((bufferPtr) =>
+            lightBuffer.Write((bufferPtr) =>
             {
                 LightData* lightDataArray = (LightData*)bufferPtr;
                 for (int i = 0; i < activeLights.Count; i++)

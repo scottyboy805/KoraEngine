@@ -58,7 +58,7 @@ namespace KoraGame.Graphics
             return null;
         }
 
-        public override void Draw(GraphicsBatch graphics)
+        public override void Draw(GraphicsCommand graphics)
         {
             // Check for any mesh
             if (mesh == null || mesh.HasVertices == false)
@@ -70,12 +70,8 @@ namespace KoraGame.Graphics
             // Draw all sub meshes
             for(uint subMesh = 0; subMesh < mesh.SubMeshCount; subMesh++)
             {
-                // Get the material
+                // Get the material - can be null
                 Material material = GetMaterial(subMesh);
-
-                // Check for none
-                if (material == null)
-                    continue;
 
                 // Draw mesh
                 graphics.Draw(modelMatrix, material, mesh, subMesh, 1);

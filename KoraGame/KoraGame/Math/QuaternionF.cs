@@ -1,4 +1,5 @@
 ﻿using System.Globalization;
+using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 
@@ -84,12 +85,6 @@ namespace KoraGame
             {
                 this = Identity;
             }
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal Jitter2.LinearMath.JQuaternion Jitter()
-        {
-            return new Jitter2.LinearMath.JQuaternion(X, Y, Z, W);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -356,6 +351,30 @@ namespace KoraGame
             res.Y = (xy + wz) * point.X + (1F - (xx + zz)) * point.Y + (yz - wx) * point.Z;
             res.Z = (xz - wy) * point.X + (yz + wx) * point.Y + (1F - (xx + yy)) * point.Z;
             return res;
+        }
+        #endregion
+
+        #region Conversion
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static implicit operator Quaternion(QuaternionF quaternion)
+        {
+            Quaternion result;
+            result.X = quaternion.X;
+            result.Y = quaternion.Y;
+            result.Z = quaternion.Z;
+            result.W = quaternion.W;
+            return result;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static implicit operator QuaternionF(Quaternion quaternion)
+        {
+            QuaternionF result;
+            result.X = quaternion.X;
+            result.Y = quaternion.Y;
+            result.Z = quaternion.Z;
+            result.W = quaternion.W;
+            return result;
         }
         #endregion
     }

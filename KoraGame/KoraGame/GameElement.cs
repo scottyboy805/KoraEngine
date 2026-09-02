@@ -14,7 +14,7 @@ namespace KoraGame
         private bool isDestroyed = false;
         private bool isInstance = false;
 
-        private GCHandle weakHandle = default;
+        private GCHandle handle = default;
 
         // Internal
         internal readonly Type elementType;
@@ -33,29 +33,16 @@ namespace KoraGame
 
         public virtual bool IsAsset => !isInstance;
 
-        internal GCHandle WeakHandle
+        internal IntPtr Ptr
         {
             get
             {
                 // Create the handle
-                if (weakHandle.IsAllocated == false && this.isDestroyed == false)
-                    weakHandle = GCHandle.Alloc(this, GCHandleType.Weak);
+                if (handle.IsAllocated == false && this.isDestroyed == false)
+                    handle = GCHandle.Alloc(this, GCHandleType.Normal);
 
                 // Get the weak handle
-                return weakHandle;
-            }
-        }
-
-        internal IntPtr WeakPtr
-        {
-            get
-            {
-                GCHandle handle = WeakHandle;
-
-                // Get ptr or null
-                return handle.IsAllocated == true
-                    ? GCHandle.ToIntPtr(handle) 
-                    : IntPtr.Zero;
+                return GCHandle.ToIntPtr(handle);
             }
         }
 
@@ -78,8 +65,8 @@ namespace KoraGame
         ~GameElement()
         {
             // Free handle
-            if (weakHandle.IsAllocated == true)
-                weakHandle.Free();
+            if (handle.IsAllocated == true)
+                handle.Free();
         }
 
         // Methods
@@ -117,6 +104,8 @@ namespace KoraGame
             CloneInstantiate(clone);
             return clone;
         }
+        protected virtual void OnCreate() { }
+
         protected virtual void OnDestroy() { }
 
         public static T Instantiate<T>(T element) where T : GameElement
@@ -166,8 +155,11 @@ namespace KoraGame
             element.OnDestroy();
         }
 
-        internal static T FromWeakHandle<T>(in GCHandle handle) where T : GameElement
+        internal static T FromPtr<T>(IntPtr ptr) where T : GameElement
         {
+            // Get the handle
+            GCHandle handle = GCHandle.FromIntPtr(ptr);
+
             // Try to get referenced object as T
             if (handle.IsAllocated == true && handle.Target != null && handle.Target is T t)
                 return t;
@@ -176,17 +168,19 @@ namespace KoraGame
             return null;
         }
 
-        internal static T FromWeakPtr<T>(in IntPtr ptr) where T : GameElement
+        internal static void DoCreate(GameElement element)
         {
-            if(ptr != IntPtr.Zero)
+            if(element != null)
             {
-                // Get from intptr
-                GCHandle handle = GCHandle.FromIntPtr(ptr);
-
-                // Try to get object
-                return FromWeakHandle<T>(handle);
+                try
+                {
+                    element.OnCreate();
+                }
+                catch(Exception e)
+                {
+                    Debug.LogException(e);
+                }
             }
-            return null;
         }
 
         public static bool operator==(GameElement a, GameElement b)

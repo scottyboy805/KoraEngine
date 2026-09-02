@@ -1,4 +1,5 @@
 ﻿using KoraGame.Graphics;
+using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 
@@ -448,11 +449,38 @@ namespace KoraGame
         }
         #endregion
 
+        #region EnumerableComponent
+        public IEnumerable<T> EnumerateComponents<T>(bool includeInactive = false) where T : class
+        {
+            // Get components
+            if (components != null)
+            {
+                foreach (Component component in components)
+                {
+                    if (component is T match && CheckComponent(component, includeInactive) == true)
+                        yield return match;
+                }
+            }
+        }
+
+        public IEnumerable<T> EnumerateComponentsInChildren<T>(bool includeInactive = false, string tag = null) where T : class
+        {
+            // Search for components
+            return BFSSearchComponentsChildren<T>(this, includeInactive, tag);
+        }
+
+        public IEnumerable<T> EnumerateComponentsInParent<T>(bool includeInactive = false, string tag = null) where T : class
+        {
+            // Search for components
+            return BFSSearchComponentsParent<T>(this, includeInactive, tag);
+        }
+        #endregion
+
         #region SearchComponents(T)
         private static T BFSSearchComponentChildren<T>(GameObject current, bool includeInactive, string tag) where T : class
         {
             // Check for any components
-            if (current.components != null && current.components.Count > 0)
+            if (current.components != null)
             {
                 // Search all
                 foreach (Component component in current.components)
@@ -462,14 +490,17 @@ namespace KoraGame
                 }
 
                 // Search deeper
-                foreach (Component component in current.components)
+                if (current.children != null)
                 {
-                    // Search inside child component
-                    T result = BFSSearchComponentChildren<T>(component.GameObject, includeInactive, tag);
+                    foreach (GameObject child in current.children)
+                    {
+                        // Search inside child component
+                        T result = BFSSearchComponentChildren<T>(child, includeInactive, tag);
 
-                    // Check for match
-                    if (result != null)
-                        return result;
+                        // Check for match
+                        if (result != null)
+                            return result;
+                    }
                 }
             }
             // Not found
@@ -478,20 +509,27 @@ namespace KoraGame
 
         private static IEnumerable<T> BFSSearchComponentsChildren<T>(GameObject current, bool includeInactive, string tag) where T : class
         {
-            // Search all components
-            foreach (Component component in current.components)
+            // Check for any
+            if (current.components != null)
             {
-                // Check for match
-                if (component is T match && CheckComponent(component, includeInactive, tag) == true)
-                    yield return match;
+                // Search all components
+                foreach (Component component in current.components)
+                {
+                    // Check for match
+                    if (component is T match && CheckComponent(component, includeInactive, tag) == true)
+                        yield return match;
+                }
             }
 
             // Search deeper
-            foreach (Component component in current.components)
+            if(current.children != null)
             {
-                // Search inside child components
-                foreach (T result in BFSSearchComponentsChildren<T>(component.GameObject, includeInactive, tag))
-                    yield return result;
+                foreach (GameObject child in current.children)
+                {
+                    // Search inside child components
+                    foreach (T result in BFSSearchComponentsChildren<T>(child, includeInactive, tag))
+                        yield return result;
+                }
             }
         }
 
@@ -499,23 +537,31 @@ namespace KoraGame
         {
             int count = 0;
 
-            // Search all components
-            foreach (Component component in current.components)
+            // Check for any
+            if (current.components != null)
             {
-                // Check for match
-                if (component is T match && CheckComponent(component, includeInactive, tag) == true)
+                // Search all components
+                foreach (Component component in current.components)
                 {
-                    results.Add(match);
-                    count++;
+                    // Check for match
+                    if (component is T match && CheckComponent(component, includeInactive, tag) == true)
+                    {
+                        results.Add(match);
+                        count++;
+                    }
                 }
             }
 
             // Search deeper
-            foreach (Component component in current.components)
+            if(current.children != null)
             {
-                // Search inside child components
-                count += BFSSearchComponentsChildren<T>(component.GameObject, results, includeInactive, tag);
+                foreach(GameObject child in current.children)
+                {
+                    // Search inside child components
+                    count += BFSSearchComponentsChildren<T>(child, results, includeInactive, tag);
+                }
             }
+
             return count;
         }
 
@@ -669,7 +715,7 @@ namespace KoraGame
             }
         }
 
-        public static GameObject PrimitiveQuad(GraphicsProvider graphics, Vector2F? extents = null)
+        public static GameObject PrimitiveQuad(GraphicsDevice graphics, Vector2F? extents = null)
         {
             // Create the object
             GameObject go = new GameObject("Quad");
@@ -682,7 +728,7 @@ namespace KoraGame
             return go;
         }
 
-        public static GameObject PrimitiveCube(GraphicsProvider graphics, Vector3F? extents = null)
+        public static GameObject PrimitiveCube(GraphicsDevice graphics, Vector3F? extents = null)
         {
             // Create the object
             GameObject go = new GameObject("Cube");
@@ -695,7 +741,7 @@ namespace KoraGame
             return go;
         }
 
-        public static GameObject PrimitiveSphere(GraphicsProvider graphics, float? radius = null, float? segments = null)
+        public static GameObject PrimitiveSphere(GraphicsDevice graphics, float? radius = null, float? segments = null)
         {
             // Create the object
             GameObject go = new GameObject("Sphere");

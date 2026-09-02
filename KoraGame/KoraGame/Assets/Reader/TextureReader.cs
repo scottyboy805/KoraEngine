@@ -27,7 +27,7 @@ namespace KoraGame.Assets
             ImageResult img = ImageResult.FromStream(stream, ColorComponents.RedGreenBlueAlpha);
 
             // Create the texture
-            Texture texture = new Texture(context.Graphics, (uint)img.Width, (uint)img.Height, TextureFormat.R8G8B8A8Unorm);
+            Texture texture = new Texture(context.GraphicsDevice, (uint)img.Width, (uint)img.Height, TextureFormat.R8G8B8A8Unorm);
             texture.Name = context.AssetName;
 
             // Write the data
@@ -49,7 +49,7 @@ namespace KoraGame.Assets
             TextureHeader header = ReadHeader(reader);
 
             // Initialize texture
-            Texture texture = new Texture(context.Graphics,
+            Texture texture = new Texture(context.GraphicsDevice,
                 header.Width,
                 header.Height,
                 header.Depth,

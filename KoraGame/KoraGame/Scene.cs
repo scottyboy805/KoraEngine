@@ -1,5 +1,4 @@
 ﻿using KoraGame.Graphics;
-using System.Runtime;
 using System.Runtime.Serialization;
 
 namespace KoraGame
@@ -57,13 +56,13 @@ namespace KoraGame
             }
         }
 
-        internal void Draw(Graphics.GraphicsBatch renderBatch)
+        internal void Draw(GraphicsCommand graphics)
         {
             // Process all renderers
             foreach(Renderer renderer in activeRenderers)
             {
                 // Render the object
-                renderer.Draw(renderBatch);
+                renderer.Draw(graphics);
             }
         }
 

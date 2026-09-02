@@ -2,6 +2,7 @@
 using KoraGame.Graphics;
 using Material = KoraGame.Graphics.Material;
 using Mesh = KoraGame.Graphics.Mesh;
+using Texture = KoraGame.Graphics.Texture;
 
 namespace KoraGame.Assets
 {
@@ -61,13 +62,13 @@ namespace KoraGame.Assets
             return result;
         }
 
-        private static unsafe Mesh ReadAsMesh(AssetReadContext context, Assimp.Scene scene, Node meshNode)
+        private static Mesh ReadAsMesh(AssetReadContext context, Assimp.Scene scene, Node meshNode)
         {
             // Get number of sub meshes
             uint subMeshCount = (uint)meshNode.MeshCount;
 
             // Create mesh
-            Mesh mesh = new Mesh(context.Graphics, subMeshCount);
+            Mesh mesh = new Mesh(context.GraphicsDevice, subMeshCount);
             mesh.Name = meshNode.Name;
 
             // Process all child

@@ -163,7 +163,7 @@ namespace KoraGame.Graphics
     public sealed class Texture : GameElement
     {
         // Private
-        private GraphicsProvider graphics;
+        private GraphicsDevice graphics;
         private TextureFormat format = 0;
         private TextureUsage usage = 0;
         private TextureShape shape = 0;
@@ -189,12 +189,12 @@ namespace KoraGame.Graphics
         public uint SizeInBytes => sizeInBytes;
 
         // Constructor
-        public Texture(GraphicsProvider graphics, uint width, uint height, TextureFormat format = 0, uint mipMapLevels = 1, TextureUsage usage = TextureUsage.Sampler, TextureShape shape = TextureShape.Texture2D)
+        public Texture(GraphicsDevice graphics, uint width, uint height, TextureFormat format = 0, uint mipMapLevels = 1, TextureUsage usage = TextureUsage.Sampler, TextureShape shape = TextureShape.Texture2D)
             : this(graphics, width, height, 1, format, mipMapLevels, usage, shape)
         {
         }
 
-        public Texture(GraphicsProvider device, uint width, uint height, uint depth, TextureFormat format = 0, uint mipMapLevels = 1, TextureUsage usage = TextureUsage.Sampler, TextureShape shape = TextureShape.Texture2D)
+        public Texture(GraphicsDevice device, uint width, uint height, uint depth, TextureFormat format = 0, uint mipMapLevels = 1, TextureUsage usage = TextureUsage.Sampler, TextureShape shape = TextureShape.Texture2D)
         {
             // Check for null
             if (device == null)

@@ -7,136 +7,136 @@ namespace KoraGame
     public static class SerializedJson
     {
         // Type
-        private enum SerializeRefType
-        {
-            None = 0,
-            LocalRef,
-            ExternRef,
-        }
+        //private enum SerializeRefType
+        //{
+        //    None = 0,
+        //    LocalRef,
+        //    ExternRef,
+        //}
 
-        internal class SerializedReferenceContext
-        {
-            // Private
-            private Dictionary<string, object> fileIdObjects;
-            private Dictionary<string, Task<object>> externalIdObjects;
-            private Dictionary<string, BindElement> localRefElements;
-            private Dictionary<string, BindElement> externalRefElements;
-            private Queue<IAssetSerialize> deserializeCallbacks;
+        //internal class SerializedReferenceContext
+        //{
+        //    // Private
+        //    private Dictionary<string, object> fileIdObjects;
+        //    private Dictionary<string, Task<object>> externalIdObjects;
+        //    private Dictionary<string, BindElement> localRefElements;
+        //    private Dictionary<string, BindElement> externalRefElements;
+        //    private Queue<IAssetSerialize> deserializeCallbacks;
 
-            // Methods
-            public virtual Type ResolveType(string typeId)
-            {
-                return Type.GetType(typeId, false);
-            }
+        //    // Methods
+        //    public virtual Type ResolveType(string typeId)
+        //    {
+        //        return Type.GetType(typeId, false);
+        //    }
 
-            public virtual string GetTypeId(Type type)
-            {
-                return type.AssemblyQualifiedName;
-            }
+        //    public virtual string GetTypeId(Type type)
+        //    {
+        //        return type.AssemblyQualifiedName;
+        //    }
 
-            public virtual Task<object> ResolveExternalObjectAsync(string id, Type asType)
-            {
-                return Task.FromResult<object>(null);
-            }
+        //    public virtual Task<object> ResolveExternalObjectAsync(string id, Type asType)
+        //    {
+        //        return Task.FromResult<object>(null);
+        //    }
 
-            public void DefineLocalReference(string localRefId, object localInstance)
-            {
-                // Create local
-                if (fileIdObjects == null)
-                    fileIdObjects = new();
+        //    public void DefineLocalReference(string localRefId, object localInstance)
+        //    {
+        //        // Create local
+        //        if (fileIdObjects == null)
+        //            fileIdObjects = new();
 
-                // Add reference
-                fileIdObjects.Add(localRefId, localInstance);
-            }
+        //        // Add reference
+        //        fileIdObjects.Add(localRefId, localInstance);
+        //    }
 
-            public void AddLocalReference(string localRefId, BindElement binding)
-            {
-                // Create binding
-                if (localRefElements == null)
-                    localRefElements = new();
+        //    public void AddLocalReference(string localRefId, BindElement binding)
+        //    {
+        //        // Create binding
+        //        if (localRefElements == null)
+        //            localRefElements = new();
 
-                // Add binding
-                localRefElements.Add(localRefId, binding);
-            }
+        //        // Add binding
+        //        localRefElements.Add(localRefId, binding);
+        //    }
 
-            public void AddExternalReference(string externRefId, BindElement binding, Type asType)
-            {
-                // Create binding
-                if (externalRefElements == null)
-                    externalRefElements = new();
+        //    public void AddExternalReference(string externRefId, BindElement binding, Type asType)
+        //    {
+        //        // Create binding
+        //        if (externalRefElements == null)
+        //            externalRefElements = new();
 
-                // Create external objects
-                if(externalIdObjects == null) 
-                    externalIdObjects = new();
+        //        // Create external objects
+        //        if(externalIdObjects == null) 
+        //            externalIdObjects = new();
 
-                // Add binding
-                externalRefElements.Add(externRefId, binding);
+        //        // Add binding
+        //        externalRefElements.Add(externRefId, binding);
 
-                // Add external object request
-                externalIdObjects.Add(externRefId, ResolveExternalObjectAsync(externRefId, asType));
-            }
+        //        // Add external object request
+        //        externalIdObjects.Add(externRefId, ResolveExternalObjectAsync(externRefId, asType));
+        //    }
 
-            public void AddDeserializationCallback(object instance)
-            {
-                if(instance is IAssetSerialize serialize)
-                {
-                    // Create collection
-                    if (deserializeCallbacks == null)
-                        deserializeCallbacks = new();
+        //    public void AddDeserializationCallback(object instance)
+        //    {
+        //        if(instance is IAssetSerialize serialize)
+        //        {
+        //            // Create collection
+        //            if (deserializeCallbacks == null)
+        //                deserializeCallbacks = new();
 
-                    // Push callback
-                    deserializeCallbacks.Enqueue(serialize);
-                }
-            }
+        //            // Push callback
+        //            deserializeCallbacks.Enqueue(serialize);
+        //        }
+        //    }
 
-            public async Task<object> PerformLateBindingsAndCallbacksAsync(object instance)
-            {
-                // Wait for completed
-                if(externalIdObjects != null)
-                    await Task.WhenAll(externalIdObjects.Values);
+        //    public async Task<object> PerformLateBindingsAndCallbacksAsync(object instance)
+        //    {
+        //        // Wait for completed
+        //        if(externalIdObjects != null)
+        //            await Task.WhenAll(externalIdObjects.Values);
 
-                // Bind local file ids
-                if (localRefElements != null && fileIdObjects != null)
-                {
-                    foreach (var fileId in localRefElements)
-                    {
-                        // Lookup the object
-                        if (fileIdObjects.TryGetValue(fileId.Key, out object value) == true)
-                            fileId.Value.Bind(value);
-                    }
-                }
+        //        // Bind local file ids
+        //        if (localRefElements != null && fileIdObjects != null)
+        //        {
+        //            foreach (var fileId in localRefElements)
+        //            {
+        //                // Lookup the object
+        //                if (fileIdObjects.TryGetValue(fileId.Key, out object value) == true)
+        //                    fileId.Value.Bind(value);
+        //            }
+        //        }
 
-                // Bind external asset paths
-                if (externalRefElements != null && externalIdObjects != null)
-                {
-                    foreach (var externalId in externalRefElements)
-                    {
-                        // Lookup the object
-                        if (externalIdObjects.TryGetValue(externalId.Key, out Task<object> elementTask) == true && elementTask.IsCompletedSuccessfully == true)
-                            externalId.Value.Bind(elementTask.Result);
-                    }
-                }
+        //        // Bind external asset paths
+        //        if (externalRefElements != null && externalIdObjects != null)
+        //        {
+        //            foreach (var externalId in externalRefElements)
+        //            {
+        //                // Lookup the object
+        //                if (externalIdObjects.TryGetValue(externalId.Key, out Task<object> elementTask) == true && elementTask.IsCompletedSuccessfully == true)
+        //                    externalId.Value.Bind(elementTask.Result);
+        //            }
+        //        }
 
-                // Do callbacks
-                if (deserializeCallbacks != null)
-                {
-                    foreach (IAssetSerialize serialize in deserializeCallbacks)
-                    {
-                        try
-                        {
-                            serialize.OnDeserialize();
-                        }
-                        catch (Exception e)
-                        {
-                            Debug.LogException(e);
-                        }
-                    }
-                }
+        //        // Do callbacks
+        //        if (deserializeCallbacks != null)
+        //        {
+        //            foreach (IAssetSerialize serialize in deserializeCallbacks)
+        //            {
+        //                try
+        //                {
+        //                    serialize.OnDeserialize();
+        //                }
+        //                catch (Exception e)
+        //                {
+        //                    Debug.LogException(e);
+        //                }
+        //            }
+        //        }
 
-                // Get the instance
-                return instance;
-            }
-        }
+        //        // Get the instance
+        //        return instance;
+        //    }
+        //}
 
         // Private
         private const string idDiscriminator = "$id";
@@ -145,10 +145,13 @@ namespace KoraGame
         private const string externalReferenceDiscriminator = "$ref";
 
         // Methods
-        public static async Task<T> DeserializeAsync<T>(string json)
+        public static async Task<T> DeserializeAsync<T>( string json)
         {
             // Get bytes
             byte[] jsonBytes = Encoding.UTF8.GetBytes(json);
+
+            // Create context
+            SerializedReference<string> context = default;
 
             // Create reader
             Utf8JsonReader reader = new Utf8JsonReader(jsonBytes);
@@ -156,7 +159,7 @@ namespace KoraGame
             try
             {
                 // Read async
-                return (T)await ReadRootObject(null, ref reader, typeof(T), null);
+                return (T)await ReadRootObject(ref context, ref reader, typeof(T), null);
             }
             catch(InvalidCastException)
             {
@@ -169,15 +172,18 @@ namespace KoraGame
             // Get bytes
             byte[] jsonBytes = Encoding.UTF8.GetBytes(json);
 
+            // Create context
+            SerializedReference<string> context = default;
+
             // Create reader
             Utf8JsonReader reader = new Utf8JsonReader(jsonBytes);
 
             // Read async
-            _ = await ReadRootObject(null, ref reader, typeof(T), instance);
+            _ = await ReadRootObject(ref context, ref reader, typeof(T), instance);
         }
 
         #region Read
-        internal static Task<object> ReadRootObject(SerializedReferenceContext context, ref Utf8JsonReader reader, Type type, object existingInstance = null)
+        internal static Task<object> ReadRootObject(ref SerializedReference<string> context, ref Utf8JsonReader reader, Type type, object existingInstance = null)
         {
             // Read first token
             if (reader.Read() == false)
@@ -186,12 +192,10 @@ namespace KoraGame
             try
             {                
                 // Try to read
-                object obj = ReadObject(context, ref reader, type, existingInstance, null);
+                object obj = ReadObject(ref context, ref reader, type, existingInstance, null);
 
                 // Wait for late binding
-                return context != null
-                    ? context.PerformLateBindingsAndCallbacksAsync(obj)
-                    : Task.FromResult(obj);
+                return context.PerformLateBindingAndDeserializeCallbacks(obj);
             }
             catch(Exception e)
             {
@@ -200,7 +204,7 @@ namespace KoraGame
             }
         }
 
-        private static bool ReadAny(SerializedReferenceContext context, ref Utf8JsonReader reader, Type type, object instance, BindElement parent, out object value)
+        private static bool ReadAny(ref SerializedReference<string> context, ref Utf8JsonReader reader, Type type, object instance, BindElement parent, out object value)
         {
             value = null;
 
@@ -216,13 +220,13 @@ namespace KoraGame
             if (reader.TokenType == JsonTokenType.StartObject)
             {
                 // Read as object
-                value = ReadObject(context, ref reader, type, instance, parent);
+                value = ReadObject(ref context, ref reader, type, instance, parent);
             }
             // Check for array
             else if (reader.TokenType == JsonTokenType.StartArray)
             {
                 // Read as array
-                value = ReadArray(context, ref reader, type, instance, parent);
+                value = ReadArray(ref context, ref reader, type, instance, parent);
             }
             // Handle any other value as a property
             else
@@ -233,7 +237,7 @@ namespace KoraGame
             return true;
         }
 
-        private static object ReadObject(SerializedReferenceContext context, ref Utf8JsonReader reader, Type type, object instance, BindElement parent)
+        private static object ReadObject(ref SerializedReference<string> context, ref Utf8JsonReader reader, Type type, object instance, BindElement parent)
         {
             // Expect object start
             if (reader.TokenType != JsonTokenType.StartObject)
@@ -260,7 +264,7 @@ namespace KoraGame
 
                     // Register the instance if a file id was specified
                     if (string.IsNullOrEmpty(fileId) == false)
-                        context?.DefineLocalReference(fileId, instance);
+                        context.RegisterLocalObject(fileId, instance, type);
                 }
                 else
                 {
@@ -293,25 +297,25 @@ namespace KoraGame
 
                     // Check for reference element
                     // If true, the elements will be added to the lookup tables and data will be bound later
-                    SerializeRefType refType = ReadReferenceInfo(ref reader, element.PropertyType, out string refId);
+                    SerializedRefType refType = ReadReferenceInfo(ref reader, element.PropertyType, out string refId);
 
                     // Check for local reference
-                    if (refType == SerializeRefType.LocalRef)
+                    if (refType == SerializedRefType.Local)
                     {
                         // Add reference to local object
-                        context?.AddLocalReference(refId, bind);
+                        context.RegisterLocalReference(refId, bind);
                     }
                     // Check for external reference
-                    else if (refType == SerializeRefType.ExternRef)
+                    else if (refType == SerializedRefType.External)
                     {
                         // Add reference to external object
-                        context?.AddExternalReference(refId, bind, element.PropertyType);
+                        context.RegisterExternalReference(refId, bind, element.PropertyType);
                     }
                     // Just deserialize normally
                     else
                     {
                         // Try to read any
-                        bool didRead = ReadAny(context, ref reader, element.PropertyType, null, bind, out object value);
+                        bool didRead = ReadAny(ref context, ref reader, element.PropertyType, null, bind, out object value);
 
                         // Check for any value
                         if (didRead == true && value != null)
@@ -334,12 +338,12 @@ namespace KoraGame
                 ReadSkipObject(ref reader);
 
             // Try to push deserialize callback
-            context?.AddDeserializationCallback(instance);
-
+            context.RegisterSerializeCallbacks(instance);
+             
             return instance;
         }
 
-        private static object ReadArray(SerializedReferenceContext context, ref Utf8JsonReader reader, Type type, object instance, BindElement parent)
+        private static object ReadArray(ref SerializedReference<string> context, ref Utf8JsonReader reader, Type type, object instance, BindElement parent)
         {
             // Expect array start
             if (reader.TokenType != JsonTokenType.StartArray)
@@ -382,7 +386,7 @@ namespace KoraGame
             while (reader.TokenType != JsonTokenType.EndArray)
             {
                 // Try to read any
-                bool didRead = ReadAny(context, ref reader, elementType, null, parent, out object value);
+                bool didRead = ReadAny(ref context, ref reader, elementType, null, parent, out object value);
 
                 // Check for any value
                 if (didRead == true)
@@ -535,7 +539,7 @@ namespace KoraGame
             }
         }
 
-        private static SerializeRefType ReadReferenceInfo(ref Utf8JsonReader reader, Type asType, out string refId)
+        private static SerializedRefType ReadReferenceInfo(ref Utf8JsonReader reader, Type asType, out string refId)
         {
             refId = null;
 
@@ -544,13 +548,13 @@ namespace KoraGame
 
             // Check for object start
             if (noModifyReader.Read() == false || noModifyReader.TokenType != JsonTokenType.StartObject)
-                return SerializeRefType.None;
+                return SerializedRefType.None;
 
             while (true)
             {
                 // Try to read
                 if (noModifyReader.Read() == false)
-                    return SerializeRefType.None;
+                    return SerializedRefType.None;
 
                 // Check for property
                 if (noModifyReader.TokenType == JsonTokenType.PropertyName)
@@ -572,7 +576,7 @@ namespace KoraGame
 
                                 // Update reader
                                 reader = noModifyReader;
-                                return SerializeRefType.LocalRef;
+                                return SerializedRefType.Local;
                             }
                         case externalReferenceDiscriminator:
                             {
@@ -586,10 +590,10 @@ namespace KoraGame
 
                                 // Update reader
                                 reader = noModifyReader;
-                                return SerializeRefType.ExternRef;
+                                return SerializedRefType.External;
                             }
                         // Exit because we did not match any value
-                        default: return SerializeRefType.None;
+                        default: return SerializedRefType.None;
                     }
                 }
             }

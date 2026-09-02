@@ -9,10 +9,10 @@
 
 	<ItemGroup>
 		<PackageReference Include="AssimpNet" Version="5.0.0-beta1" />
-		<PackageReference Include="Jitter2" Version="2.8.1" />
-		<PackageReference Include="ppy.SDL3-CS" Version="2026.320.0" />
-		<PackageReference Include="ppy.SDL3_mixer-CS" Version="2026.320.0" />
-		<PackageReference Include="ppy.SDL3_ttf-CS" Version="2026.320.0" />
-		<PackageReference Include="StbImageSharp" Version="2.30.15" />
+		<PackageReference Include="Box3D.NET" Version="0.4.0" />
+		<PackageReference Include="ppy.SDL3-CS" Version="2026.722.0" />
+		<PackageReference Include="ppy.SDL3_mixer-CS" Version="2026.722.0" />
+		<PackageReference Include="ppy.SDL3_ttf-CS" Version="2026.722.0" />
+		<PackageReference Include="StbImageSharp" Version="2.30.16" />
 	</ItemGroup>
 </Project>

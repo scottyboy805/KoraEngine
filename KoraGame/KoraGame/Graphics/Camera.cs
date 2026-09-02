@@ -20,7 +20,7 @@ namespace KoraGame.Graphics
         private readonly GraphicsBatch graphicsBatch = new(256);
 
         // Properties
-        public GraphicsProvider Graphics => Game?.Graphics;
+        public GraphicsDevice GraphicsDevice => Game?.GraphicsDevice;
 
         public Color ClearColor
         {
@@ -78,25 +78,23 @@ namespace KoraGame.Graphics
         public void Render(Texture renderTexture = null, Matrix4F? viewMatrix = null, Matrix4F? projectionMatrix = null)
         {
             // Get graphics
-            GraphicsProvider graphics = Graphics;
-
-            // Begin rendering
-            graphics.BeginRenderPass(clearColor, renderTexture);
+            GraphicsCommand graphics = GraphicsDevice.Acquire();
             {
                 // Render the camera perspective
-                Render(graphics, viewMatrix, projectionMatrix);
+                Render(graphics, renderTexture, viewMatrix, projectionMatrix);
             }
-            // End rendering
-            graphics.EndRenderPass();
-
             // Submit the command buffer
             graphics.Submit();
         }
 
-        public void Render(GraphicsProvider graphics, Matrix4F? viewMatrix = null, Matrix4F? projectionMatrix = null)
+        public void Render(GraphicsCommand graphics, Texture renderTexture = null, Matrix4F? viewMatrix = null, Matrix4F? projectionMatrix = null)
         {
+            // Get render size
+            uint renderWidth = renderTexture != null ? renderTexture.Width : GraphicsDevice.RenderWidth;
+            uint renderHeight = renderTexture != null ? renderTexture.Height : GraphicsDevice.RenderHeght;
+
             // Get the aspect
-            float aspect = graphics.RenderWidth / (float)graphics.RenderHeight;
+            float aspect = renderWidth / (float)renderHeight;
 
             // Create view matrix
             // IMPORTANT - Use WorldToLocal as the inverse for camera
@@ -109,13 +107,14 @@ namespace KoraGame.Graphics
                 ? GetProjectionMatrix(aspect)
                 : projectionMatrix.Value;
 
-            // Begin batch
-            graphicsBatch.Begin(graphics, view, projection);
+            // Begin rendering
+            graphics.BeginRenderPass(clearColor, view, projection, renderTexture, null, graphicsBatch);
             {
                 // Render the scene
-                Scene?.Draw(graphicsBatch);
+                Scene?.Draw(graphics);
             }
-            graphicsBatch.End();
+            // End rendering
+            graphics.EndRenderPass();
         }
     }
 }

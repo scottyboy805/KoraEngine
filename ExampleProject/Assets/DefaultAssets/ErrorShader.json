@@ -1,0 +1,19 @@
+{
+	"Name": "Error Shader",
+	"Format": 2,
+	"CullMode": 2,
+	"Vertex": 
+	{
+		"Source": { "$ref": "Error.vert.spv" },
+		"EntryPoint": "main",
+		"UniformCount": 1,
+		"SamplerCount": 0
+	},
+	"Fragment":
+	{
+		"Source": { "$ref": "Error.frag.spv" },
+		"EntryPoint": "main",
+		"UniformCount": 0,
+		"SamplerCount": 0
+	}
+}

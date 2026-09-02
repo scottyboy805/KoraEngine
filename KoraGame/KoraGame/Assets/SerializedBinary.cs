@@ -1,5 +1,4 @@
-﻿using Assimp.Configs;
-using System.Collections;
+﻿using System.Collections;
 
 namespace KoraGame
 {
@@ -17,76 +16,76 @@ namespace KoraGame
             ExternalReference,
         }
 
-        internal class SerializedReferenceContext
-        {
-            // Private
-            private List<object> localIds;
-            private Dictionary<int, BindElement> localRefElements;
-            private Dictionary<int, BindElement> externalRefElements;
-            private Queue<IAssetSerialize> deserializeCallbacks;
+        //internal class SerializedReferenceContext
+        //{
+        //    // Private
+        //    private List<object> localIds;
+        //    private Dictionary<int, BindElement> localRefElements;
+        //    private Dictionary<int, BindElement> externalRefElements;
+        //    private Queue<IAssetSerialize> deserializeCallbacks;
 
-            // Methods
-            public virtual int GetTypeId(Type type)
-            {
-                return -1;
-            }
+        //    // Methods
+        //    public virtual int GetTypeId(Type type)
+        //    {
+        //        return -1;
+        //    }
 
-            public virtual Type ResolveTypeId(int typeId)
-            {
-                return null;
-            }
+        //    public virtual Type ResolveTypeId(int typeId)
+        //    {
+        //        return null;
+        //    }
 
-            public virtual int GetExternalObjectId(GameElement instance, Type asType)
-            {
-                return -1;
-            }
+        //    public virtual int GetExternalObjectId(GameElement instance, Type asType)
+        //    {
+        //        return -1;
+        //    }
 
-            public virtual Task<object> ResolveExternalObjectAsync(int externalId, Type asType)
-            {
-                return Task.FromResult<object>(null);
-            }
+        //    public virtual Task<object> ResolveExternalObjectAsync(int externalId, Type asType)
+        //    {
+        //        return Task.FromResult<object>(null);
+        //    }
 
-            internal bool GetLocalObject(object obj, out int localIndex)
-            {
-                // Create locals
-                if (localIds == null)
-                    localIds = new();
+        //    internal bool GetLocalObject(object obj, out int localIndex)
+        //    {
+        //        // Create locals
+        //        if (localIds == null)
+        //            localIds = new();
 
-                // Check for existing
-                int index = localIds.IndexOf(obj);
+        //        // Check for existing
+        //        int index = localIds.IndexOf(obj);
 
-                // Check for found
-                if (index == -1)
-                {
-                    localIndex = localIds.Count;
-                    localIds.Add(obj);
-                    return false;
-                }
-                else
-                {
-                    localIndex = index;
-                    return true;
-                }
-            }
+        //        // Check for found
+        //        if (index == -1)
+        //        {
+        //            localIndex = localIds.Count;
+        //            localIds.Add(obj);
+        //            return false;
+        //        }
+        //        else
+        //        {
+        //            localIndex = index;
+        //            return true;
+        //        }
+        //    }
 
-            public async Task<object> PerformLateBindingsAndCallbacksAsync(object instance)
-            {
-                //// Wait for completed
-                //if (externalIdObjects != null)
-                //    await Task.WhenAll(externalIdObjects.Values);
+        //    public async Task<object> PerformLateBindingsAndCallbacksAsync(object instance)
+        //    {
+        //        //// Wait for completed
+        //        //if (externalIdObjects != null)
+        //        //    await Task.WhenAll(externalIdObjects.Values);
 
-                return instance;
-            }
-        }
+        //        return instance;
+        //    }
+        //}
 
         // Methods
         #region Write
-        internal static async Task WriteRootObject(SerializedReferenceContext context, BinaryWriter writer, Type type, object instance)
+        internal static void WriteRootObject(ref SerializedReference<int> context, BinaryWriter writer, Type type, object instance)
         {
             try
             {
                 // Write the root object
-                WriteObject(context, writer, type, instance, true);
+                WriteObject(ref context, writer, type, instance, true);
             }
             catch(Exception e)
             {
@@ -94,29 +93,29 @@ namespace KoraGame
             }
         }
 
-        private static void WriteAny(SerializedReferenceContext context, BinaryWriter writer, Type type, object instance)
+        private static void WriteAny(ref SerializedReference<int> context, BinaryWriter writer, Type type, object instance)
         {
             // Check for array
             if (IsArray(type) == true)
             {
                 // Write as array
-                WriteArray(context, writer, type, instance);
+                WriteArray(ref context, writer, type, instance);
             }
             // Check for object
             else if (IsObject(type) == true)
             {
                 // Write as object
-                WriteObject(context, writer, type, instance, false);
+                WriteObject(ref context, writer, type, instance, false);
             }            
             // Must be a property
             else
             {
                 // Write the value
-                WriteValue(context, writer, type, instance);
+                WriteValue(ref context, writer, type, instance);
             }
         }
 
-        private static void WriteObject(SerializedReferenceContext context, BinaryWriter writer, Type type, object instance, bool isRoot)
+        private static void WriteObject(ref SerializedReference<int> context, BinaryWriter writer, Type type, object instance, bool isRoot)
         {
             // Get the layout
             SerializedLayout layout = SerializedLayout.GetSerializeLayout(type);
@@ -128,39 +127,40 @@ namespace KoraGame
                 return;
             }
 
-            // Check for local
-            if(context.GetLocalObject(instance, out int localIndex) == true)
-            {
-                // Write local reference
-                writer.Write((byte)SerializedType.LocalReference);
-
-                // Write the local reference index
-                writer.Write(localIndex);
-                return;
-            }
             // Check for external
-            else if(isRoot == false && instance is GameElement ge && ge.IsAsset == true)
+            int localId = 0;
+            if (isRoot == false && instance is GameElement ge && ge.IsAsset == true)
             {
                 // Define the external object
-                int externalIndex = context.GetExternalObjectId(ge, type);
+                int externalId = context.GetExternalId(ge, type);
 
                 // Write external reference
                 writer.Write((byte)SerializedType.ExternalReference);
 
                 // Write the external reference index
-                writer.Write(externalIndex);
+                writer.Write(externalId);
                 return;
             }
+            // Check for local
+            else if((localId = context.GetLocalId(instance, type)) != 0)
+            {
+                // Write local reference
+                writer.Write((byte)SerializedType.LocalReference);
+
+                // Write the local reference index
+                writer.Write(localId);
+                return;
+            }            
 
             // Write object header
             writer.Write((byte)SerializedType.Object);
 
             // Write reference index
-            writer.Write(localIndex);
+            writer.Write(localId);
 
             // Write type
             if(IsTypeExplicit(type) == false)
-                WriteType(context, writer, type);            
+                WriteType(ref context, writer, type);            
 
             // Process all serialize fields
             foreach(SerializedProperty element in layout.SerializeProperties)
@@ -169,11 +169,11 @@ namespace KoraGame
                 object value = element.GetValue(instance);
 
                 // Write value
-                WriteAny(context, writer, element.PropertyType, value);
+                WriteAny(ref context, writer, element.PropertyType, value);
             }
         }
 
-        private static void WriteArray(SerializedReferenceContext context, BinaryWriter writer, Type type, object instance)
+        private static void WriteArray(ref SerializedReference<int> context, BinaryWriter writer, Type type, object instance)
         {
             // Get element type
             Type elementType = type.IsArray == true
@@ -188,7 +188,7 @@ namespace KoraGame
 
             // Write type info
             if (IsTypeExplicit(type) == false)
-                WriteType(context, writer, type);
+                WriteType(ref context, writer, type);
 
             // Write length
             writer.Write(array.Count);
@@ -205,11 +205,11 @@ namespace KoraGame
                     : elementType;
 
                 // Write the value
-                WriteAny(context, writer, explicitElementType, value);
+                WriteAny(ref context, writer, explicitElementType, value);
             }
         }
 
-        private static void WriteValue(SerializedReferenceContext context, BinaryWriter writer, Type type, object instance)
+        private static void WriteValue(ref SerializedReference<int> context, BinaryWriter writer, Type type, object instance)
         {
             // Check enum
             if(type.IsEnum == true)
@@ -218,7 +218,7 @@ namespace KoraGame
                 Type enumType = type.GetEnumUnderlyingType();
 
                 // Convert to underlying type
-                WriteValue(context, writer, enumType, Convert.ChangeType(instance, enumType));
+                WriteValue(ref context, writer, enumType, Convert.ChangeType(instance, enumType));
                 return;
             }
 
@@ -239,7 +239,7 @@ namespace KoraGame
                 case double doubleValue: writer.Write(doubleValue); break;
                 case decimal decimalValue: writer.Write(decimalValue); break;
                 case string stringValue: writer.Write(stringValue); break;
-                case Type typeValue: WriteType(context, writer, typeValue); break;
+                case Type typeValue: WriteType(ref context, writer, typeValue); break;
 
                 default: throw new NotSupportedException(type.ToString() + ": " + instance);
             }
@@ -250,7 +250,7 @@ namespace KoraGame
             writer.Write((byte)SerializedType.Null);
         }
 
-        private static void WriteType(SerializedReferenceContext context, BinaryWriter writer, Type type)
+        private static void WriteType(ref SerializedReference<int> context, BinaryWriter writer, Type type)
         {
             // Define the type
             int typeIndex = context.GetTypeId(type);
@@ -261,17 +261,15 @@ namespace KoraGame
         #endregion
 
         #region Read
-        internal static Task<object> ReadRootObject(SerializedReferenceContext context, BinaryReader reader, Type type)
+        internal static Task<object> ReadRootObject(ref SerializedReference<int> context, BinaryReader reader, Type type)
         {
             try
             {
                 // Try to read
-                object obj = ReadObject(context, reader, type, null);
+                object obj = ReadObject(ref context, reader, type, null);
 
                 // Wait for late binding
-                return context != null
-                    ? context.PerformLateBindingsAndCallbacksAsync(obj)
-                    : Task.FromResult(obj);
+                return context.PerformLateBindingAndDeserializeCallbacks(obj);
             }
             catch(Exception e)
             {
@@ -280,29 +278,29 @@ namespace KoraGame
             }
         } 
 
-        private static object ReadAny(SerializedReferenceContext context, BinaryReader reader, Type type, BindElement parent)
+        private static object ReadAny(ref SerializedReference<int> context, BinaryReader reader, Type type, BindElement parent)
         {
             // Check for array
             if (IsArray(type) == true)
             {
                 // Write as array
-                return ReadArray(context, reader, type, parent);
+                return ReadArray(ref context, reader, type, parent);
             }
             // Check for object
             else if (IsObject(type) == true)
             {
                 // Write as object
-                return ReadObject(context, reader, type, parent);
+                return ReadObject(ref context, reader, type, parent);
             }
             // Must be a property
             else
             {
                 // Write the value
-                return ReadValue(context, reader, type);
+                return ReadValue(ref context, reader, type);
             }
         }
 
-        private static object ReadObject(SerializedReferenceContext context, BinaryReader reader, Type type, BindElement parent)
+        private static object ReadObject(ref SerializedReference<int> context, BinaryReader reader, Type type, BindElement parent)
         {
             // Read type
             SerializedType serializedType = (SerializedType)reader.ReadByte();
@@ -335,7 +333,7 @@ namespace KoraGame
 
                         // Read the type if it is available
                         Type objectType = IsTypeExplicit(type) == false
-                            ? ReadType(context, reader)
+                            ? ReadType(ref context, reader)
                             : type;
 
                         // Create instance
@@ -351,7 +349,7 @@ namespace KoraGame
                             BindElement bind = new(instance, element, parent);
 
                             // Read the object
-                            object value = ReadAny(context, reader, element.PropertyType, bind);
+                            object value = ReadAny(ref context, reader, element.PropertyType, bind);
 
                             // Set the value
                             element.SetValue(instance, value);
@@ -365,7 +363,7 @@ namespace KoraGame
             }
         }
 
-        private static object ReadArray(SerializedReferenceContext context, BinaryReader reader, Type type, BindElement parent)
+        private static object ReadArray(ref SerializedReference<int> context, BinaryReader reader, Type type, BindElement parent)
         {
             // Read type
             SerializedType serializedType = (SerializedType)reader.ReadByte();
@@ -386,7 +384,7 @@ namespace KoraGame
 
                         // Read type info
                         Type arrayType = IsTypeExplicit(type) == false
-                            ? ReadType(context, reader)
+                            ? ReadType(ref context, reader)
                             : type;
 
                         // Read length
@@ -401,7 +399,7 @@ namespace KoraGame
                         for (int i = 0; i < length; i++)
                         {
                             // Read element
-                            object value = ReadAny(context, reader, elementType, parent);
+                            object value = ReadAny(ref context, reader, elementType, parent);
 
                             // Set value
                             if (array is Array)
@@ -422,7 +420,7 @@ namespace KoraGame
             }
         }
 
-        private static object ReadValue(SerializedReferenceContext context, BinaryReader reader, Type type)
+        private static object ReadValue(ref SerializedReference<int> context, BinaryReader reader, Type type)
         {
             // Check enum
             if (type.IsEnum == true)
@@ -431,12 +429,12 @@ namespace KoraGame
                 Type enumType = type.GetEnumUnderlyingType();
 
                 // Convert to underlying type
-                return ReadValue(context, reader, enumType);
+                return ReadValue(ref context, reader, enumType);
             }
 
             // Check for type
             if (type == typeof(Type))
-                return ReadType(context, reader);
+                return ReadType(ref context, reader);
 
             // Get type code
             TypeCode typeCode = Type.GetTypeCode(type);
@@ -463,13 +461,13 @@ namespace KoraGame
             }
         }
 
-        private static Type ReadType(SerializedReferenceContext context, BinaryReader reader)
+        private static Type ReadType(ref SerializedReference<int> context, BinaryReader reader)
         {
             // Read type index
             int typeIndex = reader.ReadInt32();
 
             // Try to resolve type
-            return context.ResolveTypeId(typeIndex);
+            return context.ResolveType(typeIndex);
         }
         #endregion
 

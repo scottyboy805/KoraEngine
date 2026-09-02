@@ -131,12 +131,6 @@ namespace KoraGame
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal Jitter2.LinearMath.JVector Jitter()
-        {
-            return new Jitter2.LinearMath.JVector(X, Y, Z);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static float Angle(in Vector3F from, in Vector3F to)
         {
             float mag = MathF.Sqrt(from.SqrMagnitude * to.SqrMagnitude);
@@ -406,6 +400,26 @@ namespace KoraGame
             result.Y = vector.Y;
             result.Z = vector.Z;
             result.W = 1f;
+            return result;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static implicit operator Vector3(Vector3F vector)
+        {
+            Vector3 result;
+            result.X = vector.X;
+            result.Y = vector.Y;
+            result.Z = vector.Z;
+            return result;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static implicit operator Vector3F(Vector3 vector)
+        {
+            Vector3F result;
+            result.X = vector.X;
+            result.Y = vector.Y;
+            result.Z = vector.Z;
             return result;
         }
         #endregion

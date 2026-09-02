@@ -1,0 +1,341 @@
+FileVersion = 1
+LastConfig = "Debug"
+LastPlatform = "Win64"
+RecentFilesList = ["KoraPlayer\\src\\Graphics\\GraphicsBuffer.bf", "KoraPlayer\\src\\Graphics\\GraphicsProvider.bf", "KoraPlayer\\src\\Graphics\\Mesh.bf", "KoraPlayer\\src\\NativeElement.bf", "KoraPlayer\\src\\Graphics\\GraphicsCommand.bf", "KoraPlayer\\src\\Graphics\\Texture.bf", "KoraPlayer\\src\\AssetPak.bf", "KoraPlayer\\src\\RawAsset.bf", "KoraPlayer\\src\\Graphics\\GraphicsDevice.bf", "KoraPlayer\\src\\Graphics\\Shader.bf", "KoraPlayer\\src\\Transform.bf", "KoraPlayer\\src\\Graphics\\Material.bf", "KoraPlayer\\src\\Math\\Color32.bf", "KoraPlayer\\src\\Graphics\\GraphicsBatch.bf", "KoraPlayer\\src\\Math\\Color.bf"]
+
+[MainWindow]
+X = 6135
+Y = 77
+Width = 1169
+Height = 877
+ShowKind = "ShowMaximized"
+
+[MainDockingFrame]
+Type = "DockingFrame"
+SplitType = 1
+
+[[MainDockingFrame.DockedWidgets]]
+RequestedWidth = 621.0
+RequestedHeight = 1700.0
+Type = "TabbedView"
+
+[[MainDockingFrame.DockedWidgets.Tabs]]
+Active = true
+TabLabel = "Workspace"
+TabWidth = 112.1952
+TabIsPinned = false
+Type = "ProjectPanel"
+
+[[MainDockingFrame.DockedWidgets]]
+RequestedWidth = 250.0
+RequestedHeight = 965.0
+SizePriority = 250.0
+Type = "DockingFrame"
+SplitType = 2
+
+[[MainDockingFrame.DockedWidgets.DockedWidgets]]
+RequestedWidth = 3264.5
+RequestedHeight = 1182.0
+SizePriority = 1182.0
+Type = "DockingFrame"
+SplitType = 1
+
+[[MainDockingFrame.DockedWidgets.DockedWidgets.DockedWidgets]]
+IsFillWidget = true
+RequestedWidth = 3264.5
+RequestedHeight = 64.0
+SizePriority = 3264.5
+DefaultDocumentsTabbedView = true
+Type = "TabbedView"
+
+[[MainDockingFrame.DockedWidgets.DockedWidgets.DockedWidgets.Tabs]]
+TabLabel = "NativeElement.bf"
+TabWidth = 136.5854
+TabIsPinned = false
+Type = "SourceViewPanel"
+FilePath = "KoraPlayer\\src\\NativeElement.bf"
+CursorPos = 211
+ProjectName = "KoraPlayer"
+
+[[MainDockingFrame.DockedWidgets.DockedWidgets.DockedWidgets.Tabs]]
+TabLabel = "GraphicsProvider.bf"
+TabWidth = 148.7806
+TabIsPinned = false
+Type = "SourceViewPanel"
+FilePath = "KoraPlayer\\src\\Graphics\\GraphicsProvider.bf"
+CursorPos = 10459
+VertPos = 7318.794
+ProjectName = "KoraPlayer"
+
+[[MainDockingFrame.DockedWidgets.DockedWidgets.DockedWidgets.Tabs]]
+TabLabel = "GraphicsDevice.bf"
+TabWidth = 140.8537
+TabIsPinned = false
+Type = "SourceViewPanel"
+FilePath = "KoraPlayer\\src\\Graphics\\GraphicsDevice.bf"
+CursorPos = 1007
+ProjectName = "KoraPlayer"
+
+[[MainDockingFrame.DockedWidgets.DockedWidgets.DockedWidgets.Tabs]]
+TabLabel = "Color32.bf"
+TabWidth = 87.92686
+TabIsPinned = false
+Type = "SourceViewPanel"
+FilePath = "KoraPlayer\\src\\Math\\Color32.bf"
+CursorPos = 85
+ProjectName = "KoraPlayer"
+
+[[MainDockingFrame.DockedWidgets.DockedWidgets.DockedWidgets.Tabs]]
+Active = true
+TabLabel = "GraphicsBuffer.bf"
+TabWidth = 126.9513
+TabIsPinned = false
+Type = "SourceViewPanel"
+FilePath = "KoraPlayer\\src\\Graphics\\GraphicsBuffer.bf"
+CursorPos = 4294
+VertPos = 3637.28
+ProjectName = "KoraPlayer"
+
+[[MainDockingFrame.DockedWidgets.DockedWidgets.DockedWidgets.Tabs]]
+TabLabel = "Mesh.bf"
+TabWidth = 75.73174
+TabIsPinned = false
+Type = "SourceViewPanel"
+FilePath = "KoraPlayer\\src\\Graphics\\Mesh.bf"
+CursorPos = 8040
+VertPos = 7900.0
+ProjectName = "KoraPlayer"
+
+[[MainDockingFrame.DockedWidgets.DockedWidgets.DockedWidgets.Tabs]]
+TabLabel = "GraphicsBatch.bf"
+TabWidth = 125.122
+TabIsPinned = false
+Type = "SourceViewPanel"
+FilePath = "KoraPlayer\\src\\Graphics\\GraphicsBatch.bf"
+CursorPos = 2973
+ProjectName = "KoraPlayer"
+
+[[MainDockingFrame.DockedWidgets.DockedWidgets.DockedWidgets.Tabs]]
+TabLabel = "Texture.bf"
+TabWidth = 85.48784
+TabIsPinned = false
+Type = "SourceViewPanel"
+FilePath = "KoraPlayer\\src\\Graphics\\Texture.bf"
+CursorPos = 3489
+VertPos = 4900.0
+ProjectName = "KoraPlayer"
+
+[[MainDockingFrame.DockedWidgets.DockedWidgets.DockedWidgets.Tabs]]
+TabLabel = "Runtime.bf"
+TabWidth = 92.19516
+TabIsPinned = false
+Type = "SourceViewPanel"
+FilePath = "c:\\Program Files\\BeefLang\\BeefLibs\\corlib\\src\\Runtime.bf"
+CursorPos = 11397
+ProjectName = "corlib"
+
+[[MainDockingFrame.DockedWidgets.DockedWidgets.DockedWidgets.Tabs]]
+TabLabel = "RawAsset.bf"
+TabWidth = 98.90248
+TabIsPinned = false
+Type = "SourceViewPanel"
+FilePath = "KoraPlayer\\src\\RawAsset.bf"
+CursorPos = 317
+ProjectName = "KoraPlayer"
+
+[[MainDockingFrame.DockedWidgets.DockedWidgets.DockedWidgets.Tabs]]
+TabLabel = "AssetPak.bf"
+TabWidth = 95.24394
+TabIsPinned = false
+Type = "SourceViewPanel"
+FilePath = "KoraPlayer\\src\\AssetPak.bf"
+CursorPos = 96
+ProjectName = "KoraPlayer"
+
+[[MainDockingFrame.DockedWidgets.DockedWidgets.DockedWidgets.Tabs]]
+TabLabel = "Quaternion.bf"
+TabWidth = 108.6586
+TabIsPinned = false
+Type = "SourceViewPanel"
+FilePath = "KoraPlayer\\src\\Math\\Quaternion.bf"
+CursorPos = 645
+ProjectName = "KoraPlayer"
+
+[[MainDockingFrame.DockedWidgets.DockedWidgets.DockedWidgets.Tabs]]
+TabLabel = "Matrix4.bf"
+TabWidth = 87.31711
+TabIsPinned = false
+Type = "SourceViewPanel"
+FilePath = "KoraPlayer\\src\\Math\\Matrix4.bf"
+CursorPos = 586
+ProjectName = "KoraPlayer"
+
+[[MainDockingFrame.DockedWidgets.DockedWidgets.DockedWidgets.Tabs]]
+TabLabel = "Float4.bf"
+TabWidth = 78.78052
+TabIsPinned = false
+Type = "SourceViewPanel"
+FilePath = "KoraPlayer\\src\\Math\\Float4.bf"
+CursorPos = 1008
+ProjectName = "KoraPlayer"
+
+[[MainDockingFrame.DockedWidgets.DockedWidgets.DockedWidgets.Tabs]]
+TabLabel = "Float2.bf"
+TabWidth = 78.78052
+TabIsPinned = false
+Type = "SourceViewPanel"
+FilePath = "KoraPlayer\\src\\Math\\Float2.bf"
+CursorPos = 66
+ProjectName = "KoraPlayer"
+
+[[MainDockingFrame.DockedWidgets.DockedWidgets.DockedWidgets.Tabs]]
+TabLabel = "Transform.bf"
+TabWidth = 100.7318
+TabIsPinned = false
+Type = "SourceViewPanel"
+FilePath = "KoraPlayer\\src\\Transform.bf"
+CursorPos = 149
+ProjectName = "KoraPlayer"
+
+[[MainDockingFrame.DockedWidgets.DockedWidgets.DockedWidgets]]
+IsFillWidget = true
+RequestedWidth = 3213.72
+RequestedHeight = 1869.72
+SizePriority = 3213.72
+Type = "TabbedView"
+
+[[MainDockingFrame.DockedWidgets.DockedWidgets.DockedWidgets.Tabs]]
+Active = true
+TabLabel = "GraphicsProvider.bf"
+TabWidth = 148.7806
+TabIsPinned = false
+Type = "SourceViewPanel"
+FilePath = "KoraPlayer\\src\\Graphics\\GraphicsProvider.bf"
+CursorPos = 1041
+VertPos = 25.0
+ProjectName = "KoraPlayer"
+
+[[MainDockingFrame.DockedWidgets.DockedWidgets.DockedWidgets.Tabs]]
+TabLabel = "Color.bf"
+TabWidth = 73.90247
+TabIsPinned = false
+Type = "SourceViewPanel"
+FilePath = "KoraPlayer\\src\\Math\\Color.bf"
+CursorPos = 44
+ProjectName = "KoraPlayer"
+
+[[MainDockingFrame.DockedWidgets.DockedWidgets.DockedWidgets.Tabs]]
+TabLabel = "GraphicsCommand.bf"
+TabWidth = 151.9513
+TabIsPinned = false
+Type = "SourceViewPanel"
+FilePath = "KoraPlayer\\src\\Graphics\\GraphicsCommand.bf"
+CursorPos = 4140
+VertPos = 900.0
+ProjectName = "KoraPlayer"
+
+[[MainDockingFrame.DockedWidgets.DockedWidgets.DockedWidgets.Tabs]]
+TabLabel = "Material.bf"
+TabWidth = 90.97565
+TabIsPinned = false
+Type = "SourceViewPanel"
+FilePath = "KoraPlayer\\src\\Graphics\\Material.bf"
+CursorPos = 324
+ProjectName = "KoraPlayer"
+
+[[MainDockingFrame.DockedWidgets.DockedWidgets.DockedWidgets.Tabs]]
+TabLabel = "Shader.bf"
+TabWidth = 83.04881
+TabIsPinned = false
+Type = "SourceViewPanel"
+FilePath = "KoraPlayer\\src\\Graphics\\Shader.bf"
+CursorPos = 6366
+VertPos = 6374.27
+ProjectName = "KoraPlayer"
+
+[[MainDockingFrame.DockedWidgets.DockedWidgets]]
+RequestedWidth = 250.0
+RequestedHeight = 518.0
+Type = "DockingFrame"
+SplitType = 1
+
+[[MainDockingFrame.DockedWidgets.DockedWidgets.DockedWidgets]]
+RequestedWidth = 250.0
+RequestedHeight = 250.0
+SizePriority = 1918.0
+Type = "TabbedView"
+
+[[MainDockingFrame.DockedWidgets.DockedWidgets.DockedWidgets.Tabs]]
+TabLabel = "Memory"
+TabWidth = 97.561
+TabIsPinned = false
+Type = "MemoryPanel"
+AutoResize = "Auto_Mul8"
+RequestedWidth = 300.0
+
+[[MainDockingFrame.DockedWidgets.DockedWidgets.DockedWidgets.Tabs]]
+TabLabel = "Watch"
+TabWidth = 85.97563
+TabIsPinned = false
+Type = "WatchPanel"
+Columns = [{Width = 212.0}, {Width = 212.0}, {Width = 212.0}]
+
+[[MainDockingFrame.DockedWidgets.DockedWidgets.DockedWidgets.Tabs.Items]]
+EvalStr = ""
+
+[[MainDockingFrame.DockedWidgets.DockedWidgets.DockedWidgets.Tabs]]
+Active = true
+TabLabel = "Auto"
+TabWidth = 77.43904
+TabIsPinned = false
+Type = "AutoWatchPanel"
+Columns = [{Width = 431.0}, {Width = 369.0}, {Width = 212.0}]
+
+[[MainDockingFrame.DockedWidgets.DockedWidgets.DockedWidgets]]
+RequestedWidth = 250.0
+RequestedHeight = 250.0
+SizePriority = 1918.0
+Type = "TabbedView"
+
+[[MainDockingFrame.DockedWidgets.DockedWidgets.DockedWidgets.Tabs]]
+TabLabel = "Find Results"
+TabWidth = 117.683
+TabIsPinned = false
+Type = "FindResultsPanel"
+
+[[MainDockingFrame.DockedWidgets.DockedWidgets.DockedWidgets.Tabs]]
+TabLabel = "Threads"
+TabWidth = 94.51222
+TabIsPinned = false
+Type = "ThreadPanel"
+
+[[MainDockingFrame.DockedWidgets.DockedWidgets.DockedWidgets.Tabs]]
+TabLabel = "Call Stack"
+TabWidth = 103.6586
+TabIsPinned = false
+Type = "CallStackPanel"
+
+[[MainDockingFrame.DockedWidgets.DockedWidgets.DockedWidgets.Tabs]]
+TabLabel = "Immediate"
+TabWidth = 110.3659
+TabIsPinned = false
+Type = "ImmediatePanel"
+
+[[MainDockingFrame.DockedWidgets.DockedWidgets.DockedWidgets.Tabs]]
+Active = true
+TabLabel = "Output"
+TabWidth = 90.24393
+TabIsPinned = false
+Type = "OutputPanel"
+
+[[BookmarkFolders]]
+Title = ""
+
+[OutputFilters]
+ModuleLoadMessages = false
+ModuleUnloadMessages = false
+ProcessExitMessages = false
+ThreadCreateMessages = false
+ThreadExitMessages = false
+SymbolLoadMessages = false
+ProgramOutput = false

@@ -1,4 +1,5 @@
 ﻿using KoraGame.Graphics;
+using KoraGame.Physics;
 using SDL;
 using System.Runtime.InteropServices;
 
@@ -19,9 +20,45 @@ namespace KoraGame
         public IntPtr Handle => (IntPtr)handle;
         public bool Quit => game.Quit;
 
+        // Properties
+        private string RuntimeAssetsDirectory
+        {
+            get
+            {
+#if DEBUG
+                // Example project folder
+                return Path.Combine(Path.GetFullPath("../../../../../"), "ExampleProject", "Assets");
+#else
+                // Assets folder next to executable
+                return Path.Combine(Environment.CurrentDirectory, "Assets");
+#endif
+            }
+        }
+
         // Methods
         protected virtual Game CreateGame()
         {
+            // Init SDL
+            Debug.Log("Initialize SDL", LogFilter.Game);
+            if (SDL3.SDL_Init(SDL_InitFlags.SDL_INIT_VIDEO | SDL_InitFlags.SDL_INIT_GAMEPAD) == false)
+            {
+                Debug.LogError("Failed to initialize SDL", LogFilter.Game);
+                Environment.Exit(1);
+            }
+
+            // Init SDL audio
+            if (SDL3_mixer.MIX_Init() == false)
+            {
+                Debug.LogError("Failed to initialize SDL mixer", LogFilter.Audio);
+            }
+
+            // Init SDL font
+            if (SDL3_ttf.TTF_Init() == false)
+            {
+                Debug.LogError("Failed to initialize SDL ttf", LogFilter.Graphics);
+            }
+
+
             // Create scripting
             Debug.Log("Initialize scripting", LogFilter.Script);
             ScriptableProvider scriptable = new ScriptableProvider();
@@ -33,18 +70,26 @@ namespace KoraGame
             Debug.Log($"Use screen resolution: '{screen.Width} x {screen.Height}', FullScreen = '{screen.Fullscreen}'", LogFilter.Graphics);
 
             // Create graphics            
-            GraphicsProvider graphics = new GraphicsProvider(screen);
+            GraphicsDevice graphics = new GraphicsDevice(screen);
 
             Debug.Log($"Use graphics API: '{graphics.GetDeviceDriverName()}'", LogFilter.Graphics);
 
             // Create assets
             Debug.Log($"Initialize assets", LogFilter.Assets);
-            AssetProvider assets = new AssetProvider(scriptable, graphics, Environment.CurrentDirectory + "/Assets", false);
+            AssetProvider assets = new AssetProvider(scriptable, graphics, RuntimeAssetsDirectory, false);
 
             Debug.Log($"Use assets directory: '{assets.AssetDirectory}'", LogFilter.Assets);
 
+            // Create physics
+            Debug.Log("Initialize physics", LogFilter.Physics);
+            PhysicsWorld physics = new PhysicsWorld();
+            physics.Initialize();
+
+            // Load default assets
+            _ = graphics.InitializeDefaultAssetsAsync(assets);
+
             // Create the game
-            return new Game(null, screen, graphics, assets, scriptable, false, true);
+            return new Game(null, screen, graphics, assets, scriptable, physics, false, true);
         }
 
         internal void DoInitialize()
@@ -86,6 +131,15 @@ namespace KoraGame
             // Free handle
             handle.Free();
             handle = default;
+
+            // Quit ttf
+            SDL3_ttf.TTF_Quit();
+
+            // Quit mixer
+            SDL3_mixer.MIX_Quit();
+
+            // Quit SDL
+            SDL3.SDL_Quit();
         }
 
         internal static GameHost Get(IntPtr handle)

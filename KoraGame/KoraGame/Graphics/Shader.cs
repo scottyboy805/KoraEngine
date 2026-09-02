@@ -108,7 +108,7 @@ namespace KoraGame.Graphics
         private List<ShaderProperty> properties = new();
 #pragma warning restore 0649
 
-        private GraphicsProvider graphics;        
+        private GraphicsDevice graphics;        
         private Dictionary<ShaderPipelineKey, IntPtr> pipelines = new();
 
         // Public
@@ -127,10 +127,10 @@ namespace KoraGame.Graphics
         private Shader()
         {
             // Get device
-            this.graphics = Game.Graphics;
+            this.graphics = Game.GraphicsDevice;
         }
 
-        public Shader(GraphicsProvider graphics, byte[] vertexSource, byte[] fragmentSource, ShaderFormat format, string entryPoint = "main")
+        public Shader(GraphicsDevice graphics, ReadOnlySpan<byte> vertexSource, ReadOnlySpan<byte> fragmentSource, ShaderFormat format, string entryPoint = "main")
         {
             // Check for null
             if(graphics == null)
@@ -203,7 +203,7 @@ namespace KoraGame.Graphics
             return (SDL_GPUGraphicsPipeline*)pipeline;
         }
 
-        private SDL_GPUShader* InitializeShader(byte[] source, ShaderFormat format, ShaderStage stage, string entryPoint, uint uniformBuffers, uint samplers)
+        private SDL_GPUShader* InitializeShader(ReadOnlySpan<byte> source, ShaderFormat format, ShaderStage stage, string entryPoint, uint uniformBuffers, uint samplers)
         {
             // Get the array for entry point
             byte[] entryPointBytes = Encoding.UTF8.GetBytes(entryPoint);

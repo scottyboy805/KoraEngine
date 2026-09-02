@@ -1,4 +1,5 @@
-﻿using KoraGame.Graphics;
+﻿
+using KoraGame.Graphics;
 
 namespace KoraGame.Assets
 {
@@ -34,11 +35,13 @@ namespace KoraGame.Assets
 
         // Internal
         internal readonly AssetProvider assets;
+        internal readonly GraphicsCommand graphics;
 
         // Properties
         public bool IsDependency => DependencyDepth > 0;
         public ScriptableProvider Scriptable => assets?.Scriptable;
-        public GraphicsProvider Graphics => assets?.GraphicsProvider;
+        public GraphicsDevice GraphicsDevice => assets?.GraphicsProvider;
+        public GraphicsCommand Graphics => graphics;
 
         // Constructor
         internal AssetReadContext(AssetProvider assets, Type assetType, string assetNameAndExtension, AssetReadContext? parent)
@@ -61,11 +64,14 @@ namespace KoraGame.Assets
             {
                 foreach (string searchDirectory in parent.Value.SearchDirectories)
                     SearchDirectories.Add(searchDirectory);
-            }
 
-            // Create copy pass for uploads
-            if (Graphics.IsCopyPass == false)
-                Graphics.BeginCopyPass();
+                this.graphics = parent.Value.graphics;
+            }
+            else
+            {
+                this.graphics = assets.GraphicsProvider.Acquire();
+                this.graphics.BeginCopyPass();                
+            }
         }
 
         // Methods
@@ -99,17 +105,13 @@ namespace KoraGame.Assets
             return await assets.LoadContextAsync(context, assetRelativePath, assetOrPakName, cancellationToken);
         }
 
-        internal Task SubmitAsync()
+        public readonly Task SubmitAsync()
         {
-            // Check for not ours
-            if (IsDependency == true)
-                return Task.CompletedTask;
+            // End the copy pass
+            graphics.EndCopyPass();
 
-            // End phase
-            Graphics.EndCopyPass();
-
-            // Wait for completed
-            return Graphics.SubmitAsync();
+            // Wait for submit
+            return graphics.SubmitAsync();
         }
     }
 

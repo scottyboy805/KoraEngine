@@ -66,30 +66,17 @@ namespace KoraGame.Graphics
             public uint VertexOffset;
             public uint Count;
         }
-
-        [StructLayout(LayoutKind.Sequential)]
-        private struct Transform
-        {
-            public Matrix4F ViewMatrix;
-            public Matrix4F ProjectionMatrix;
-            public Matrix4F ModelMatrix;
-        }
         #endregion
 
         // Private
         private static readonly DrawCommandComparer keyComparer = new();
 
-        private uint batchSize = 0;
-        private List<DrawCommand> batchDraw = null;
-
-        private GraphicsProvider graphics;
-        private Matrix4F viewMatrix = Matrix4F.Identity;
-        private Matrix4F projectionMatrix = Matrix4F.Identity;
+        private readonly uint batchSize = 0;
+        private readonly List<DrawCommand> batchDraw = null;
 
         // Properties
-        public GraphicsProvider Graphics => graphics;
-        public Matrix4F ViewMatrix => viewMatrix;
-        public Matrix4F ProjectionMatrix => projectionMatrix;
+        public bool IsEmpty => batchDraw.Count == 0;
+        public bool IsFull => batchDraw.Count >= batchSize;
 
         // Constructor
         public GraphicsBatch(uint batchSize)
@@ -99,61 +86,21 @@ namespace KoraGame.Graphics
         }
 
         // Methods
-        public void Begin(GraphicsProvider graphics, Matrix4F viewMatrix, Matrix4F projectionMatrix)
-        {
-            this.graphics = graphics;
-            this.viewMatrix = viewMatrix;
-            this.projectionMatrix = projectionMatrix;
-
-            // Clear draw calls
-            batchDraw.Clear();
-        }
-
-        public void Draw(Matrix4F matrix, Material material, Mesh mesh, uint subMeshOffset = 0, uint subMeshCount = 1)
+        public void PushDraw(Matrix4F modelMatrix, Material material, GraphicsBuffer vertexBuffer, MeshVertexElements elements, uint offset, uint size)
         {
             // Check null
             if (material == null)
                 throw new ArgumentNullException(nameof(material));
 
-            if(mesh == null)
-                throw new ArgumentNullException(nameof(mesh));
+            if (vertexBuffer == null)
+                throw new ArgumentNullException(nameof(vertexBuffer));
 
-            // Get submeshes
-            uint start = subMeshCount >= mesh.SubMeshCount ? 0 : subMeshOffset;
-            uint count = subMeshOffset + subMeshCount > mesh.SubMeshCount ? mesh.SubMeshCount : subMeshCount;
-            uint end = start + count;
-
-            // Draw submesh
-            for (uint i = start; i < end; i++)
+            // Check for too many
+            if (batchDraw.Count >= batchSize)
             {
-                // Get mesh elements
-                mesh.GetElements(out uint indexOffset, out uint vertexOffset, out uint elementCount, i);
-
-                // Get the mesh vertex elements
-                MeshVertexElements vertexElements = mesh.GetVertexElements(i);
-
-                // Check for indexed
-                if(mesh.HasIndices == true)
-                {
-                    // Get the index format
-                    IndexBufferFormat indexFormat = mesh.GetIndexFormat(i);
-
-                    // Draw indexed
-                    DrawIndexed(matrix, material, mesh.VertexBuffer, vertexElements, mesh.IndexBuffer, indexFormat, indexOffset, vertexOffset, elementCount);
-                }
-                else
-                {
-                    // Draw vertices
-                    Draw(matrix, material, mesh.VertexBuffer, vertexElements, vertexOffset, elementCount);
-                }
+                Debug.LogWarning("Draw call would exceed max batch count. Execute the batch first");
+                return;
             }
-        }
-
-        public void Draw(Matrix4F matrix, Material material, GraphicsBuffer vertexBuffer, MeshVertexElements elements, uint offset, uint size)
-        {
-            // Check null
-            if (material == null)
-                throw new ArgumentNullException(nameof(material));
 
             // Add the draw call
             batchDraw.Add(new DrawCommand
@@ -165,23 +112,26 @@ namespace KoraGame.Graphics
                     RenderQueue = 0,
                     VertexElements = elements,
                 },
-                Matrix = matrix,
+                Matrix = modelMatrix,
                 Material = material,
                 VertexBuffer = vertexBuffer,
                 VertexOffset = offset,
                 Count = size,
             });
-
-            // Check for flush
-            if (batchDraw.Count >= batchSize)
-                Execute();
         }
 
-        public void DrawIndexed(Matrix4F matrix, Material material, GraphicsBuffer vertexBuffer, MeshVertexElements elements, GraphicsBuffer indexBuffer, IndexBufferFormat indexFormat, uint indexOffset, uint vertexOffset, uint size)
+        public void PushDrawIndexed(Matrix4F matrix, Material material, GraphicsBuffer vertexBuffer, MeshVertexElements elements, GraphicsBuffer indexBuffer, IndexBufferFormat indexFormat, uint indexOffset, uint vertexOffset, uint size)
         {
             // Check null
             if (material == null)
                 throw new ArgumentNullException(nameof(material));
+
+            // Check for too many
+            if (batchDraw.Count >= batchSize)
+            {
+                Debug.LogWarning("Draw call would exceed max batch count. Execute the batch first");
+                return;
+            }
 
             // Add the draw call
             batchDraw.Add(new DrawCommand
@@ -202,22 +152,9 @@ namespace KoraGame.Graphics
                 VertexOffset = vertexOffset,
                 Count = size,
             });
-
-            // Check for flush
-            if (batchDraw.Count >= batchSize)
-                Execute();
         }
 
-        public void End()
-        {
-            // Flush remaining calls
-            Execute();
-
-            // Reset matrix
-            this.viewMatrix = Matrix4F.Identity;
-        }
-
-        private void Execute()
+        public void Execute(GraphicsCommand graphics, Matrix4F viewMatrix, Matrix4F projectionMatrix)
         {
             // Check for any
             if (batchDraw.Count == 0)
@@ -230,7 +167,7 @@ namespace KoraGame.Graphics
             DrawKey currentKey = default;
 
             // Create the transform
-            Transform transform = new Transform
+            GraphicsCommand.TransformUniform transform = new ()
             {
                 ViewMatrix = viewMatrix,
                 ProjectionMatrix = projectionMatrix,

@@ -1,0 +1,4 @@
+{
+	"Name": "Pbr Material",
+	"Shader": { "$ref": "PbrShader.json" }
+}

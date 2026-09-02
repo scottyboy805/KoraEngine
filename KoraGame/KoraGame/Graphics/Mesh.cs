@@ -32,7 +32,7 @@ namespace KoraGame.Graphics
         }
 
         // Private
-        private GraphicsProvider graphics;
+        private GraphicsDevice graphics;
         private GraphicsBuffer indexBuffer;
         private GraphicsBuffer vertexBuffer;
         private SubMesh[] subMeshes;
@@ -48,10 +48,10 @@ namespace KoraGame.Graphics
         // Constructor
         private Mesh()
         {
-            graphics = Game.Graphics;
+            graphics = Game.GraphicsDevice;
         }
 
-        public Mesh(GraphicsProvider graphics, uint subMeshCount = 1)
+        public Mesh(GraphicsDevice graphics, uint subMeshCount = 1)
         {
             // Check for null
             if (graphics == null)
@@ -182,10 +182,10 @@ namespace KoraGame.Graphics
             }
 
             // Create new buffer
-            GraphicsBuffer newBuffer = new GraphicsBuffer(graphics, GraphicsBufferUsage.Index, totalSize);
+            GraphicsBuffer newBuffer = new GraphicsBuffer(graphics, totalSize, GraphicsBufferUsage.Index);
 
             // Copy existing data and write new data
-            newBuffer.MapMemory(newBufferPtr =>
+            newBuffer.Write(newBufferPtr =>
             {
                 byte* newPtr = (byte*)newBufferPtr;
                 uint writeOffset = 0;
@@ -193,7 +193,7 @@ namespace KoraGame.Graphics
                 // Copy existing sub mesh data and write new data
                 if (indexBuffer != null)
                 {
-                    indexBuffer.MapMemory(oldBufferPtr =>
+                    indexBuffer.Write(oldBufferPtr =>
                     {
                         byte* oldPtr = (byte*)oldBufferPtr;
                         uint readOffset = 0;
@@ -324,10 +324,10 @@ namespace KoraGame.Graphics
             }
 
             // Create new buffer
-            GraphicsBuffer newBuffer = new GraphicsBuffer(graphics, GraphicsBufferUsage.Vertex, totalSize);
+            GraphicsBuffer newBuffer = new GraphicsBuffer(graphics, totalSize, GraphicsBufferUsage.Vertex);
 
             // Copy existing data and write new data
-            newBuffer.MapMemory(newBufferPtr =>
+            newBuffer.Write(newBufferPtr =>
             {
                 byte* newPtr = (byte*)newBufferPtr;
                 uint writeOffset = 0;
@@ -335,7 +335,7 @@ namespace KoraGame.Graphics
                 // Copy existing sub mesh data and write new data
                 if (vertexBuffer != null)
                 {
-                    vertexBuffer.MapMemory(oldBufferPtr =>
+                    vertexBuffer.Write(oldBufferPtr =>
                     {
                         byte* oldPtr = (byte*)oldBufferPtr;
                         uint readOffset = 0;
@@ -474,7 +474,7 @@ namespace KoraGame.Graphics
         }
 
         #region Primitives
-        public static Mesh PrimitiveQuad(GraphicsProvider graphics, Vector2F bounds)
+        public static Mesh PrimitiveQuad(GraphicsDevice graphics, Vector2F bounds)
         {
             // Check for null device
             if (graphics == null)
@@ -536,7 +536,7 @@ namespace KoraGame.Graphics
             return mesh;
         }
         
-        public static Mesh PrimitiveCube(GraphicsProvider graphics, Vector3F extents)
+        public static Mesh PrimitiveCube(GraphicsDevice graphics, Vector3F extents)
         {
             // Check for null device
             if (graphics == null)
@@ -653,7 +653,7 @@ namespace KoraGame.Graphics
             return mesh;
         }
 
-        public static Mesh PrimitiveSphere(GraphicsProvider graphics, float radius, float segments)
+        public static Mesh PrimitiveSphere(GraphicsDevice graphics, float radius, float segments)
         {
             // Check for null device
             if (graphics == null)

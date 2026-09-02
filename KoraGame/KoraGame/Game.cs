@@ -1,5 +1,6 @@
-﻿using SDL;
-using KoraGame.Graphics;
+﻿using KoraGame.Graphics;
+using KoraGame.Physics;
+using SDL;
 using System.Runtime.CompilerServices;
 
 [assembly: InternalsVisibleTo("KoraGame-Desktop")]
@@ -16,9 +17,10 @@ namespace KoraGame
         private bool quit = false;
         private GameSettings settings = null;
         private Screen screen = null;
-        private GraphicsProvider graphics = null;
+        private GraphicsDevice graphics = null;
         private AssetProvider assets = null;
         private ScriptableProvider scriptable = null;
+        private PhysicsWorld physics = null;
         private Scene scene = null;
         private bool isEditor = false;
         private bool isPlaying = false;
@@ -30,22 +32,24 @@ namespace KoraGame
         public bool Quit => quit;
         public GameSettings Settings => settings;
         public Screen Screen => screen;
-        public GraphicsProvider Graphics => graphics;
+        public GraphicsDevice GraphicsDevice => graphics;
         public AssetProvider Assets => assets;
         public ScriptableProvider Scriptable => scriptable;
+        public PhysicsWorld PhysicsWorld => physics;
         public Scene Scene => scene;
 
         public bool IsEditor => isEditor;
         public bool IsPlaying => isPlaying;        
 
         // Constructor
-        internal Game(GameSettings settings, Screen screen, GraphicsProvider graphics, AssetProvider assets, ScriptableProvider scriptable, bool isEditor, bool isPlaying)
+        internal Game(GameSettings settings, Screen screen, GraphicsDevice graphics, AssetProvider assets, ScriptableProvider scriptable, PhysicsWorld physics, bool isEditor, bool isPlaying)
         {
             this.settings = settings;
             this.screen = screen;
             this.graphics = graphics;
             this.assets = assets;
             this.scriptable = scriptable;
+            this.physics = physics;
             this.isEditor = isEditor;
             this.isPlaying = isPlaying;
         }
@@ -72,26 +76,6 @@ namespace KoraGame
 
         internal void Initialize()
         {
-            // Init SDL
-            Debug.Log("Initialize SDL", LogFilter.Game);
-            if(SDL3.SDL_Init(SDL_InitFlags.SDL_INIT_VIDEO | SDL_InitFlags.SDL_INIT_GAMEPAD) == false)
-            {
-                Debug.LogError("Failed to initialize SDL", LogFilter.Game);
-                return;
-            }
-
-            // Init SDL audio
-            if(SDL3_mixer.MIX_Init() == false)
-            {
-                Debug.LogError("Failed to initialize SDL mixer", LogFilter.Audio);
-            }
-
-            // Init SDL font
-            if(SDL3_ttf.TTF_Init() == false)
-            {
-                Debug.LogError("Failed to initialize SDL ttf", LogFilter.Graphics);
-            }
-
             // Initialize timing
             performanceFrequency = SDL3.SDL_GetPerformanceFrequency();
             lastFrameTime = SDL3.SDL_GetPerformanceCounter();
@@ -104,9 +88,13 @@ namespace KoraGame
             cam.Scene = scene;
 
             GameObject cube = assets.LoadAsync<GameObject>("DefaultAssets/Cube.fbx").Result;
+            //cube.GetComponent<MeshRenderer>().SetMaterial(null);
             cube.Scene = scene;
             cube.WorldPosition = new Vector3F(0, 0, -5);
             cube.WorldRotation = QuaternionF.Euler(0, 45, 0);
+
+            cube.AddComponent<RigidBody>();
+            cube.AddComponent<BoxCollider>();
 
             ChangeScene(scene);
         }
@@ -120,6 +108,9 @@ namespace KoraGame
 
             // Update time system
             Time.UpdateTime(deltaTime);
+
+            // Update physics
+            physics?.Update();
 
             // Render current scene
             if (scene != null)
@@ -148,20 +139,14 @@ namespace KoraGame
 
         internal void Shutdown()
         {
+            // Stop physics
+            physics?.Shutdown();
+
             // Unload assets
             assets?.UnloadAll();
 
             // Shutdown debug
             Debug.Terminate();
-
-            // Quit ttf
-            SDL3_ttf.TTF_Quit();
-
-            // Quit mixer
-            SDL3_mixer.MIX_Quit();
-
-            // Quit SDL
-            SDL3.SDL_Quit();
         }
 
         internal void HandleEvent(in SDL_Event evt)

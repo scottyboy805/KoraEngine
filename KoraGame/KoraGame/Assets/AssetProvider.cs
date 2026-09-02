@@ -19,7 +19,7 @@ namespace KoraGame
         private static readonly HttpClient webClient = new();
 
         private readonly ScriptableProvider scriptable;
-        private readonly GraphicsProvider graphics;
+        private readonly GraphicsDevice graphics;
         private readonly string assetDirectory = "";
         private readonly bool useWebRequest = false;
         private readonly ConcurrentDictionary<string, ThreadLocal<IAssetImporter>> assetImporters = new();
@@ -31,11 +31,11 @@ namespace KoraGame
 
         // Properties
         public ScriptableProvider Scriptable => scriptable;
-        public GraphicsProvider GraphicsProvider => graphics;
+        public GraphicsDevice GraphicsProvider => graphics;
         public string AssetDirectory => assetDirectory;
 
         // Constructor
-        public AssetProvider(ScriptableProvider scriptable, GraphicsProvider graphics, string assetDirectory, bool useWebRequest)
+        public AssetProvider(ScriptableProvider scriptable, GraphicsDevice graphics, string assetDirectory, bool useWebRequest)
         {
             this.scriptable = scriptable;
             this.graphics = graphics;
@@ -104,7 +104,12 @@ namespace KoraGame
             Debug.Log($"Load asset: '{assetRelativePath}' - {context.AssetType.FullName}", LogFilter.Assets);
 
             // Load the context
-            return await LoadContextAsync(context, assetRelativePath, assetOrPakName, cancellationToken, false) as T;
+            T result = await LoadContextAsync(context, assetRelativePath, assetOrPakName, cancellationToken, false) as T;
+
+            // Await graphics submit for any uploads
+            await context.SubmitAsync();
+
+            return result;
         }
 
         public virtual async Task<GameElement> LoadAsync(string assetRelativePath, Type assetType = null, string assetOrPakName = null, CancellationToken cancellationToken = default)
@@ -127,7 +132,12 @@ namespace KoraGame
             Debug.Log($"Load asset: '{assetRelativePath}' - {context.AssetType.FullName}", LogFilter.Assets);
 
             // Load the context
-            return await LoadContextAsync(context, assetRelativePath, assetOrPakName, cancellationToken, false);
+            GameElement result = await LoadContextAsync(context, assetRelativePath, assetOrPakName, cancellationToken, false);
+
+            // Await graphics submit for any uploads
+            await context.SubmitAsync();
+
+            return result;
         }
 
         internal async Task<GameElement> LoadContextAsync(AssetReadContext context, string assetRelativePath, string assetOrPakName, CancellationToken cancellationToken = default, bool checkCache = true)
@@ -198,9 +208,6 @@ namespace KoraGame
                     Debug.LogException(e);
                 }
             }
-
-            // Wait for graphics upload
-            await context.SubmitAsync();
 
             // Check for loaded
             if (result != null)

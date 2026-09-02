@@ -23,7 +23,7 @@ namespace KoraGame.Graphics
         public const string MainTextureName = "Texture";        
 
         // Properties
-        public GraphicsProvider Graphics => Game?.Graphics;
+        public GraphicsDevice GraphicsDevice => Game?.GraphicsDevice;
 
         public Shader Shader
         {
@@ -80,7 +80,7 @@ namespace KoraGame.Graphics
             clone.textures = textures.ToList();
         }
 
-        public void Bind(GraphicsProvider graphics, MeshVertexElements elements)
+        public void Bind(GraphicsCommand graphics, MeshVertexElements elements)
         {
             // Bind the shader
             if (shader != null)
@@ -99,7 +99,7 @@ namespace KoraGame.Graphics
                             // Get the texture
                             Texture bindTexture = slot.Texture != null
                                 ? slot.Texture
-                                : Graphics.WhiteTexture;
+                                : GraphicsDevice.WhiteTexture;
 
                             // Bind the texture to the property slot
                             graphics.BindTexture(bindTexture, property.Location);
